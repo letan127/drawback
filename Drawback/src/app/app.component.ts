@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PaintInfo } from './paintInfo';
 
 @Component({
   selector: 'app-root',
@@ -10,30 +11,66 @@ export class AppComponent {
   constructor() {
   }
 }
-var paint = false
-var canvas = <HTMLCanvasElement>document.getElementById('jamboard');
-canvas.addEventListener("mousedown", mouseDown, false);
-canvas.addEventListener("mousemove", mouseMove, false);
-canvas.addEventListener("mouseup", mouseUp, false);
-canvas.addEventListener("mouseleave", mouseLeave, false);
+
+var canvasHeight = 500;
+var canvasWidth = 1000;
+var paint = false;
+var canvas: HTMLCanvasElement;
+var context;
+var mouseDown = false;
+var paintArray = new Array<PaintInfo>();
+var x;
+var y;
 
 
-function mouseDown(event: MouseEvent): void {
-  var x: number = event.x; //x and y coordinates of mousepress on window
-  var y: number = event.y;
-  x -= canvas.offsetLeft;
-  y -= canvas.offsetTop;
-  paint = true
-}
-function mouseMove(event: MouseEvent): void {
-  if (paint) {
+window.onload=function() {
+  canvas = <HTMLCanvasElement>document.getElementById("jamboard");
+  context = canvas.getContext("2d");
+
+  canvas.onmousedown = function(e){
+    mouseDown = true;
+    paint = true;
+    x = e.x - canvas.offsetLeft;
+    y = e.y - canvas.offsetTop;
+    var paintInfo = new PaintInfo(x, y, false);
+    paintArray.push(paintInfo);
+    draw()
 
   }
-}
-function mouseUp(event: MouseEvent): void {
-  paint = false;
+  canvas.onmouseup = function(e){
+    mouseDown = false;
+    paint = false;
+  }
+  canvas.onmouseleave = function(e){
+    paint = false;
+  }
+  canvas.onmousemove = function(e){
+    if (mouseDown == true) {
+      x = e.x - canvas.offsetLeft;
+      y = e.y - canvas.offsetTop;
+      var paintInfo = new PaintInfo(x, y, true);
+      paintArray.push(paintInfo);
+      draw()
+    }
+  }
+
 }
 
-function mouseLeave(event: MouseEvent): void {
-  paint = false;
+function draw() {
+  context.clearRect(0, 0, canvasWidth, canvasHeight);
+  context.strokeStyle = "#df4b26";
+  context.lineJoin = "round";
+  context.lineWidth = 5;
+  for(var i=0; i < paintArray.length; i++) {
+    context.beginPath();
+    if(paintArray[i].drag && i){
+      context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
+    }
+    else{
+      context.moveTo(paintArray[i].x - 1, paintArray[i].y);
+    }
+  context.lineTo(paintArray[i].x, paintArray[i].y);
+  context.closePath();
+  context.stroke();
+  }
 }

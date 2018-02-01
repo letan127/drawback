@@ -10,6 +10,10 @@ export class AppComponent {
   title = 'app';
   constructor() {
   }
+  clear() {
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+    paintArray = [];
+  }
 }
 
 var canvasHeight = 500;
@@ -17,7 +21,7 @@ var canvasWidth = 1000;
 var paint = false;
 var canvas: HTMLCanvasElement;
 var context;
-var mouseDown = false;
+var drag = false;
 var paintArray = new Array<PaintInfo>();
 var x;
 var y;
@@ -25,37 +29,43 @@ var y;
 
 window.onload=function() {
   canvas = <HTMLCanvasElement>document.getElementById("jamboard");
+  canvas.addEventListener("mousedown", mouseDown, false);
+  canvas.addEventListener("mousemove", mouseMove, false);
+  canvas.addEventListener("mouseleave", mouseLeave, false);
+  canvas.addEventListener("mouseup", mouseUp, false);
   context = canvas.getContext("2d");
 
-  canvas.onmousedown = function(e){
-    mouseDown = true;
-    paint = true;
-    x = e.x - canvas.offsetLeft;
-    y = e.y - canvas.offsetTop;
-    var paintInfo = new PaintInfo(x, y, false);
-    paintArray.push(paintInfo);
-    draw()
-
-  }
-  canvas.onmouseup = function(e){
-    mouseDown = false;
-    paint = false;
-  }
-  canvas.onmouseleave = function(e){
-    paint = false;
-  }
-  canvas.onmousemove = function(e){
-    if (mouseDown == true) {
-      x = e.x - canvas.offsetLeft;
-      y = e.y - canvas.offsetTop;
-      var paintInfo = new PaintInfo(x, y, true);
-      paintArray.push(paintInfo);
-      draw()
-    }
-  }
-
+}
+function mouseDown(event: MouseEvent): void {
+   x = event.x - canvas.offsetLeft;
+   y = event.y - canvas.offsetTop;
+   var paintInfo = new PaintInfo(x, y, drag);
+   drag = true;
+   paint = true;
+   paintArray.push(paintInfo);
+   draw()
 }
 
+function mouseUp(event: MouseEvent): void {
+  paint = false;
+  drag = false
+}
+function mouseMove(event: MouseEvent): void {
+  if (paint == true) {
+    var x = event.x - canvas.offsetLeft;
+    var y = event.y - canvas.offsetTop;
+    var paintInfo = new PaintInfo(x, y, drag);
+    paintArray.push(paintInfo);
+    draw()
+  }
+}
+
+function mouseLeave(event: MouseEvent): void {
+  paint = false;
+}
+
+
+//taken from online
 function draw() {
   context.clearRect(0, 0, canvasWidth, canvasHeight);
   context.strokeStyle = "#df4b26";

@@ -7,11 +7,11 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="nav navbar-nav">
         <li>
-          <a href="#" (click)="clear()">Clear</a>
+          <a href="#" (click)="clear()">Clear Drawing</a>
         </li>
         <li class="dropdown" appDropdown>
         <a href="#" role="button" class="dropdown-toggle" appDropdown>
-          Dropdown <span class="caret"></span>
+          Colors <span class="caret"></span>
         </a>
           <ul class="dropdown-menu">
             <li>
@@ -28,6 +28,28 @@
             </li>
             <li>
               <a href="#" (click)="change_color($event)" id="red" >Red<img src="https://vignette.wikia.nocookie.net/phobia/images/5/5a/Red.jpg/revision/latest?cb=20161109225243" width="24px" height="19px" vertical-align:middle></a>
+            </li>
+          </ul>
+        </li>
+        <li class="dropdown" appDropdown>
+        <a href="#" role="button" class="dropdown-toggle" appDropdown>
+          Pens <span class="caret"></span>
+        </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="#" id="pen-1" (click)="change_pen($event)">Pen 1<img src="https://www.andacod.com/images/articles/compendium/methods/drawing/as1100/lines_linestyle/thickline.png" width="100px" height="25px" vertical-align:middle></a>
+            </li>
+            <li>
+              <a href="#" (click)="change_pen($event)" id="pen-2">Pen 2<img src="https://mpnforum.files.wordpress.com/2012/10/line-thick.jpg?w=375" width="100px" height="25px" vertical-align:middle> </a>
+            </li>
+            <li>
+              <a href="#" (click)="change_pen($event)" id="pen-3">Pen 3<img src="http://laoblogger.com/images/thick-black-line-clipart-7.jpg" width="100px" height="25px" vertical-align:middle></a>
+            </li>
+            <li>
+              <a href="#" (click)="change_pen($event)" id="pen-4" >Pen 4<img src="http://laoblogger.com/images/thick-black-line-clipart-6.jpg" width="100px" height="25px" vertical-align:middle></a>
+            </li>
+            <li>
+              <a href="#" (click)="change_pen($event)" id="pen-5" >Pen 5<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Counting_rod_horizontal_black_1.svg/1280px-Counting_rod_horizontal_black_1.svg.png" width="100px" height="25px" vertical-align:middle></a>
             </li>
           </ul>
         </li>

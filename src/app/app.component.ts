@@ -28,6 +28,10 @@ export class AppComponent {
     }
     draw();
   }
+  erase() {
+    currentPaintColor = "#FFFFFF";
+  //  document.body.style.cursor = 'URL("https://lh5.ggpht.com/2uHihdKWR-bmNcjJTp-T7KN4OlQjy3gt7DYdKx0LYGgoDRCFBRvbyPll_UJAQcfrNQGU=w300"), auto';
+  }
   change_color(event) {
     var color = event.target.id;
     switch(color) {

@@ -3,10 +3,33 @@
     <div class="navbar-header">
       <a href="#" class="navbar-brand">Drawback</a>
     </div>
-    <div class="collapse navbar-collapse">
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="nav navbar-nav">
         <li>
           <a href="#" (click)="clear()">Clear</a>
+        </li>
+        <li class="dropdown" appDropdown>
+        <a href="#" role="button" class="dropdown-toggle" appDropdown>
+          Dropdown <span class="caret"></span>
+        </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="#" id="blue" (click)="change_color($event)">Blue <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Solid_blue.svg/225px-Solid_blue.svg.png" width="24px" height="19px" vertical-align:middle></a>
+            </li>
+            <li>
+              <a href="#" (click)="change_color($event)" id="black">Black <img src="http://www.color-hex.com/palettes/7449.png" width="24px" height="19px" vertical-align:middle> </a>
+            </li>
+            <li>
+              <a href="#" (click)="change_color($event)" id="green">Green <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Flag_of_Libya_%281977-2011%29.svg/2000px-Flag_of_Libya_%281977-2011%29.svg.png" width="24px" height="19px" vertical-align:middle></a>
+            </li>
+            <li>
+              <a href="#" (click)="change_color($event)" id="brown" >Brown <img src="https://i.pinimg.com/originals/34/a1/13/34a1137416f3b698eb4a9c67a1bc877b.jpg" width="24px" height="19px" vertical-align:middle></a>
+            </li>
+            <li>
+              <a href="#" (click)="change_color($event)" id="red" >Red<img src="https://vignette.wikia.nocookie.net/phobia/images/5/5a/Red.jpg/revision/latest?cb=20161109225243" width="24px" height="19px" vertical-align:middle></a>
+            </li>
+          </ul>
         </li>
       </ul>
     </div>

@@ -14,15 +14,41 @@ export class AppComponent {
     context.clearRect(0, 0, canvasWidth, canvasHeight);
     paintArray = [];
   }
+  change_color(event) {
+    var color = event.target.id;
+    switch(color) {
+      case "blue":
+        currentPaintColor = "#130CD5";
+        break;
+      case "brown":
+        currentPaintColor = "#8A5111";
+        break;
+      case "red":
+        currentPaintColor = "#E82218";
+        break;
+      case "green":
+        currentPaintColor = "#18E85D";
+        break;
+      case "black":
+        currentPaintColor = "#030202";
+        break;
+      default:
+        currentPaintColor = "#030202";
+    }
+  }
+
 }
 
 var canvasHeight = 500;
 var canvasWidth = 1000;
 var paint = false;
+var currentPaintColor = "#030202";
+var currentPenSize;
 var canvas: HTMLCanvasElement;
 var context;
 var drag = false;
 var paintArray = new Array<PaintInfo>();
+var strokeArray = new Array<PaintInfo>();
 var x;
 var y;
 
@@ -39,7 +65,7 @@ window.onload=function() {
 function mouseDown(event: MouseEvent): void {
    x = event.x - canvas.offsetLeft;
    y = event.y - canvas.offsetTop;
-   var paintInfo = new PaintInfo(x, y, drag);
+   var paintInfo = new PaintInfo(x, y, drag, currentPaintColor);
    drag = true;
    paint = true;
    paintArray.push(paintInfo);
@@ -54,29 +80,30 @@ function mouseMove(event: MouseEvent): void {
   if (paint == true) {
     var x = event.x - canvas.offsetLeft;
     var y = event.y - canvas.offsetTop;
-    var paintInfo = new PaintInfo(x, y, drag);
+    var paintInfo = new PaintInfo(x, y, drag, currentPaintColor);
     paintArray.push(paintInfo);
     draw()
   }
 }
 
 function mouseLeave(event: MouseEvent): void {
-  paint = false;
-}
+    paint = false;
+  }
 
 
 //taken from online
 function draw() {
   context.clearRect(0, 0, canvasWidth, canvasHeight);
-  context.strokeStyle = "#df4b26";
   context.lineJoin = "round";
   context.lineWidth = 5;
   for(var i=0; i < paintArray.length; i++) {
     context.beginPath();
     if(paintArray[i].drag && i){
+      context.strokeStyle = paintArray[i].color;
       context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
     }
     else{
+      context.strokeStyle = paintArray[i].color;
       context.moveTo(paintArray[i].x - 1, paintArray[i].y);
     }
   context.lineTo(paintArray[i].x, paintArray[i].y);

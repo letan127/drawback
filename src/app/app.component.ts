@@ -13,6 +13,20 @@ export class AppComponent {
   clear() {
     context.clearRect(0, 0, canvasWidth, canvasHeight);
     paintArray = [];
+    currentStroke = 0;
+  }
+  undo() {
+    console.log(currentStroke);
+    if(currentStroke == 0) {
+      return;
+    }
+    currentStroke -= 1;
+    for(var i = paintArray.length - 1; i >= 0; i--) {
+      if(paintArray[i].stroke == currentStroke) {
+        paintArray.splice(i,1);
+      }
+    }
+    draw();
   }
   change_color(event) {
     var color = event.target.id;
@@ -66,6 +80,7 @@ var canvasWidth = 1000;
 var paint = false;
 var currentPaintColor = "#030202";
 var currentPenSize = 5;
+var currentStroke = 0;
 var canvas: HTMLCanvasElement;
 var context;
 var drag = false;
@@ -87,7 +102,7 @@ window.onload=function() {
 function mouseDown(event: MouseEvent): void {
    x = event.x - canvas.offsetLeft;
    y = event.y - canvas.offsetTop;
-   var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize);
+   var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
    drag = true;
    paint = true;
    paintArray.push(paintInfo);
@@ -97,12 +112,13 @@ function mouseDown(event: MouseEvent): void {
 function mouseUp(event: MouseEvent): void {
   paint = false;
   drag = false
+  currentStroke += 1;
 }
 function mouseMove(event: MouseEvent): void {
   if (paint == true) {
     var x = event.x - canvas.offsetLeft;
     var y = event.y - canvas.offsetTop;
-    var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize);
+    var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
     paintArray.push(paintInfo);
     draw()
   }
@@ -110,7 +126,8 @@ function mouseMove(event: MouseEvent): void {
 
 function mouseLeave(event: MouseEvent): void {
     paint = false;
-  }
+    drag = false;
+}
 
 
 //taken from online

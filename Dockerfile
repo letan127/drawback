@@ -17,8 +17,8 @@ WORKDIR /drawing-jamboard
 RUN npm install
 
 # expose port 4200
-EXPOSE 8080
+EXPOSE 4200
 
 # run ng serve on localhost
-#CMD ["ng","serve", "--host", "0.0.0.0", "--disable-host-check"] 
-CMD ["ng", "build"]
+CMD ["ng","serve", "--host", "0.0.0.0", "--disable-host-check", "true"] 
+#CMD ["ng", "build"]

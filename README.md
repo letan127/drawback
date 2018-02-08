@@ -9,7 +9,8 @@ Online, collaborative whiteboard written in Angular.
 5. Draw and have fun!
 
 ## Features
+- Colors - Can draw in red, blue, black, green, brown
 - Clear - Removes all marks from the canvas
-- Colors - Changes colors of the pen
-- Pens - Changes width of the pen
-- Undo - Undos the last stroke 
+- Undo - Removes the last stroke done on the canvas
+- Eraser - Will draw white on the canvas 
+- Pens - Has different size pen widths

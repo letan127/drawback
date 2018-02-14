@@ -1,15 +1,61 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { PaintInfo } from './paintInfo';
+import * as socketIo from 'socket.io-client';
+import { DrawService } from './draw.service';
+import * as moment from 'moment';
+
+
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  providers: [DrawService]
 })
-export class AppComponent {
+export class AppComponent implements OnInit, AfterViewInit{
   title = 'app';
-  constructor() {
+  message: PaintInfo;
+
+  messages = [];
+  constructor(private drawService: DrawService) {
   }
+  ngOnInit(): void {
+    this.drawService.getDrawing().subscribe((message: Array<PaintInfo>) => {
+      paintArray = paintArray.concat(message);
+      context.clearRect(0, 0, canvasWidth, canvasHeight);
+      context.lineJoin = "round";
+      for(var i=0; i < paintArray.length; i++) {
+        context.beginPath();
+        if(paintArray[i].drag && i){
+          context.strokeStyle = paintArray[i].color;
+          context.lineWidth = paintArray[i].size;
+          context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
+        }
+        else{
+          context.strokeStyle = paintArray[i].color;
+          context.lineWidth = paintArray[i].size;
+          context.moveTo(paintArray[i].x - 1, paintArray[i].y);
+        }
+      context.lineTo(paintArray[i].x, paintArray[i].y);
+      context.closePath();
+      context.stroke();
+      }
+    })
+  }
+  ngAfterViewInit() {
+    canvas = <HTMLCanvasElement>document.getElementById("jamboard");
+    canvas.addEventListener("mousedown", this.mouseDown, false);
+    canvas.addEventListener("mousemove", this.mouseMove, false);
+    canvas.addEventListener("mouseleave", this.mouseLeave, false);
+    canvas.addEventListener("mouseup", this.mouseUp, false);
+    context = canvas.getContext("2d");
+  }
+  sendDrawing() {
+    this.drawService.sendDrawing(this.message);
+
+  }
+
+
   clear() {
     context.clearRect(0, 0, canvasWidth, canvasHeight);
     paintArray = [];
@@ -26,7 +72,7 @@ export class AppComponent {
         paintArray.splice(i,1);
       }
     }
-    draw();
+    this.drawService.sendDrawing(strokeArray);
   }
   erase() {
     currentPaintColor = "#FFFFFF";
@@ -77,6 +123,76 @@ export class AppComponent {
     }
   }
 
+  mouseDown(event: MouseEvent): void {
+     x = event.x - canvas.offsetLeft;
+     y = event.y - canvas.offsetTop;
+     var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
+     drag = true;
+     paint = true;
+     paintArray.push(paintInfo);
+     strokeArray.push(paintInfo);
+     context.clearRect(0, 0, canvasWidth, canvasHeight);
+     context.lineJoin = "round";
+     for(var i=0; i < paintArray.length; i++) {
+       context.beginPath();
+       if(paintArray[i].drag && i){
+         context.strokeStyle = paintArray[i].color;
+         context.lineWidth = paintArray[i].size;
+         context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
+       }
+       else{
+         context.strokeStyle = paintArray[i].color;
+         context.lineWidth = paintArray[i].size;
+         context.moveTo(paintArray[i].x - 1, paintArray[i].y);
+       }
+     context.lineTo(paintArray[i].x, paintArray[i].y);
+     context.closePath();
+     context.stroke();
+     }
+
+  }
+
+  mouseUp(event: MouseEvent): void {
+    paint = false;
+    drag = false
+    currentStroke += 1;
+    this.drawService.sendDrawing(strokeArray);
+  }
+  mouseMove(event: MouseEvent): void {
+    if (paint == true) {
+      var x = event.x - canvas.offsetLeft;
+      var y = event.y - canvas.offsetTop;
+      var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
+      paintArray.push(paintInfo);
+      strokeArray.push(paintInfo);
+      context.clearRect(0, 0, canvasWidth, canvasHeight);
+      context.lineJoin = "round";
+      for(var i=0; i < paintArray.length; i++) {
+        context.beginPath();
+        if(paintArray[i].drag && i){
+          context.strokeStyle = paintArray[i].color;
+          context.lineWidth = paintArray[i].size;
+          context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
+        }
+        else{
+          context.strokeStyle = paintArray[i].color;
+          context.lineWidth = paintArray[i].size;
+          context.moveTo(paintArray[i].x - 1, paintArray[i].y);
+        }
+      context.lineTo(paintArray[i].x, paintArray[i].y);
+      context.closePath();
+      context.stroke();
+      }
+    }
+  }
+
+  mouseLeave(event: MouseEvent): void {
+      paint = false;
+      drag = false;
+  }
+
+  //taken from online
+
 }
 
 var canvasHeight = 500;
@@ -94,64 +210,66 @@ var x;
 var y;
 
 
-window.onload=function() {
-  canvas = <HTMLCanvasElement>document.getElementById("jamboard");
-  canvas.addEventListener("mousedown", mouseDown, false);
-  canvas.addEventListener("mousemove", mouseMove, false);
-  canvas.addEventListener("mouseleave", mouseLeave, false);
-  canvas.addEventListener("mouseup", mouseUp, false);
-  context = canvas.getContext("2d");
-
-}
-function mouseDown(event: MouseEvent): void {
-   x = event.x - canvas.offsetLeft;
-   y = event.y - canvas.offsetTop;
-   var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
-   drag = true;
-   paint = true;
-   paintArray.push(paintInfo);
-   draw()
-}
-
-function mouseUp(event: MouseEvent): void {
-  paint = false;
-  drag = false
-  currentStroke += 1;
-}
-function mouseMove(event: MouseEvent): void {
-  if (paint == true) {
-    var x = event.x - canvas.offsetLeft;
-    var y = event.y - canvas.offsetTop;
-    var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
-    paintArray.push(paintInfo);
-    draw()
-  }
-}
-
-function mouseLeave(event: MouseEvent): void {
-    paint = false;
-    drag = false;
-}
-
-
-//taken from online
-function draw() {
-  context.clearRect(0, 0, canvasWidth, canvasHeight);
-  context.lineJoin = "round";
-  for(var i=0; i < paintArray.length; i++) {
-    context.beginPath();
-    if(paintArray[i].drag && i){
-      context.strokeStyle = paintArray[i].color;
-      context.lineWidth = paintArray[i].size;
-      context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
-    }
-    else{
-      context.strokeStyle = paintArray[i].color;
-      context.lineWidth = paintArray[i].size;
-      context.moveTo(paintArray[i].x - 1, paintArray[i].y);
-    }
-  context.lineTo(paintArray[i].x, paintArray[i].y);
-  context.closePath();
-  context.stroke();
-  }
-}
+// window.onload=function() {
+//   canvas = <HTMLCanvasElement>document.getElementById("jamboard");
+//   canvas.addEventListener("mousedown", mouseDown, false);
+//   canvas.addEventListener("mousemove", mouseMove, false);
+//   canvas.addEventListener("mouseleave", mouseLeave, false);
+//   canvas.addEventListener("mouseup", mouseUp, false);
+//   context = canvas.getContext("2d");
+//
+// }
+// function mouseDown(event: MouseEvent): void {
+//    x = event.x - canvas.offsetLeft;
+//    y = event.y - canvas.offsetTop;
+//    var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
+//    drag = true;
+//    paint = true;
+//    paintArray.push(paintInfo);
+//    strokeArray.push(paintInfo);
+//    draw();
+// }
+//
+// function mouseUp(event: MouseEvent): void {
+//   paint = false;
+//   drag = false
+//   currentStroke += 1;
+// }
+// function mouseMove(event: MouseEvent): void {
+//   if (paint == true) {
+//     var x = event.x - canvas.offsetLeft;
+//     var y = event.y - canvas.offsetTop;
+//     var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
+//     paintArray.push(paintInfo);
+//     strokeArray.push(paintInfo);
+//     draw()
+//   }
+// }
+//
+// function mouseLeave(event: MouseEvent): void {
+//     paint = false;
+//     drag = false;
+// }
+//
+//
+// //taken from online
+// function draw() {
+//   context.clearRect(0, 0, canvasWidth, canvasHeight);
+//   context.lineJoin = "round";
+//   for(var i=0; i < paintArray.length; i++) {
+//     context.beginPath();
+//     if(paintArray[i].drag && i){
+//       context.strokeStyle = paintArray[i].color;
+//       context.lineWidth = paintArray[i].size;
+//       context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
+//     }
+//     else{
+//       context.strokeStyle = paintArray[i].color;
+//       context.lineWidth = paintArray[i].size;
+//       context.moveTo(paintArray[i].x - 1, paintArray[i].y);
+//     }
+//   context.lineTo(paintArray[i].x, paintArray[i].y);
+//   context.closePath();
+//   context.stroke();
+//   }
+// }

@@ -1,10 +1,13 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
-
+import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
 import { DropDownDirective } from './shared/dropdown.directive';
 import { HoverClassDirective } from './shared/hover-class.directive';
+import { DrawService } from './draw.service';
+
 
 
 @NgModule({
@@ -14,9 +17,9 @@ import { HoverClassDirective } from './shared/hover-class.directive';
     HoverClassDirective
   ],
   imports: [
-    BrowserModule
+    BrowserModule, HttpModule, FormsModule
   ],
-  providers: [],
+  providers: [DrawService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

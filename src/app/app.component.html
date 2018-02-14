@@ -1,3 +1,10 @@
+<div *ngFor="let message of messages">
+    {{message}}
+</div>
+
+<input [(ngModel)]="message" (keyup)="$event.keyCode == 13 && sendDrawing()" />
+<button (click)="sendDrawing()">Send</button>
+<button (click)="sendDrawing()">Send Message</button>
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <div class="navbar-header">

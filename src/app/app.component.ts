@@ -20,7 +20,7 @@ export class AppComponent implements OnInit, AfterViewInit{
   constructor(private drawService: DrawService) {
   }
   ngOnInit(): void {
-    this.drawService.getDrawing().subscribe((message: Array<PaintInfo>) => {
+    this.drawService.getDrawing().subscribe(message => {
       paintArray = paintArray.concat(message);
       context.clearRect(0, 0, canvasWidth, canvasHeight);
       context.lineJoin = "round";
@@ -44,10 +44,10 @@ export class AppComponent implements OnInit, AfterViewInit{
   }
   ngAfterViewInit() {
     canvas = <HTMLCanvasElement>document.getElementById("jamboard");
-    canvas.addEventListener("mousedown", this.mouseDown, false);
-    canvas.addEventListener("mousemove", this.mouseMove, false);
-    canvas.addEventListener("mouseleave", this.mouseLeave, false);
-    canvas.addEventListener("mouseup", this.mouseUp, false);
+    canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
+    canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
+    canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
+    canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
     context = canvas.getContext("2d");
   }
   sendDrawing() {
@@ -124,6 +124,7 @@ export class AppComponent implements OnInit, AfterViewInit{
   }
 
   mouseDown(event: MouseEvent): void {
+    console.log("hi");
      x = event.x - canvas.offsetLeft;
      y = event.y - canvas.offsetTop;
      var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);

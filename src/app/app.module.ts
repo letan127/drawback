@@ -6,7 +6,6 @@ import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
 import { DropDownDirective } from './shared/dropdown.directive';
 import { HoverClassDirective } from './shared/hover-class.directive';
-import { DrawService } from './draw.service';
 
 
 
@@ -19,7 +18,7 @@ import { DrawService } from './draw.service';
   imports: [
     BrowserModule, HttpModule, FormsModule
   ],
-  providers: [DrawService],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

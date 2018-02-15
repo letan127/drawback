@@ -6,6 +6,7 @@ import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
 import { DropDownDirective } from './shared/dropdown.directive';
 import { HoverClassDirective } from './shared/hover-class.directive';
+import { CanvasComponent } from './canvas/canvas.component';
 
 
 
@@ -13,12 +14,13 @@ import { HoverClassDirective } from './shared/hover-class.directive';
   declarations: [
     AppComponent,
     DropDownDirective,
-    HoverClassDirective
+    HoverClassDirective,
+    CanvasComponent
   ],
   imports: [
     BrowserModule, HttpModule, FormsModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent, CanvasComponent]
 })
 export class AppModule { }

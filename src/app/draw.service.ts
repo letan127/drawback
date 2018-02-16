@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as io from 'socket.io-client';
 import { Observable } from 'rxjs/Observable';
+import { PaintInfo } from './paintInfo';
+
 
 @Injectable()
 export class DrawService {
@@ -9,8 +11,12 @@ export class DrawService {
   constructor() {
     this.socket = io(this.url);
   }
-  public sendDrawing(message) {
-    this.socket.emit('new-message', message);
+  public sendDrawing(message, roomID) {
+    var roomandpaint = {
+      stroke: message,
+      room: roomID
+    };
+    this.socket.emit('new-message', roomandpaint);
   }
   public getDrawing = () => {
     return Observable.create((observer) => {
@@ -18,6 +24,9 @@ export class DrawService {
         observer.next(message);
       });
     });
+  }
+  public sendRoom(room){
+    this.socket.emit('room', room);
   }
 
 }

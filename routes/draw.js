@@ -9,10 +9,19 @@ let io = socketIO(server);
 
 server.listen(4000);
 
+router.get('/', (req, res) => {
+  res.send('api works');
+});
+
+
 io.on('connection', (socket) => {
 	console.log('user connected');
 	socket.on('new-message', (message) => {
-			 io.emit('new-message', message);
+			 io.to(message.room).emit('new-message', message);
+	 });
+	socket.on('room', function(room) {
+	 	socket.join(room);
 	 });
 });
+
 module.exports = router;

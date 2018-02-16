@@ -7,7 +7,13 @@ import { AppComponent } from './app.component';
 import { DropDownDirective } from './shared/dropdown.directive';
 import { HoverClassDirective } from './shared/hover-class.directive';
 import { CanvasComponent } from './canvas/canvas.component';
+import { Routes, RouterModule } from '@angular/router';
 
+
+const appRoutes: Routes = [
+  {path: '', component: CanvasComponent},
+  {path: 'draw/rooms/:id', component: CanvasComponent},
+];
 
 
 @NgModule({
@@ -18,7 +24,10 @@ import { CanvasComponent } from './canvas/canvas.component';
     CanvasComponent
   ],
   imports: [
-    BrowserModule, HttpModule, FormsModule
+    BrowserModule,
+    HttpModule,
+    FormsModule,
+    RouterModule.forRoot(appRoutes)
   ],
   providers: [],
   bootstrap: [AppComponent, CanvasComponent]

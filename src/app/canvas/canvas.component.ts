@@ -3,6 +3,7 @@ import { PaintInfo } from '../paintInfo';
 import * as socketIo from 'socket.io-client';
 import { DrawService } from '../draw.service';
 import * as moment from 'moment';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-canvas',
@@ -15,12 +16,16 @@ export class CanvasComponent implements OnInit {
   message: PaintInfo;
   messages = [];
 
-  constructor(private drawService: DrawService) {
+  constructor(private drawService: DrawService, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
+    // if (this.route.snapshot.params['id'] != '') {
+    //   this.drawService.sendRoom(this.route.snapshot.params['id']);
+    // }
+    this.drawService.sendRoom('center');
     this.drawService.getDrawing().subscribe(message => {
-      paintArray = paintArray.concat(message);
+      paintArray = paintArray.concat(message.stroke);
       context.clearRect(0, 0, canvasWidth, canvasHeight);
       context.lineJoin = "round";
       for(var i=0; i < paintArray.length; i++) {
@@ -49,10 +54,6 @@ export class CanvasComponent implements OnInit {
     canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
     context = canvas.getContext("2d");
   }
-  sendDrawing() {
-    this.drawService.sendDrawing(this.message);
-
-  }
 
 
   clear() {
@@ -71,7 +72,6 @@ export class CanvasComponent implements OnInit {
         paintArray.splice(i,1);
       }
     }
-    this.drawService.sendDrawing(strokeArray);
   }
   erase() {
     currentPaintColor = "#FFFFFF";
@@ -123,7 +123,6 @@ export class CanvasComponent implements OnInit {
   }
 
   mouseDown(event: MouseEvent): void {
-    console.log("hi");
      x = event.x - canvas.offsetLeft;
      y = event.y - canvas.offsetTop;
      var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
@@ -156,7 +155,7 @@ export class CanvasComponent implements OnInit {
     paint = false;
     drag = false
     currentStroke += 1;
-    this.drawService.sendDrawing(strokeArray);
+    this.drawService.sendDrawing(strokeArray, 'center');
   }
   mouseMove(event: MouseEvent): void {
     if (paint == true) {

@@ -15,6 +15,7 @@ export class CanvasComponent implements OnInit {
   title = 'app';
   message: PaintInfo;
   messages = [];
+  id = '';
 
   constructor(private drawService: DrawService, private route: ActivatedRoute) {
   }
@@ -23,7 +24,10 @@ export class CanvasComponent implements OnInit {
     // if (this.route.snapshot.params['id'] != '') {
     //   this.drawService.sendRoom(this.route.snapshot.params['id']);
     // }
-    this.drawService.sendRoom('center');
+    this.route.params.subscribe(params => {
+      this.id = params['id'];
+    })
+    this.drawService.sendRoom(this.id);
     this.drawService.getDrawing().subscribe(message => {
       paintArray = paintArray.concat(message.stroke);
       context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -155,7 +159,7 @@ export class CanvasComponent implements OnInit {
     paint = false;
     drag = false
     currentStroke += 1;
-    this.drawService.sendDrawing(strokeArray, 'center');
+    this.drawService.sendDrawing(strokeArray, this.id);
   }
   mouseMove(event: MouseEvent): void {
     if (paint == true) {

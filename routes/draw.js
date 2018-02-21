@@ -10,21 +10,29 @@ let io = socketIO(server);
 server.listen(4000);
 
 router.get('/', (req, res) => {
-  res.send('api works');
+    res.send('api works');
 });
 
-
+// Begin listening for message when a client connects to the server
 io.on('connection', (socket) => {
-	console.log('user connected');
-	socket.on('new-message', (message) => {
-			 io.to(message.room).emit('new-message', message);
-	 });
-	socket.on('room', function(room) {
-	 	socket.join(room);
-	 });
-  socket.on('clear', (message) => {
-    io.to(message).emit('clear', message);
-  });
+    console.log('user connected');
+
+    // When the server receives a stroke from a client, it sends the stroke
+    // to all clients in that room
+    socket.on('stroke', (strokeMessage) => {
+        io.to(strokeMessage.room).emit('stroke', strokeMessage);
+    });
+
+    // When the server receives a room ID, it will add the client to that room
+    socket.on('room', function(room) {
+        socket.join(room);
+    });
+
+    // When the server receives a clear, it sends the sender's room ID to all
+    // clients in that room
+    socket.on('clear', (room) => {
+        io.to(room).emit('clear', room);
+    });
 });
 
 module.exports = router;

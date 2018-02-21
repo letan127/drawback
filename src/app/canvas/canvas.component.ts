@@ -32,7 +32,7 @@ export class CanvasComponent implements OnInit {
         this.drawService.sendRoom(this.id);
 
         // When the server sends a stroke, add it to our list of strokes and redraw everything
-        this.drawService.getDrawing().subscribe(message => {
+        this.drawService.getStroke().subscribe(message => {
             // FIXME: The client will get double copies of their own strokes (use broadcast instead of emit?)
             strokes.push(message.stroke);
             context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -41,7 +41,7 @@ export class CanvasComponent implements OnInit {
         })
 
         // When the server a clear event, clear the canvas
-        this.drawService.clearDrawing().subscribe(message => {
+        this.drawService.getClear().subscribe(message => {
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             strokes = [];
         })
@@ -89,7 +89,7 @@ export class CanvasComponent implements OnInit {
 
     // Removes everything from the canvas
     clear() {
-        this.drawService.callClear(this.id);
+        this.drawService.sendClear(this.id);
     }
 
     // Undoes the latest stroke
@@ -178,7 +178,7 @@ export class CanvasComponent implements OnInit {
     // Stop drawing and send this latest stroke to the server
     mouseUp(event: MouseEvent): void {
         drag = false;
-        this.drawService.sendDrawing(strokes[strokes.length-1], this.id);
+        this.drawService.sendStroke(strokes[strokes.length-1], this.id);
     }
 
     // Continue updating and drawing the current stroke

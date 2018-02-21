@@ -13,36 +13,40 @@ export class DrawService {
         this.socket = io(this.url);
     }
 
-    public sendDrawing(message, roomID) {
-        var roomandpaint = {
-            stroke: message,
-            room: roomID
-        };
-        this.socket.emit('new-message', roomandpaint);
-    }
-
-    public callClear(room) {
-        this.socket.emit('clear', room);
-    }
-
-    public getDrawing = () => {
-        return Observable.create((observer) => {
-            this.socket.on('new-message', (message) => {
-                observer.next(message);
-            });
-        });
-    }
-
-    public clearDrawing = () => {
-        return Observable.create((observer) => {
-            this.socket.on('clear', (message) => {
-                observer.next(message);
-            });
-        });
-    }
-
+    // Send the server our room ID
     public sendRoom(room){
         this.socket.emit('room', room);
     }
 
+    // Send a stroke object and the client's room ID to the server
+    public sendStroke(stroke, roomID) {
+        var strokeWithRoom = {
+            stroke: stroke,
+            room: roomID
+        };
+        this.socket.emit('stroke', strokeWithRoom);
+    }
+
+    // When the server sends a stroke, send the strokeMessage to subscried observers
+    public getStroke = () => {
+        return Observable.create((observer) => {
+            this.socket.on('stroke', (strokeMessage) => {
+                observer.next(strokeMessage);
+            });
+        });
+    }
+
+    // Tell server that the client clicked the clear button
+    public sendClear(room) {
+        this.socket.emit('clear', room);
+    }
+
+    // When the server emits a clear message, send the room to subscribed observers
+    public getClear = () => {
+        return Observable.create((observer) => {
+            this.socket.on('clear', (room) => {
+                observer.next(room);
+            });
+        });
+    }
 }

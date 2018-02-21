@@ -42,22 +42,7 @@ export class CanvasComponent implements OnInit {
             context.lineJoin = "round";
 
             // Redraw everything from our list of strokes
-            for(var i=0; i < paintArray.length; i++) {
-                context.beginPath();
-                if(paintArray[i].drag && i){
-                    context.strokeStyle = paintArray[i].color;
-                    context.lineWidth = paintArray[i].size;
-                    context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
-                }
-                else{
-                    context.strokeStyle = paintArray[i].color;
-                    context.lineWidth = paintArray[i].size;
-                    context.moveTo(paintArray[i].x - 1, paintArray[i].y);
-                }
-                context.lineTo(paintArray[i].x, paintArray[i].y);
-                context.closePath();
-                context.stroke();
-            }
+            this.draw();
         })
 
         // When the server a clear event, clear the canvas
@@ -76,6 +61,36 @@ export class CanvasComponent implements OnInit {
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
         context = canvas.getContext("2d");
+    }
+
+    draw() {
+        // Clear the canvas
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        // Set the pen type
+        context.lineJoin = "round";
+
+        // Draw each stroke/path from our list of pixel data
+        for(var i=0; i < paintArray.length; i++) {
+            context.strokeStyle = paintArray[i].color;
+            context.lineWidth = paintArray[i].size;
+
+            context.beginPath();
+            if(paintArray[i].drag && i){
+                // If this is not the first pixel in a stroke, then create
+                // a path from the previous pixel to the current pixl
+                context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
+            }
+            else{
+                // If this is the first pixel in a stroke, then draw a small dot
+                context.moveTo(paintArray[i].x - 1, paintArray[i].y);
+            }
+            context.lineTo(paintArray[i].x, paintArray[i].y);
+            context.closePath();
+
+            // Actually draw the stroke on the canvas
+            context.stroke();
+        }
     }
 
     // Removes everything from the canvas
@@ -160,38 +175,17 @@ export class CanvasComponent implements OnInit {
         // Get the current tool and pixel data
         var paintInfo = new PaintInfo(x, y, drag, currentPaintColor, currentPenSize, currentStroke);
         drag = true;
-        paint = true;
 
         // Add the single pixel info to our list of strokes
         paintArray.push(paintInfo);
         strokeArray.push(paintInfo);
 
-        // Clear the canvas and redraw everything
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
-        context.lineJoin = "round";
-        for(var i=0; i < paintArray.length; i++) {
-            context.beginPath();
-            if(paintArray[i].drag && i){
-                context.strokeStyle = paintArray[i].color;
-                context.lineWidth = paintArray[i].size;
-                context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
-            }
-            else{
-                context.strokeStyle = paintArray[i].color;
-                context.lineWidth = paintArray[i].size;
-                context.moveTo(paintArray[i].x - 1, paintArray[i].y);
-            }
-            context.lineTo(paintArray[i].x, paintArray[i].y);
-            context.closePath();
-            context.stroke();
-        }
-
+        this.draw();
     }
 
     // Stop drawing
     mouseUp(event: MouseEvent): void {
-        paint = false;
-        drag = false
+        drag = false;
         currentStroke += 1;
         this.drawService.sendDrawing(strokeArray, this.id);
         strokeArray = [];
@@ -199,7 +193,7 @@ export class CanvasComponent implements OnInit {
 
     // Continue drawing a stroke
     mouseMove(event: MouseEvent): void {
-        if (paint == true) {
+        if (drag == true) {
             var x = event.x - canvas.offsetLeft;
             var y = event.y - canvas.offsetTop;
 
@@ -207,30 +201,12 @@ export class CanvasComponent implements OnInit {
             paintArray.push(paintInfo);
             strokeArray.push(paintInfo);
 
-            context.clearRect(0, 0, canvasWidth, canvasHeight);
-            context.lineJoin = "round";
-            for(var i=0; i < paintArray.length; i++) {
-                context.beginPath();
-                if(paintArray[i].drag && i){
-                    context.strokeStyle = paintArray[i].color;
-                    context.lineWidth = paintArray[i].size;
-                    context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
-                }
-                else{
-                    context.strokeStyle = paintArray[i].color;
-                    context.lineWidth = paintArray[i].size;
-                    context.moveTo(paintArray[i].x - 1, paintArray[i].y);
-                }
-                context.lineTo(paintArray[i].x, paintArray[i].y);
-                context.closePath();
-                context.stroke();
-            }
+            this.draw();
         }
     }
 
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
-        paint = false;
         drag = false;
     }
 
@@ -246,8 +222,7 @@ var context; // Contains a reference to the canvas element
 // Global pixel/stroke data
 var paintArray = new Array<PaintInfo>(); // Array of every pixel and its tool data
 var strokeArray = new Array<PaintInfo>(); // Array of all pixel and tool data for one stroke (from mousedown to mouseup)
-var paint = false; // True if we should be drawing to the canvas (after a mouse down)
-var drag = false; // True if we should be drawing
+var drag = false; // True if we should be drawing to the canvas (after a mouse down)
 var currentPaintColor = "#030202";
 var currentPenSize = 5;
 var currentStroke = 0; // Keeps count of the current stroke number

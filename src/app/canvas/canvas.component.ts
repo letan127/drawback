@@ -79,13 +79,13 @@ export class CanvasComponent implements OnInit {
             if(paintArray[i].drag && i){
                 // If this is not the first pixel in a stroke, then create
                 // a path from the previous pixel to the current pixl
-                context.moveTo(paintArray[i-1].x, paintArray[i-1].y);
+                context.moveTo(paintArray[i-1].pos.x, paintArray[i-1].pos.y);
             }
             else{
                 // If this is the first pixel in a stroke, then draw a small dot
-                context.moveTo(paintArray[i].x - 1, paintArray[i].y);
+                context.moveTo(paintArray[i].pos.x - 1, paintArray[i].pos.y);
             }
-            context.lineTo(paintArray[i].x, paintArray[i].y);
+            context.lineTo(paintArray[i].pos.x, paintArray[i].pos.y);
             context.closePath();
 
             // Actually draw the stroke on the canvas

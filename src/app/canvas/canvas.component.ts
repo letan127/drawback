@@ -49,6 +49,11 @@ export class CanvasComponent implements OnInit {
       context.stroke();
       }
     })
+    this.drawService.clearDrawing().subscribe(message => {
+      context.clearRect(0, 0, canvasWidth, canvasHeight);
+      paintArray = [];
+      currentStroke = 0;
+    })
   }
   ngAfterViewInit() {
     canvas = <HTMLCanvasElement>document.getElementById("jamboard");
@@ -60,10 +65,8 @@ export class CanvasComponent implements OnInit {
   }
 
 
-  clear() {
-    context.clearRect(0, 0, canvasWidth, canvasHeight);
-    paintArray = [];
-    currentStroke = 0;
+  public clear() {
+    this.drawService.callClear(this.id);
   }
   undo() {
     console.log(currentStroke);
@@ -160,6 +163,7 @@ export class CanvasComponent implements OnInit {
     drag = false
     currentStroke += 1;
     this.drawService.sendDrawing(strokeArray, this.id);
+    strokeArray = [];
   }
   mouseMove(event: MouseEvent): void {
     if (paint == true) {

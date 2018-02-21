@@ -22,6 +22,9 @@ io.on('connection', (socket) => {
 	socket.on('room', function(room) {
 	 	socket.join(room);
 	 });
+  socket.on('clear', (message) => {
+    io.to(message).emit('clear', message);
+  });
 });
 
 module.exports = router;

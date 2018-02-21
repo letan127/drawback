@@ -7,13 +7,13 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="nav navbar-nav">
         <li>
-          <a href="#" (click)="clear()">Clear Drawing</a>
+          <button (click)="clear()">Clear Drawing </button>
         </li>
         <li>
-          <a href="#" (click)="undo()">Undo</a>
+          <button onclick="undo()">Undo</button>
         </li>
         <li>
-          <a href="#" (click)="erase()">Eraser</a>
+          <button onclick="erase()">Eraser</button>
         </li>
         <li class="dropdown" appDropdown>
         <a href="#" role="button" class="dropdown-toggle" appDropdown>
@@ -64,4 +64,4 @@
   </div>
 </nav>
 <canvas id="jamboard" width="1000" height="500"></canvas>
-<script src="app.component.ts"></script>
+<script src="canvas.component.ts"></script>

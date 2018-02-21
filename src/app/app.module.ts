@@ -30,6 +30,6 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes)
   ],
   providers: [],
-  bootstrap: [AppComponent, CanvasComponent]
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

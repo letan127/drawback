@@ -18,9 +18,19 @@ export class DrawService {
     };
     this.socket.emit('new-message', roomandpaint);
   }
+  public callClear(room) {
+    this.socket.emit('clear', room);
+  }
   public getDrawing = () => {
     return Observable.create((observer) => {
       this.socket.on('new-message', (message) => {
+        observer.next(message);
+      });
+    });
+  }
+  public clearDrawing = () => {
+    return Observable.create((observer) => {
+      this.socket.on('clear', (message) => {
         observer.next(message);
       });
     });

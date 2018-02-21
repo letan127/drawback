@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as io from 'socket.io-client';
 import { Observable } from 'rxjs/Observable';
-import { PaintInfo } from './paintInfo';
+import { Stroke } from './stroke';
 
 
 @Injectable()
@@ -40,7 +40,7 @@ export class DrawService {
             });
         });
     }
-    
+
     public sendRoom(room){
         this.socket.emit('room', room);
     }

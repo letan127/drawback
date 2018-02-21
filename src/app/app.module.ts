@@ -11,25 +11,25 @@ import { Routes, RouterModule } from '@angular/router';
 
 
 const appRoutes: Routes = [
-  {path: '', redirectTo: '/draw/rooms/1', pathMatch: 'full'},
-  {path: 'draw/rooms/:id', component: CanvasComponent},
+    {path: '', redirectTo: '/draw/rooms/1', pathMatch: 'full'},
+    {path: 'draw/rooms/:id', component: CanvasComponent},
 ];
 
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    DropDownDirective,
-    HoverClassDirective,
-    CanvasComponent
-  ],
-  imports: [
-    BrowserModule,
-    HttpModule,
-    FormsModule,
-    RouterModule.forRoot(appRoutes)
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        DropDownDirective,
+        HoverClassDirective,
+        CanvasComponent
+    ],
+    imports: [
+        BrowserModule,
+        HttpModule,
+        FormsModule,
+        RouterModule.forRoot(appRoutes)
+    ],
+    providers: [],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }

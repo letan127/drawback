@@ -169,25 +169,27 @@ export class CanvasComponent implements OnInit {
         // Get the first pixel in the new stroke
         curPixels = [];
         curPixels.push(new Position(x, y));
+        // Add the stroke's pixels and tool settings
+        strokes.push(new Stroke(curPixels, currentPaintColor, currentPenSize));
 
         drag = true;
         this.draw();
     }
 
-    // Stop drawing and send the stroke to the server
+    // Stop drawing and send this latest stroke to the server
     mouseUp(event: MouseEvent): void {
-        // Add the stroke's pixels and tool settings
-        strokes.push(new Stroke(curPixels, currentPaintColor, currentPenSize));
         drag = false;
         this.drawService.sendDrawing(strokes[strokes.length-1], this.id);
     }
 
-    // Continue drawing a stroke
+    // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (drag == true) {
             var x = event.x - canvas.offsetLeft;
             var y = event.y - canvas.offsetTop;
+
             curPixels.push(new Position(x,y));
+            strokes[strokes.length-1].pos = curPixels
             this.draw();
         }
     }

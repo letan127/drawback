@@ -166,11 +166,10 @@ export class CanvasComponent implements OnInit {
         x = event.x - canvas.offsetLeft;
         y = event.y - canvas.offsetTop;
 
-        // Get the first pixel in the new stroke
-        curPixels = [];
-        curPixels.push(new Position(x, y));
         // Add the stroke's pixels and tool settings
-        strokes.push(new Stroke(curPixels, currentPaintColor, currentPenSize));
+        strokes.push(new Stroke(new Array<Position>(), currentPaintColor, currentPenSize));
+        // Get the first pixel in the new stroke
+        strokes[strokes.length-1].pos.push(new Position(x,y));
 
         drag = true;
         this.draw();
@@ -188,8 +187,7 @@ export class CanvasComponent implements OnInit {
             var x = event.x - canvas.offsetLeft;
             var y = event.y - canvas.offsetTop;
 
-            curPixels.push(new Position(x,y));
-            strokes[strokes.length-1].pos = curPixels
+            strokes[strokes.length-1].pos.push(new Position(x,y));
             this.draw();
         }
     }
@@ -208,8 +206,7 @@ var canvasWidth = 1000;
 var canvas: HTMLCanvasElement;
 var context; // Contains a reference to the canvas element
 
-// Global pixel/stroke data
-var curPixels = new Array<Position>(); // Contains all the pixel positions for one stroke (from mousedown to mouseup)
+// Global stroke data
 var strokes = new Array<Stroke>(); // Contains every stroke on the canvas
 var drag = false; // True if we should be drawing to the canvas (after a mouse down)
 var currentPaintColor = "#030202";

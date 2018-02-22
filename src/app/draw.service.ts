@@ -27,7 +27,7 @@ export class DrawService {
         this.socket.emit('stroke', strokeWithRoom);
     }
 
-    // When the server sends a stroke, send the strokeMessage to subscried observers
+    // When the server sends a stroke, send the strokeMessage to our subscribed observers
     public getStroke = () => {
         return Observable.create((observer) => {
             this.socket.on('stroke', (strokeMessage) => {
@@ -41,11 +41,11 @@ export class DrawService {
         this.socket.emit('clear', room);
     }
 
-    // When the server emits a clear message, send the room to subscribed observers
+    // When the server emits a clear message, subscribed observers will execute their functions
     public getClear = () => {
         return Observable.create((observer) => {
             this.socket.on('clear', (room) => {
-                observer.next(room);
+                observer.next(); // Don't send anything to the subscribed observers
             });
         });
     }

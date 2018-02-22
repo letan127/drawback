@@ -17,21 +17,21 @@ router.get('/', (req, res) => {
 io.on('connection', (socket) => {
     console.log('user connected');
 
-    // When the server receives a stroke from a client, it sends the stroke
-    // to all clients in that room
-    socket.on('stroke', (strokeMessage) => {
-        io.to(strokeMessage.room).emit('stroke', strokeMessage);
-    });
-
     // When the server receives a room ID, it will add the client to that room
     socket.on('room', function(room) {
         socket.join(room);
     });
 
-    // When the server receives a clear, it sends the sender's room ID to all
-    // clients in that room
+    // When the server receives a stroke from a client, it sends the stroke
+    // to all clients in that room except for the sender
+    socket.on('stroke', (strokeMessage) => {
+        socket.to(strokeMessage.room).emit('stroke', strokeMessage);
+    });
+
+    // When the server receives a clear from a client in a certain room,
+    // it sends a clear event back to all clients in that room except for the sender
     socket.on('clear', (room) => {
-        io.to(room).emit('clear', room);
+        socket.to(room).emit('clear');
     });
 });
 

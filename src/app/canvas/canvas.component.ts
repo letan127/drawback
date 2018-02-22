@@ -23,7 +23,7 @@ export class CanvasComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // Get the room number/id from URL
+        // Get the room number/id from the URL
         this.route.params.subscribe(params => {
             this.id = params['id'];
         })
@@ -33,15 +33,14 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a stroke, add it to our list of strokes and redraw everything
         this.drawService.getStroke().subscribe(message => {
-            // FIXME: The client will get double copies of their own strokes (use broadcast instead of emit?)
             strokes.push(message.stroke);
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             context.lineJoin = "round";
             this.draw();
         })
 
-        // When the server a clear event, clear the canvas
-        this.drawService.getClear().subscribe(message => {
+        // When the server sends a clear event, clear the canvas
+        this.drawService.getClear().subscribe(() => {
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             strokes = [];
         })
@@ -57,6 +56,7 @@ export class CanvasComponent implements OnInit {
         context = canvas.getContext("2d");
     }
 
+    // Clears the canvas and redraws every stroke in our list of strokes
     draw() {
         // Clear the canvas
         context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -87,8 +87,10 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    // Removes everything from the canvas
+    // Removes everything from the canvas and sends a clear message to the server
     clear() {
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        strokes = [];
         this.drawService.sendClear(this.id);
     }
 
@@ -196,7 +198,6 @@ export class CanvasComponent implements OnInit {
     mouseLeave(event: MouseEvent): void {
         drag = false;
     }
-
 //taken from online
 }
 

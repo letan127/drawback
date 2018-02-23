@@ -1,3 +1,7 @@
 .navbar a:hover, .dropdown:hover .dropbtn {
     background-color: gray;
 }
+
+canvas {
+    background-color: red;
+}

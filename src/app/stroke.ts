@@ -5,9 +5,11 @@ export class Stroke {
     public color: string;
     public size: number;
     public stroke: number;
-    constructor(positions: Position[], color: string, size: number) {
+    public mode: string;
+    constructor(positions: Position[], color: string, size: number, mode:string) {
         this.pos =  positions.slice(0);
         this.color = color;
         this.size = size;
+        this.mode = mode;
     }
 }

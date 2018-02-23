@@ -63,26 +63,39 @@ export class CanvasComponent implements OnInit {
         // Set the pen type
         context.lineJoin = "round";
 
+
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < strokes.length; i++) {
             context.strokeStyle = strokes[i].color;
             context.lineWidth = strokes[i].size;
+            context.globalCompositeOperation = strokes[i].mode;
 
-            // Draw the first pixel in the stroke
-            context.beginPath();
-            context.moveTo(strokes[i].pos[0].x-1, strokes[i].pos[0].y);
-            context.lineTo(strokes[i].pos[0].x, strokes[i].pos[0].y);
-            context.closePath();
-            context.stroke();
-
-            // Draw the rest of the pixels in the stroke
-            for (var j = 1; j < strokes[i].pos.length; j++) {
-                // Create a smooth path from the previous pixel to the current pixel
+            // Pen strokes
+            if (context.globalCompositeOperation === "source-over") {
+                // Draw the first pixel in the stroke
                 context.beginPath();
-                context.moveTo(strokes[i].pos[j-1].x, strokes[i].pos[j-1].y);
-                context.lineTo(strokes[i].pos[j].x, strokes[i].pos[j].y);
+                context.moveTo(strokes[i].pos[0].x-1, strokes[i].pos[0].y);
+                context.lineTo(strokes[i].pos[0].x, strokes[i].pos[0].y);
                 context.closePath();
                 context.stroke();
+
+                // Draw the rest of the pixels in the stroke
+                for (var j = 1; j < strokes[i].pos.length; j++) {
+                    // Create a smooth path from the previous pixel to the current pixel
+                    context.beginPath();
+                    context.moveTo(strokes[i].pos[j-1].x, strokes[i].pos[j-1].y);
+                    context.lineTo(strokes[i].pos[j].x, strokes[i].pos[j].y);
+                    context.closePath();
+                    context.stroke();
+                }
+            }
+
+            // Eraser strokes
+            if (context.globalCompositeOperation === "destination-out") {
+                for (var j = 0; j < strokes[i].pos.length; j++) {
+                    context.arc(strokes[i].pos[j].x, strokes[i].pos[j].y,5,0,Math.PI*2, false);
+                    context.fill();
+                }
             }
         }
     }
@@ -109,8 +122,14 @@ export class CanvasComponent implements OnInit {
     }
 
     // Set the pen color to the color of the background
+
     erase() {
-        currentPaintColor = "#FFFFFF";
+        // toggle erase
+        if (mode === "destination-out")
+            mode = "source-over";
+        else
+            mode = "destination-out";
+        console.log(mode);
         //  document.body.style.cursor = 'URL("https://lh5.ggpht.com/2uHihdKWR-bmNcjJTp-T7KN4OlQjy3gt7DYdKx0LYGgoDRCFBRvbyPll_UJAQcfrNQGU=w300"), auto';
     }
 
@@ -169,7 +188,7 @@ export class CanvasComponent implements OnInit {
         y = event.y - canvas.offsetTop;
 
         // Add the stroke's pixels and tool settings
-        strokes.push(new Stroke(new Array<Position>(), currentPaintColor, currentPenSize));
+        strokes.push(new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode));
         // Get the first pixel in the new stroke
         strokes[strokes.length-1].pos.push(new Position(x,y));
 
@@ -198,7 +217,6 @@ export class CanvasComponent implements OnInit {
     mouseLeave(event: MouseEvent): void {
         drag = false;
     }
-//taken from online
 }
 
 // Global canvas data
@@ -215,3 +233,4 @@ var currentPenSize = 5;
 var currentStroke = 0; // Keeps count of the current stroke number
 var x;
 var y;
+var mode = "source-over"; // Default drawing mode

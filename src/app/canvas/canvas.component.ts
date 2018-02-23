@@ -138,22 +138,22 @@ export class CanvasComponent implements OnInit {
         var color = event.target.id;
         switch(color) {
             case "blue":
-            currentPaintColor = "#130CD5";
-            break;
+                currentPaintColor = "blue";
+                break;
             case "brown":
-            currentPaintColor = "#8A5111";
-            break;
+                currentPaintColor = "brown";
+                break;
             case "red":
-            currentPaintColor = "#E82218";
-            break;
+                currentPaintColor = "red";
+                break;
             case "green":
-            currentPaintColor = "#18E85D";
-            break;
+                currentPaintColor = "green";
+                break;
             case "black":
-            currentPaintColor = "#030202";
-            break;
+                currentPaintColor = "black";
+                break;
             default:
-            currentPaintColor = "#030202";
+                currentPaintColor = "black";
         }
     }
 
@@ -162,22 +162,22 @@ export class CanvasComponent implements OnInit {
         var color = event.target.id;
         switch(color) {
             case "pen-1":
-            currentPenSize = 2;
-            break;
+                currentPenSize = 2;
+                break;
             case "pen-2":
-            currentPenSize= 8;
-            break;
+                currentPenSize= 8;
+                break;
             case "pen-3":
-            currentPenSize = 15;
-            break;
+                currentPenSize = 15;
+                break;
             case "pen-4":
-            currentPenSize = 30;
-            break;
+                currentPenSize = 30;
+                break;
             case "pen-5":
-            currentPenSize = 80;
-            break;
+                currentPenSize = 60;
+                break;
             default:
-            currentPenSize = 10;
+                currentPenSize = 8;
         }
     }
 
@@ -228,8 +228,8 @@ var context; // Contains a reference to the canvas element
 // Global stroke data
 var strokes = new Array<Stroke>(); // Contains every stroke on the canvas
 var drag = false; // True if we should be drawing to the canvas (after a mouse down)
-var currentPaintColor = "#030202";
-var currentPenSize = 5;
+var currentPaintColor = "black";
+var currentPenSize = 8;
 var currentStroke = 0; // Keeps count of the current stroke number
 var x;
 var y;

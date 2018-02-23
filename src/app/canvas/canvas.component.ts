@@ -70,32 +70,21 @@ export class CanvasComponent implements OnInit {
             context.lineWidth = strokes[i].size;
             context.globalCompositeOperation = strokes[i].mode;
 
-            // Pen strokes
-            if (context.globalCompositeOperation === "source-over") {
-                // Draw the first pixel in the stroke
+            // Draw the first pixel in the stroke
+            context.beginPath();
+            context.moveTo(strokes[i].pos[0].x-1, strokes[i].pos[0].y);
+            context.lineTo(strokes[i].pos[0].x, strokes[i].pos[0].y);
+            context.closePath();
+            context.stroke();
+
+            // Draw the rest of the pixels in the stroke
+            for (var j = 1; j < strokes[i].pos.length; j++) {
+                // Create a smooth path from the previous pixel to the current pixel
                 context.beginPath();
-                context.moveTo(strokes[i].pos[0].x-1, strokes[i].pos[0].y);
-                context.lineTo(strokes[i].pos[0].x, strokes[i].pos[0].y);
+                context.moveTo(strokes[i].pos[j-1].x, strokes[i].pos[j-1].y);
+                context.lineTo(strokes[i].pos[j].x, strokes[i].pos[j].y);
                 context.closePath();
                 context.stroke();
-
-                // Draw the rest of the pixels in the stroke
-                for (var j = 1; j < strokes[i].pos.length; j++) {
-                    // Create a smooth path from the previous pixel to the current pixel
-                    context.beginPath();
-                    context.moveTo(strokes[i].pos[j-1].x, strokes[i].pos[j-1].y);
-                    context.lineTo(strokes[i].pos[j].x, strokes[i].pos[j].y);
-                    context.closePath();
-                    context.stroke();
-                }
-            }
-
-            // Eraser strokes
-            if (context.globalCompositeOperation === "destination-out") {
-                for (var j = 0; j < strokes[i].pos.length; j++) {
-                    context.arc(strokes[i].pos[j].x, strokes[i].pos[j].y,5,0,Math.PI*2, false);
-                    context.fill();
-                }
             }
         }
     }

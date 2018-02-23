@@ -23,7 +23,7 @@
     display: block; /* Make the links appear below each other instead of side-by-side */
     text-align: center; /* Center-align text */
     padding: 10px; /* Add some padding */
-    transition: all 0.3s ease; /* Add transition for hover effects */
+    /*transition: all 0.1s ease; /* Add transition for hover effects */
     color: white; /* White text color */
     font-size: 20px; /* Increased font-size */
 }
@@ -33,5 +33,6 @@
 }
 
 .active {
-    background-color: #4CAF50; /* Add an active/current color */
+    /* Add an active/current color and change to active color as soon as icon is clicked*/ 
+    background-color: #4CAF50 !important;
 }

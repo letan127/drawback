@@ -46,14 +46,27 @@ export class CanvasComponent implements OnInit {
         })
     }
 
-    // Set callback functions for mouse events
     ngAfterViewInit() {
+        // Set callback functions for canvas mouse events
         canvas = <HTMLCanvasElement>document.getElementById("canvas");
         canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
         context = canvas.getContext("2d");
+
+        /* When user clicks a tool, that tool's icon will become active */
+        // Get all the tools from the toolbar
+        var tools = document.getElementsByClassName("tool");
+
+        // Loop through the tools and add the active class to the current/clicked tool
+        for (var i = 0; i < tools.length; i++) {
+          tools[i].addEventListener("click", function() {
+            var current = document.getElementsByClassName("active");
+            current[0].className = current[0].className.replace(" active", "");
+            this.className += " active";
+          });
+        }
     }
 
     // Clears the canvas and redraws every stroke in our list of strokes

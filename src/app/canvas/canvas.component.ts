@@ -123,16 +123,14 @@ export class CanvasComponent implements OnInit {
         // }
     }
 
-    // Set the pen color to the color of the background
+    // Pen tool was clicked; get out of erase mode
+    selectPen() {
+        mode = "source-over";
+    }
 
+    // Erase tool was clicked; enter erase mode
     erase() {
-        // toggle erase
-        if (mode === "destination-out")
-            mode = "source-over";
-        else
-            mode = "destination-out";
-        console.log(mode);
-        //  document.body.style.cursor = 'URL("https://lh5.ggpht.com/2uHihdKWR-bmNcjJTp-T7KN4OlQjy3gt7DYdKx0LYGgoDRCFBRvbyPll_UJAQcfrNQGU=w300"), auto';
+        mode = "destination-out";
     }
 
     // Change the pen color

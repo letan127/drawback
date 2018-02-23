@@ -66,15 +66,40 @@
         </div>
     </div>
 </nav>
+
 <!-- From https://www.w3schools.com/howto/howto_css_icon_bar.asp -->
 <div class="canvas-container">
     <canvas id='canvas' width='1000px' height='500px'></canvas>
-    <div class="toolbar">
-        <a class="tool active" (click)="selectPen()"><i class="fa fa-pencil"></i></a>
-        <a class="tool" (click)="erase()"><i class="fa fa-eraser"></i></a>
-        <a class="tool"><i class="fa fa-paint-brush"></i></a>
-        <a class="tool" (click)="undo()"><i class="fa fa-undo"></i></a>
-        <a class="tool"><i class="fa fa-repeat"></i></a>
-        <a class="tool" (click)="clear()"><i class="fa fa-trash"></i></a>
-    </div>
+    <ul class="toolbar">
+        <li id="pen" class="tool active" (click)="selectPen()">
+            <a>
+                <i class="fa fa-pencil"></i>
+            </a>
+        </li>
+        <li id="eraser" class="tool" (click)="erase()">
+            <a>
+                <i class="fa fa-eraser"></i>
+            </a>
+        </li>
+        <li id="color" class="tool">
+            <a>
+                <i class="fa fa-paint-brush"></i>
+            </a>
+        </li>
+        <li id="undo" class="tool">
+            <a>
+                <i class="fa fa-undo" (click)="undo()"></i>
+            </a>
+        </li>
+        <li id="redo" class="tool">
+            <a>
+                <i class="fa fa-repeat"></i>
+            </a>
+        </li>
+        <li id="clear" class="tool" (click)="clear()">
+            <a>
+                <i class="fa fa-trash"></i>
+            </a>
+        </li>
+    </ul>
 </div>

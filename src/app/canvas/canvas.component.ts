@@ -48,7 +48,7 @@ export class CanvasComponent implements OnInit {
 
     // Set callback functions for mouse events
     ngAfterViewInit() {
-        canvas = <HTMLCanvasElement>document.getElementById("jamboard");
+        canvas = <HTMLCanvasElement>document.getElementById("canvas");
         canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);

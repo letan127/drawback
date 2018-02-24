@@ -72,33 +72,45 @@
     <canvas id='canvas' width='1000px' height='500px'></canvas>
     <ul class="toolbar">
         <li id="pen" class="tool active" (click)="selectPen()">
-            <a>
-                <i class="fa fa-pencil"></i>
+            <a class="tool-tip">
+                <i class="fa fa-pencil">
+                    <span class="tool-tip-text">Pen</span>
+                </i>
             </a>
         </li>
         <li id="eraser" class="tool" (click)="erase()">
-            <a>
-                <i class="fa fa-eraser"></i>
+            <a class="tool-tip">
+                <i class="fa fa-eraser">
+                    <span class="tool-tip-text">Eraser</span>
+                </i>
             </a>
         </li>
         <li id="color" class="tool">
-            <a>
-                <i class="fa fa-paint-brush"></i>
+            <a class="tool-tip">
+                <i class="fa fa-paint-brush">
+                    <span class="tool-tip-text">Color</span>
+                </i>
             </a>
         </li>
         <li id="undo" class="tool">
-            <a>
-                <i class="fa fa-undo" (click)="undo()"></i>
+            <a class="tool-tip">
+                <i class="fa fa-undo" (click)="undo()">
+                    <span class="tool-tip-text">Undo</span>
+                </i>
             </a>
         </li>
         <li id="redo" class="tool">
-            <a>
-                <i class="fa fa-repeat"></i>
+            <a class="tool-tip">
+                <i class="fa fa-repeat">
+                    <span class="tool-tip-text">Redo</span>
+                </i>
             </a>
         </li>
         <li id="clear" class="tool" (click)="clear()">
-            <a>
-                <i class="fa fa-trash"></i>
+            <a class="tool-tip">
+                <i class="fa fa-trash">
+                    <span class="tool-tip-text">Clear</span>
+                </i>
             </a>
         </li>
     </ul>

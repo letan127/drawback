@@ -46,6 +46,82 @@
     background-color: #4CAF50 !important;
 }
 
+
+
+/* DROPDOWN */
+.dropbtn {
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a span {
+    float: left; /* Float links side by side */
+    text-align: center; /* Center-align text */
+    width: 20%; /* Equal width (5 icons with 20% width each = 100%) */
+    padding: 12px 0; /* Some top and bottom padding */
+    transition: all 0.3s ease; /* Add transition for hover effects */
+    color: white; /* White text color */
+    font-size: 36px; /* Increased font size */
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: #f1f1f1
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+
+/* Show the dropdown menu on on click */
+.show .dropdown-content {
+    display: block;
+}
+
+
+
+/* COLORS */
+.original-color {
+    /* width: 10px;
+    border-radius: 100%;
+    margin: 10px;
+    align-items: center; */
+    padding: 10px 11px;
+    background: green;
+    width: 1px;
+    border-radius: 100%;
+    margin: 10px;
+    width: 1%;
+}
+
+.pen-size {
+    width: 20px;
+    margin: 5px;
+    padding: 10px 11px;
+    color: black;
+}
+
 /* Tooltip should be positioned relative to the tool icon */
 .tool-tip {
     position: relative;

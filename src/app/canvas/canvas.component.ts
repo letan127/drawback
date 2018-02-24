@@ -69,6 +69,15 @@ export class CanvasComponent implements OnInit {
         }
     }
 
+    /* When the user clicks on the button, toggle between hiding and showing the dropdown content */
+    showColors() {
+        document.getElementById("colors").classList.toggle("show");
+    }
+
+    showSizes() {
+        document.getElementById("tool-sizes").classList.toggle("show");
+    }
+
     // Clears the canvas and redraws every stroke in our list of strokes
     draw() {
         // Clear the canvas
@@ -133,7 +142,7 @@ export class CanvasComponent implements OnInit {
         mode = "destination-out";
     }
 
-    // Change the pen color
+    // Change the tool color
     change_color(event) {
         var color = event.target.id;
         switch(color) {

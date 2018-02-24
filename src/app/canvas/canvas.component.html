@@ -71,7 +71,7 @@
 <div class="canvas-container">
     <canvas id='canvas' width='1000px' height='500px'></canvas>
     <ul class="toolbar">
-        <li id="pen" class="tool active" (click)="selectPen()">
+        <li id="pen" class="tool active" (click)="selectPen()" style="color:red;">
             <a class="tool-tip">
                 <i class="fa fa-pencil">
                     <span class="tool-tip-text">Pen</span>
@@ -85,11 +85,32 @@
                 </i>
             </a>
         </li>
-        <li id="color" class="tool">
-            <a class="tool-tip">
+        <li id="colors" class="tool dropdown">
+            <a class="tool-tip dropbtn" (click)="showColors()">
                 <i class="fa fa-paint-brush">
-                    <span class="tool-tip-text">Color</span>
+                    <span class="tool-tip-text">Colors</span>
                 </i>
+                <div class="dropdown-content">
+                    <a id="black" class="original-color" style="background-color:black;" (click)=change_color($event)></a>
+                    <a id="red" class="original-color" style="background-color:red;" (click)=change_color($event)></a>
+                    <a id="blue" class="original-color" style="background-color:blue;" (click)=change_color($event)></a>
+                    <a id="green" class="original-color" style="background-color:green;" (click)=change_color($event)></a>
+                    <a id="brown" class="original-color" style="background-color:brown;" (click)=change_color($event)></a>
+                </div>
+            </a>
+        </li>
+        <li id="tool-sizes" class="tool dropdown">
+            <a class="tool-tip dropbtn" (click)="showSizes()">
+                <i class="fa fa-window-minimize">
+                    <span class="tool-tip-text">Sizes</span>
+                </i>
+                <div class="dropdown-content">
+                    <span id="pen-1" class="pen-size" style="font-size:10px;" (click)=change_pen($event)>_</span>
+                    <span id="pen-2" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
+                    <span id="pen-3" class="pen-size" style="font-size:30px;" (click)=change_pen($event)>_</span>
+                    <span id="pen-4" class="pen-size" style="font-size:40px;" (click)=change_pen($event)>_</span>
+                    <span id="pen-5" class="pen-size" style="font-size:50px;" (click)=change_pen($event)>_</span>
+                </div>
             </a>
         </li>
         <li id="undo" class="tool">

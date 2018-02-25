@@ -50,6 +50,7 @@ export class CanvasComponent implements OnInit {
         // Set callback functions for canvas mouse events
         canvas = <HTMLCanvasElement>document.getElementById("canvas");
         this.resize();
+        window.addEventListener("resize", this.resize.bind(this), false);
         canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
@@ -70,9 +71,15 @@ export class CanvasComponent implements OnInit {
         }
     }
 
+    // When the window is resized, reset the canvas size and redraw it
     resize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        canvasWidth = canvas.width;
+        canvasHeight = canvas.height;
+
+        if (strokes.length > 0)
+            this.draw();
     }
     /* When the user clicks on the button, toggle between hiding and showing the dropdown content */
     showColors() {
@@ -234,8 +241,8 @@ export class CanvasComponent implements OnInit {
 }
 
 // Global canvas data
-var canvasHeight = 500;
-var canvasWidth = 1000;
+var canvasHeight;
+var canvasWidth;
 var canvas: HTMLCanvasElement;
 var context; // Contains a reference to the canvas element
 

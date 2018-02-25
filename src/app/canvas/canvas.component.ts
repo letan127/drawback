@@ -53,7 +53,39 @@ export class CanvasComponent implements OnInit {
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
-        context = canvas.getContext("2d");
+        
+	canvas.addEventListener("touchstart", function (e) {
+            e.preventDefault();
+              var touch = e.touches[0];
+              var mouseEvent = new MouseEvent("mousedown", {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+              });
+              canvas.dispatchEvent(mouseEvent);
+            }, false);
+        canvas.addEventListener("touchend", function (e) {
+            e.preventDefault();
+              var mouseEvent = new MouseEvent("mouseup", {});
+              canvas.dispatchEvent(mouseEvent);
+            }, false);
+        canvas.addEventListener("touchcancel",function (e) {
+            e.preventDefault();
+              var mouseEvent = new MouseEvent("mouseleave", {});
+              canvas.dispatchEvent(mouseEvent);
+
+
+            }, false);
+        canvas.addEventListener("touchmove", function (e) {
+          e.preventDefault();
+              var touch = e.touches[0];
+              var mouseEvent = new MouseEvent("mousemove", {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+              });
+              canvas.dispatchEvent(mouseEvent);
+            }, false);
+	
+	context = canvas.getContext("2d");
     }
 
     // Clears the canvas and redraws every stroke in our list of strokes

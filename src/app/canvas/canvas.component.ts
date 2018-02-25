@@ -33,12 +33,14 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a stroke, add it to our list of strokes and redraw everything
         this.drawService.getStroke().subscribe(message => {
-            strokes.push(message.stroke);
-            context.clearRect(0, 0, canvasWidth, canvasHeight);
-            context.lineJoin = "round";
-            this.draw();
+            strokes[message.strokeID] = (message.stroke);
+            this.drawStroke(message.stroke);
         })
 
+        // When the server sends a strokeID, set curID
+        this.drawService.getStrokeID().subscribe(strokeID => {
+            curID = strokeID;
+        })
         // When the server sends a clear event, clear the canvas
         this.drawService.getClear().subscribe(() => {
             context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -88,36 +90,39 @@ export class CanvasComponent implements OnInit {
 	context = canvas.getContext("2d");
     }
 
+    // Draws a single stroke that is passed in as an argument
+    drawStroke(stroke) {
+        context.strokeStyle = stroke.color;
+        context.lineWidth = stroke.size;
+        context.globalCompositeOperation = stroke.mode;
+        context.lineJoin = "round";
+        // Draw the first pixel in the stroke
+        context.beginPath();
+        context.moveTo(stroke.pos[0].x-1, stroke.pos[0].y);
+        context.lineTo(stroke.pos[0].x, stroke.pos[0].y);
+        context.closePath();
+        context.stroke();
+
+        // Draw the rest of the pixels in the stroke
+        for (var j = 1; j < stroke.pos.length; j++) {
+            // Create a smooth path from the previous pixel to the current pixel
+            context.beginPath();
+            context.moveTo(stroke.pos[j-1].x, stroke.pos[j-1].y);
+            context.lineTo(stroke.pos[j].x, stroke.pos[j].y);
+            context.closePath();
+            context.stroke();
+        }
+    }
+
     // Clears the canvas and redraws every stroke in our list of strokes
-    draw() {
+    drawAll() {
         // Clear the canvas
         context.clearRect(0, 0, canvasWidth, canvasHeight);
-        // Set the pen type
-        context.lineJoin = "round";
-
 
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < strokes.length; i++) {
-            context.strokeStyle = strokes[i].color;
-            context.lineWidth = strokes[i].size;
-            context.globalCompositeOperation = strokes[i].mode;
-
-            // Draw the first pixel in the stroke
-            context.beginPath();
-            context.moveTo(strokes[i].pos[0].x-1, strokes[i].pos[0].y);
-            context.lineTo(strokes[i].pos[0].x, strokes[i].pos[0].y);
-            context.closePath();
-            context.stroke();
-
-            // Draw the rest of the pixels in the stroke
-            for (var j = 1; j < strokes[i].pos.length; j++) {
-                // Create a smooth path from the previous pixel to the current pixel
-                context.beginPath();
-                context.moveTo(strokes[i].pos[j-1].x, strokes[i].pos[j-1].y);
-                context.lineTo(strokes[i].pos[j].x, strokes[i].pos[j].y);
-                context.closePath();
-                context.stroke();
-            }
+            if (strokes[i])
+                this.drawStroke(strokes[i]);
         }
     }
 
@@ -130,16 +135,6 @@ export class CanvasComponent implements OnInit {
 
     // Undoes the latest stroke
     undo() {
-        // console.log(currentStroke);
-        // if(currentStroke == 0) {
-        //     return;
-        // }
-        // currentStroke -= 1;
-        // for(var i = paintArray.length - 1; i >= 0; i--) {
-        //     if(paintArray[i].stroke == currentStroke) {
-        //         paintArray.splice(i,1);
-        //     }
-        // }
     }
 
     // Set the pen color to the color of the background
@@ -204,23 +199,26 @@ export class CanvasComponent implements OnInit {
 
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
+        //this.drawService.reqStrokeID(this.id);
         // Get the cursor's current position
         x = event.x - canvas.offsetLeft;
         y = event.y - canvas.offsetTop;
 
         // Add the stroke's pixels and tool settings
-        strokes.push(new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode));
+        curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode);
         // Get the first pixel in the new stroke
-        strokes[strokes.length-1].pos.push(new Position(x,y));
-
+        curStroke.pos.push(new Position(x,y));
         drag = true;
-        this.draw();
+        this.drawStroke(curStroke);
+        //TODO: if sendStroke here, will it cause others to see drawing in real time?
     }
 
     // Stop drawing and send this latest stroke to the server
     mouseUp(event: MouseEvent): void {
         drag = false;
-        this.drawService.sendStroke(strokes[strokes.length-1], this.id);
+        this.drawService.reqStrokeID(this.id);
+        strokes[curID] = curStroke;
+        this.drawService.sendStroke(curStroke, curID, this.id);
     }
 
     // Continue updating and drawing the current stroke
@@ -228,9 +226,9 @@ export class CanvasComponent implements OnInit {
         if (drag == true) {
             var x = event.x - canvas.offsetLeft;
             var y = event.y - canvas.offsetTop;
-
-            strokes[strokes.length-1].pos.push(new Position(x,y));
-            this.draw();
+            curStroke.pos.push(new Position(x,y));
+            this.drawStroke(curStroke);
+            //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
     }
 
@@ -255,3 +253,8 @@ var currentStroke = 0; // Keeps count of the current stroke number
 var x;
 var y;
 var mode = "source-over"; // Default drawing mode
+var curID;
+var curStroke;
+var userStrokes = new Array<number>();
+var undoStrokes = new Array<number>();
+var socket;

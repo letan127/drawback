@@ -6,6 +6,7 @@ let server = http.Server(app);
 let socketIO = require('socket.io');
 let io = socketIO(server);
 //const port = process.env.PORT || 3000;
+let strokeIDMap = new Map();
 
 server.listen(4000);
 
@@ -20,12 +21,22 @@ io.on('connection', (socket) => {
     // When the server receives a room ID, it will add the client to that room
     socket.on('room', function(room) {
         socket.join(room);
+        if (!strokeIDMap.has(room))
+            strokeIDMap.set(room, 0);
     });
 
     // When the server receives a stroke from a client, it sends the stroke
     // to all clients in that room except for the sender
     socket.on('stroke', (strokeMessage) => {
         socket.to(strokeMessage.room).emit('stroke', strokeMessage);
+        //io.in(strokeMessage.room).emit('stroke', strokeMessage)
+    });
+
+    // When the server recieves a strokeID request from a client, it sends
+    // an available ID in that room to the sender
+    socket.on('strokeID', (room) => {
+        socket.emit('strokeID', strokeIDMap.get(room));
+        strokeIDMap.set(room, strokeIDMap.get(room) + 1);
     });
 
     // When the server receives a clear from a client in a certain room,

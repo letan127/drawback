@@ -19,9 +19,10 @@ export class DrawService {
     }
 
     // Send a stroke object and the client's room ID to the server
-    public sendStroke(stroke, roomID) {
+    public sendStroke(stroke, strokeID, roomID) {
         var strokeWithRoom = {
             stroke: stroke,
+            strokeID: strokeID,
             room: roomID
         };
         this.socket.emit('stroke', strokeWithRoom);
@@ -32,6 +33,20 @@ export class DrawService {
         return Observable.create((observer) => {
             this.socket.on('stroke', (strokeMessage) => {
                 observer.next(strokeMessage);
+            });
+        });
+    }
+
+    // Ask the server for a strokeID
+    public reqStrokeID(room) {
+        this.socket.emit('strokeID', room);
+    }
+
+    // When the server sends a strokeID, send it to our subscribed observers
+    public getStrokeID = () => {
+        return Observable.create((observer) => {
+            this.socket.on('strokeID', (strokeID) => {
+                observer.next(strokeID);
             });
         });
     }

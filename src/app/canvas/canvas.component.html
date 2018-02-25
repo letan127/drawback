@@ -98,11 +98,11 @@
                     <span class="tool-tip-text">Colors</span>
                 </i>
                 <div class="dropdown-content">
-                    <a id="black" class="original-color" style="background-color:black;" (click)=change_color($event)></a>
-                    <a id="red" class="original-color" style="background-color:red;" (click)=change_color($event)></a>
-                    <a id="blue" class="original-color" style="background-color:blue;" (click)=change_color($event)></a>
-                    <a id="green" class="original-color" style="background-color:green;" (click)=change_color($event)></a>
-                    <a id="brown" class="original-color" style="background-color:brown;" (click)=change_color($event)></a>
+                    <span id="black" class="original-color" style="background-color:black;" (click)=change_color($event)></span>
+                    <span id="red" class="original-color" style="background-color:red;" (click)=change_color($event)></span>
+                    <span id="blue" class="original-color" style="background-color:blue;" (click)=change_color($event)></span>
+                    <span id="green" class="original-color" style="background-color:green;" (click)=change_color($event)></span>
+                    <span id="brown" class="original-color" style="background-color:brown;" (click)=change_color($event)></span>
                 </div>
             </a>
         </li>
@@ -112,11 +112,18 @@
                     <span class="tool-tip-text">Sizes</span>
                 </i>
                 <div class="dropdown-content">
-                    <span id="pen-1" class="pen-size" style="font-size:10px;" (click)=change_pen($event)>_</span>
+                    <!-- <span id="pen-1" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
                     <span id="pen-2" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
-                    <span id="pen-3" class="pen-size" style="font-size:30px;" (click)=change_pen($event)>_</span>
-                    <span id="pen-4" class="pen-size" style="font-size:40px;" (click)=change_pen($event)>_</span>
-                    <span id="pen-5" class="pen-size" style="font-size:50px;" (click)=change_pen($event)>_</span>
+                    <span id="pen-3" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
+                    <span id="pen-4" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
+                    <span id="pen-5" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span> -->
+                    <svg height= "30" width = "200">
+                        <circle id="pen-1" cx="30" cy="15" r="3" (click)=change_pen($event)/>
+                        <circle id="pen-2" cx="60" cy="15" r="5" (click)=change_pen($event)/>
+                        <circle id="pen-3" cx="95" cy="15" r="7" (click)=change_pen($event)/>
+                        <circle id="pen-4" cx="130" cy="15" r="10" (click)=change_pen($event)/>
+                        <circle id="pen-5" cx="170" cy="15" r="12" (click)=change_pen($event)/>
+                    </svg>
                 </div>
             </a>
         </li>

@@ -49,6 +49,7 @@ export class CanvasComponent implements OnInit {
     ngAfterViewInit() {
         // Set callback functions for canvas mouse events
         canvas = <HTMLCanvasElement>document.getElementById("canvas");
+        this.resize();
         canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
@@ -69,6 +70,10 @@ export class CanvasComponent implements OnInit {
         }
     }
 
+    resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
     /* When the user clicks on the button, toggle between hiding and showing the dropdown content */
     showColors() {
         document.getElementById("colors").classList.toggle("show");

@@ -15,8 +15,6 @@ import { ActivatedRoute } from '@angular/router';
 
 export class CanvasComponent implements OnInit {
     title = 'app';
-    message: Stroke;
-    messages = [];
     id = '';
 
     constructor(private drawService: DrawService, private route: ActivatedRoute) {
@@ -31,16 +29,19 @@ export class CanvasComponent implements OnInit {
         // Send the room ID to the server
         this.drawService.sendRoom(this.id);
 
-        // When the server sends a stroke, add it to our list of strokes and redraw everything
+        // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
-            strokes[message.strokeID] = (message.stroke);
-            this.drawStroke(message.stroke);
+            strokes[message.strokeID] = message.stroke;
+            this.draw(message.stroke);
         })
 
-        // When the server sends a strokeID, set curID
+        // When the server sends a strokeID, give it to the earliest orphaned stroke
+        // and send the stroke to everyone else
         this.drawService.getStrokeID().subscribe(strokeID => {
-            curID = strokeID;
+            strokes[strokeID] = orphanedStrokes.shift();
+            this.drawService.sendStroke(strokes[strokeID], strokeID, this.id);
         })
+
         // When the server sends a clear event, clear the canvas
         this.drawService.getClear().subscribe(() => {
             context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -59,7 +60,7 @@ export class CanvasComponent implements OnInit {
     }
 
     // Draws a single stroke that is passed in as an argument
-    drawStroke(stroke) {
+    draw(stroke) {
         context.strokeStyle = stroke.color;
         context.lineWidth = stroke.size;
         context.globalCompositeOperation = stroke.mode;
@@ -90,7 +91,7 @@ export class CanvasComponent implements OnInit {
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < strokes.length; i++) {
             if (strokes[i])
-                this.drawStroke(strokes[i]);
+                this.draw(strokes[i]);
         }
     }
 
@@ -106,15 +107,12 @@ export class CanvasComponent implements OnInit {
     }
 
     // Set the pen color to the color of the background
-
     erase() {
         // toggle erase
         if (mode === "destination-out")
             mode = "source-over";
         else
             mode = "destination-out";
-        console.log(mode);
-        //  document.body.style.cursor = 'URL("https://lh5.ggpht.com/2uHihdKWR-bmNcjJTp-T7KN4OlQjy3gt7DYdKx0LYGgoDRCFBRvbyPll_UJAQcfrNQGU=w300"), auto';
     }
 
     // Change the pen color
@@ -167,7 +165,6 @@ export class CanvasComponent implements OnInit {
 
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
-        //this.drawService.reqStrokeID(this.id);
         // Get the cursor's current position
         x = event.x - canvas.offsetLeft;
         y = event.y - canvas.offsetTop;
@@ -177,16 +174,16 @@ export class CanvasComponent implements OnInit {
         // Get the first pixel in the new stroke
         curStroke.pos.push(new Position(x,y));
         drag = true;
-        this.drawStroke(curStroke);
+        this.draw(curStroke);
         //TODO: if sendStroke here, will it cause others to see drawing in real time?
     }
 
-    // Stop drawing and send this latest stroke to the server
+    // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
     mouseUp(event: MouseEvent): void {
         drag = false;
         this.drawService.reqStrokeID(this.id);
-        strokes[curID] = curStroke;
-        this.drawService.sendStroke(curStroke, curID, this.id);
+        // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
+        orphanedStrokes.push(curStroke);
     }
 
     // Continue updating and drawing the current stroke
@@ -195,7 +192,7 @@ export class CanvasComponent implements OnInit {
             var x = event.x - canvas.offsetLeft;
             var y = event.y - canvas.offsetTop;
             curStroke.pos.push(new Position(x,y));
-            this.drawStroke(curStroke);
+            this.draw(curStroke);
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
     }
@@ -207,22 +204,20 @@ export class CanvasComponent implements OnInit {
 }
 
 // Global canvas data
-var canvasHeight = 500;
-var canvasWidth = 1000;
 var canvas: HTMLCanvasElement;
 var context; // Contains a reference to the canvas element
-
-// Global stroke data
-var strokes = new Array<Stroke>(); // Contains every stroke on the canvas
-var drag = false; // True if we should be drawing to the canvas (after a mouse down)
+var canvasHeight = 500;
+var canvasWidth = 1000;
 var currentPaintColor = "black";
 var currentPenSize = 8;
-var currentStroke = 0; // Keeps count of the current stroke number
 var x;
 var y;
-var mode = "source-over"; // Default drawing mode
-var curID;
-var curStroke;
-var userStrokes = new Array<number>();
-var undoStrokes = new Array<number>();
-var socket;
+var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
+
+// Global stroke data
+var strokes = new Array<Stroke>();      // Contains every stroke on the canvas
+var orphanedStrokes = new Array<Stroke>(); // Contains every stroke that needs an ID from the server
+var myStrokes = new Array<number>();    // Contains all of this user's drawn strokes
+var undoStrokes = new Array<number>();  // Contains every stroke that was undid and won't be drawn
+var drag = false; // True if we should be drawing to the canvas (after a mouse down)
+var curStroke; // The current stroke being drawn

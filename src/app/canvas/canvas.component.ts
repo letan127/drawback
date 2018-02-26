@@ -53,6 +53,11 @@ export class CanvasComponent implements OnInit {
             strokes[strokeID].draw = false;
             this.drawAll();
         })
+
+        this.drawService.getRedo().subscribe(strokeID => {
+            strokes[strokeID].draw = true;
+            this.drawAll();
+        })
     }
 
     // Set callback functions for mouse events
@@ -113,10 +118,24 @@ export class CanvasComponent implements OnInit {
 
     // Undoes the latest stroke
     undo() {
+        if(!myStrokes.length)
+            return;
         undoStrokes.push(myStrokes.pop());
-        strokes[undoStrokes[undoStrokes.length -1]].draw = false;
-        this.drawAll();
         this.drawService.sendUndo(this.id, undoStrokes[undoStrokes.length - 1]);
+        strokes[undoStrokes[undoStrokes.length - 1]].draw = false;
+        this.drawAll();
+    }
+
+    // Redoes the latest undone stroke
+    redo() {
+        if(!undoStrokes.length)
+            return;
+
+        myStrokes.push(undoStrokes.pop());
+        var redoStroke = myStrokes[myStrokes.length - 1];
+        this.drawService.sendRedo(this.id, redoStroke);
+        strokes[redoStroke].draw = true;
+        this.draw(strokes[redoStroke]);
     }
 
     // Set the pen color to the color of the background
@@ -178,6 +197,10 @@ export class CanvasComponent implements OnInit {
 
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
+        if(undoStrokes.length) {
+            //TODO: remove the stroke from stroke array?
+            undoStrokes = [];
+        }
         // Get the cursor's current position
         x = event.x - canvas.offsetLeft;
         y = event.y - canvas.offsetTop;

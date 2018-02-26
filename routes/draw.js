@@ -29,7 +29,6 @@ io.on('connection', (socket) => {
     // to all clients in that room except for the sender
     socket.on('stroke', (strokeMessage) => {
         socket.to(strokeMessage.room).emit('stroke', strokeMessage);
-        //io.in(strokeMessage.room).emit('stroke', strokeMessage)
     });
 
     // When the server recieves a strokeID request from a client, it sends
@@ -43,6 +42,12 @@ io.on('connection', (socket) => {
     // it sends a clear event back to all clients in that room except for the sender
     socket.on('clear', (room) => {
         socket.to(room).emit('clear');
+    });
+
+    // When the server receives an undo from a client, send an undo event to all
+    // other clients in that room
+    socket.on('undo', (undoStroke) => {
+        socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
     });
 });
 

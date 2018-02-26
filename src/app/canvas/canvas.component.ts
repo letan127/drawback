@@ -38,6 +38,7 @@ export class CanvasComponent implements OnInit {
         // When the server sends a strokeID, give it to the earliest orphaned stroke
         // and send the stroke to everyone else
         this.drawService.getStrokeID().subscribe(strokeID => {
+            myStrokes.push(strokeID);
             strokes[strokeID] = orphanedStrokes.shift();
             this.drawService.sendStroke(strokes[strokeID], strokeID, this.id);
         })
@@ -46,6 +47,11 @@ export class CanvasComponent implements OnInit {
         this.drawService.getClear().subscribe(() => {
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             strokes = [];
+        })
+
+        this.drawService.getUndo().subscribe(strokeID => {
+            strokes[strokeID].draw = false;
+            this.drawAll();
         })
     }
 
@@ -61,6 +67,9 @@ export class CanvasComponent implements OnInit {
 
     // Draws a single stroke that is passed in as an argument
     draw(stroke) {
+        if(!stroke.draw)
+            return;
+
         context.strokeStyle = stroke.color;
         context.lineWidth = stroke.size;
         context.globalCompositeOperation = stroke.mode;
@@ -104,6 +113,10 @@ export class CanvasComponent implements OnInit {
 
     // Undoes the latest stroke
     undo() {
+        undoStrokes.push(myStrokes.pop());
+        strokes[undoStrokes[undoStrokes.length -1]].draw = false;
+        this.drawAll();
+        this.drawService.sendUndo(this.id, undoStrokes[undoStrokes.length - 1]);
     }
 
     // Set the pen color to the color of the background
@@ -170,7 +183,7 @@ export class CanvasComponent implements OnInit {
         y = event.y - canvas.offsetTop;
 
         // Add the stroke's pixels and tool settings
-        curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode);
+        curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
         // Get the first pixel in the new stroke
         curStroke.pos.push(new Position(x,y));
         drag = true;
@@ -217,7 +230,7 @@ var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
 // Global stroke data
 var strokes = new Array<Stroke>();      // Contains every stroke on the canvas
 var orphanedStrokes = new Array<Stroke>(); // Contains every stroke that needs an ID from the server
-var myStrokes = new Array<number>();    // Contains all of this user's drawn strokes
+var myStrokes = new Array<number>();    // IDs of strokes drawn by user
 var undoStrokes = new Array<number>();  // Contains every stroke that was undid and won't be drawn
 var drag = false; // True if we should be drawing to the canvas (after a mouse down)
 var curStroke; // The current stroke being drawn

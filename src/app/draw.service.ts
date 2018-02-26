@@ -64,4 +64,20 @@ export class DrawService {
             });
         });
     }
+
+    public sendUndo(room, strokeID) {
+        var undoStroke = {
+            room: room,
+            strokeID: strokeID
+        };
+        this.socket.emit('undo', undoStroke);
+    }
+
+    public getUndo = () => {
+        return Observable.create((observer) => {
+            this.socket.on('undo', (strokeID) => {
+                observer.next(strokeID);
+            });
+        });
+    }
 }

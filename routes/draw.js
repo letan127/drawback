@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
     res.send('api works');
 });
 
-// Begin listening for message when a client connects to the server
+// Begin listening for requests when a client connects
 io.on('connection', (socket) => {
     console.log('user connected');
 
@@ -25,29 +25,32 @@ io.on('connection', (socket) => {
             strokeIDMap.set(room, 0);
     });
 
-    // When the server receives a stroke from a client, it sends the stroke
-    // to all clients in that room except for the sender
+    // When a client sends a stroke, send it to all other clients in that room
     socket.on('stroke', (strokeMessage) => {
         socket.to(strokeMessage.room).emit('stroke', strokeMessage);
     });
 
-    // When the server recieves a strokeID request from a client, it sends
-    // an available ID in that room to the sender
+    // When a client requests a strokeID, send an available ID for that room
     socket.on('strokeID', (room) => {
         socket.emit('strokeID', strokeIDMap.get(room));
         strokeIDMap.set(room, strokeIDMap.get(room) + 1);
     });
 
-    // When the server receives a clear from a client in a certain room,
-    // it sends a clear event back to all clients in that room except for the sender
+    // When a client clicks clear, tell all other clients to clear
     socket.on('clear', (room) => {
         socket.to(room).emit('clear');
     });
 
-    // When the server receives an undo from a client, send an undo event to all
-    // other clients in that room
+    // When a client clicks undo, tell all other clients in the room to undo
+    // that stroke
     socket.on('undo', (undoStroke) => {
         socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
+    });
+
+    // When a client clicks redo, tell all other clients in the room to redo
+    // that stroke
+    socket.on('redo', (redoStroke) => {
+        socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
     });
 });
 

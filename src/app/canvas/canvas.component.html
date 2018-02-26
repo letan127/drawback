@@ -12,12 +12,14 @@
     <canvas id='canvas'></canvas>
     <!-- Header -->
     <div class="flex-container header-bar canvas-component">
-        <div class="title-box">
-            <input class="title-name" type="text" value="Untitled Canvas"/>
-            <div>Some words from our sponsors</div>
-        </div>
-        <div class="flex dropdown-symbol">
-            <i class="fa fa-caret-down"></i>
+        <div class="title-menu flex">
+            <div class="title-box">
+                <input class="canvas-name" type="text" value="Untitled Canvas"/>
+                <div class="title-text">Some words from our sponsors</div>
+            </div>
+            <div class="flex dropdown-symbol">
+                <i class="fa fa-caret-down"></i>
+            </div>
         </div>
         <div class="flex copy-clipboard">
             <div class="tool-tip">
@@ -41,8 +43,8 @@
         </div>
         <div id="colors" class="tool-button tool-tip" (click)="showColors()">
             <i class="fa fa-paint-brush">
-                <div class="dropdown-carat">
-                    <i class="fa fa-caret-down"></i>
+                <div class="dropdown-caret">
+                    <i class="fa fa-caret-right"></i>
                 </div>
                 <span class="tool-tip-text">Colors</span>
             </i>
@@ -66,8 +68,8 @@
         </div>
         <div id="sizes" class="tool-button tool-tip" (click)="showSizes()">
             <i class="fa fa-window-minimize">
-                <div class="dropdown-carat">
-                    <i class="fa fa-caret-down"></i>
+                <div class="dropdown-caret">
+                    <i class="fa fa-caret-right"></i>
                 </div>
                 <span class="tool-tip-text">Sizes</span>
             </i>
@@ -106,16 +108,19 @@
         </div>
     </div>
     <div class="navigation-bar toolbar flex-container canvas-component">
-        <div id="zoom-in" class="tool-button">
+        <div id="zoom-in" class="tool-button tool-tip">
             <i class="fa fa-plus"></i>
+            <span class="tool-tip-text">Zoom In</span>
         </div>
         <div id="zoom-amount" class="tools-text">100%</div>
-        <div id="zoom-out" class="tool-button">
+        <div id="zoom-out" class="tool-button tool-tip">
             <i class="fa fa-minus"></i>
+            <span class="tool-tip-text">Zoom Out</span>
         </div>
         <div class="tools-separator"></div>
-        <div id="move" class="tool-button">
+        <div id="move" class="tool-button tool-tip">
             <i class="fa fa-hand-paper-o"></i>
+            <span class="tool-tip-text">Move</span>
         </div>
     </div>
 </div>

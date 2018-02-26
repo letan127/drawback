@@ -8,84 +8,103 @@
 </head>
 <body>
 
-<div class="canvas-container">
-    <canvas id='canvas' width='1000px' height='500px'></canvas>
-    <div id="title-box" class="toolbar toolbar-horizontal dropbtn">
-        <input type="text" value="Untitled Canvas">
-        <div class="toolbar-info">Placeholder for stuff</div>
+<div>
+    <canvas id='canvas'></canvas>
+    <!-- Header -->
+    <div class="flex-container header-bar canvas-component">
+        <div class="title-box">
+            <input class="title-name" type="text" value="Untitled Canvas"/>
+            <div>Some words from our sponsors</div>
+        </div>
+        <div class="flex dropdown-symbol">
+            <i class="fa fa-caret-down"></i>
+        </div>
+        <div class="flex copy-clipboard">
+            <div class="tool-tip">
+                <i class="fa fa-clipboard">
+                    <span class="tool-tip-text">Copy URL</span>
+                </i>
+            </div>
+        </div>
     </div>
-    <ul id="tool-selection-bar" class="toolbar toolbar-vertical">
-        <li id="pen" class="tool active" (click)="selectPen()" style="color:red;">
-            <a class="tool-tip">
-                <i class="fa fa-pencil">
-                    <span class="tool-tip-text">Pen</span>
-                </i>
-            </a>
-        </li>
-        <li id="eraser" class="tool" (click)="erase()">
-            <a class="tool-tip">
-                <i class="fa fa-eraser">
-                    <span class="tool-tip-text">Eraser</span>
-                </i>
-            </a>
-        </li>
-        <li id="colors" class="tool dropdown">
-            <a class="tool-tip dropbtn" (click)="showColors()">
-                <i class="fa fa-paint-brush">
-                    <span class="tool-tip-text">Colors</span>
-                </i>
-                <div class="dropdown-content">
-                    <span id="black" class="original-color" style="background-color:black;" (click)=change_color($event)></span>
-                    <span id="red" class="original-color" style="background-color:red;" (click)=change_color($event)></span>
-                    <span id="blue" class="original-color" style="background-color:blue;" (click)=change_color($event)></span>
-                    <span id="green" class="original-color" style="background-color:green;" (click)=change_color($event)></span>
-                    <span id="brown" class="original-color" style="background-color:brown;" (click)=change_color($event)></span>
+    <!-- Main toolbar with Drawings Tools -->
+    <div class="toolbar flex-container canvas-component">
+        <div id="pen" class="tool-button tool-tip active" (click)="selectPen()">
+            <i class="fa fa-pencil">
+                <span class="tool-tip-text">Pen</span>
+            </i>
+        </div>
+        <div id="eraser" class="tool-button tool-tip" (click)="erase()">
+            <i class="fa fa-eraser">
+                <span class="tool-tip-text">Eraser</span>
+            </i>
+        </div>
+        <div id="colors" class="tool-button tool-tip" (click)="showColors()">
+            <i class="fa fa-paint-brush">
+                <div class="dropdown-carat">
+                    <i class="fa fa-caret-down"></i>
                 </div>
-            </a>
-        </li>
-        <li id="tool-sizes" class="tool dropdown">
-            <a class="tool-tip dropbtn" (click)="showSizes()">
-                <i class="fa fa-window-minimize">
-                    <span class="tool-tip-text">Sizes</span>
-                </i>
-                <div class="dropdown-content">
-                    <!-- <span id="pen-1" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
-                    <span id="pen-2" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
-                    <span id="pen-3" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
-                    <span id="pen-4" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span>
-                    <span id="pen-5" class="pen-size" style="font-size:20px;" (click)=change_pen($event)>_</span> -->
-                    <svg height= "30" width = "200">
-                        <circle id="pen-1" cx="30" cy="15" r="3" (click)=change_pen($event)/>
-                        <circle id="pen-2" cx="60" cy="15" r="5" (click)=change_pen($event)/>
-                        <circle id="pen-3" cx="95" cy="15" r="7" (click)=change_pen($event)/>
-                        <circle id="pen-4" cx="130" cy="15" r="10" (click)=change_pen($event)/>
-                        <circle id="pen-5" cx="170" cy="15" r="12" (click)=change_pen($event)/>
-                    </svg>
+                <span class="tool-tip-text">Colors</span>
+            </i>
+            <div class="dropdown-menu flex-container">
+                <div id="black" class="dropdown-item" style="color:black" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
                 </div>
-            </a>
-        </li>
-        <li id="undo" class="tool">
-            <a class="tool-tip">
-                <i class="fa fa-undo" (click)="undo()">
-                    <span class="tool-tip-text">Undo</span>
-                </i>
-            </a>
-        </li>
-        <li id="redo" class="tool">
-            <a class="tool-tip">
-                <i class="fa fa-repeat">
-                    <span class="tool-tip-text">Redo</span>
-                </i>
-            </a>
-        </li>
-        <li id="clear" class="tool" (click)="clear()">
-            <a class="tool-tip">
-                <i class="fa fa-trash">
-                    <span class="tool-tip-text">Clear</span>
-                </i>
-            </a>
-        </li>
-    </ul>
+                <div id="red" class="dropdown-item" style="color:red" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="blue" class="dropdown-item" style="color:blue" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="green" class="dropdown-item" style="color:green" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="brown" class="dropdown-item" style="color:brown" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div id="sizes" class="tool-button tool-tip" (click)="showSizes()">
+            <i class="fa fa-window-minimize">
+                <div class="dropdown-carat">
+                    <i class="fa fa-caret-down"></i>
+                </div>
+                <span class="tool-tip-text">Sizes</span>
+            </i>
+            <div class="size-menu dropdown-menu flex-container">
+                <div id="pen-1" class="dropdown-item" (click)="changeSize($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="pen-2" class="dropdown-item" (click)="changeSize($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="pen-3" class="dropdown-item" (click)="changeSize($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="pen-4" class="dropdown-item" (click)="changeSize($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="pen-5" class="dropdown-item" (click)="changeSize($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div id="undo" class="tool-button tool-tip" (click)="undo()">
+            <i class="fa fa-undo">
+                <span class="tool-tip-text">Undo</span>
+            </i>
+        </div>
+        <div id="redo" class="tool-button tool-tip">
+            <i class="fa fa-repeat">
+                <span class="tool-tip-text">Redo</span>
+            </i>
+        </div>
+        <div id="clear" class="tool-button tool-tip" (click)="clear()">
+            <i class="fa fa-trash">
+                <span class="tool-tip-text">Clear</span>
+            </i>
+        </div>
+    </div>
 </div>
 </body>
 </html>

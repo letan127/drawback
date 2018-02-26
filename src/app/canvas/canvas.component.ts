@@ -59,15 +59,22 @@ export class CanvasComponent implements OnInit {
 
         /* When user clicks a tool, that tool's icon will become active */
         // Get all the tools from the toolbar
-        var tools = document.getElementsByClassName("tool");
+        var tools = document.getElementsByClassName("tool-button");
 
-        // Loop through the tools and add the active class to the current/clicked tool
+        // Set callback functions for each tool; tool becomes active when clicked
         for (var i = 0; i < tools.length; i++) {
-          tools[i].addEventListener("click", function() {
-            var current = document.getElementsByClassName("active");
-            current[0].className = current[0].className.replace(" active", "");
-            this.className += " active";
-          });
+            tools[i].addEventListener("click", function() {
+                var actives = document.getElementsByClassName("active");
+
+                // Always keep either the pen or eraser active but switch other tools' actives
+                if (this.id === "pen" || this.id === "eraser")
+                    actives[0].className = actives[0].className.replace(" active", "");
+                else if (actives.length > 1 &&
+                        (actives[0].id === "pen" || actives[0].id === "eraser"))
+                    actives[1].className = actives[1].className.replace(" active", "");
+
+                this.className += " active";
+            });
         }
     }
 
@@ -87,7 +94,7 @@ export class CanvasComponent implements OnInit {
     }
 
     showSizes() {
-        document.getElementById("tool-sizes").classList.toggle("show");
+        document.getElementById("sizes").classList.toggle("show");
     }
 
     // Clears the canvas and redraws every stroke in our list of strokes
@@ -155,8 +162,13 @@ export class CanvasComponent implements OnInit {
     }
 
     // Change the tool color
-    change_color(event) {
-        var color = event.target.id;
+    changeColor(event) {
+        var color;
+        if (event.target.tagName.toLowerCase() === "i")
+            color = event.currentTarget.id; // Get parent's ID
+        else
+            color = event.target.id;
+
         switch(color) {
             case "blue":
                 currentPaintColor = "blue";
@@ -179,9 +191,14 @@ export class CanvasComponent implements OnInit {
     }
 
     // Change the pen size
-    change_pen(event) {
-        var color = event.target.id;
-        switch(color) {
+    changeSize(event) {
+        var size;
+        if (event.target.tagName.toLowerCase() === "i")
+            size = event.currentTarget.id; // Get parent's ID
+        else
+            size = event.target.id;
+
+        switch(size) {
             case "pen-1":
                 currentPenSize = 2;
                 break;

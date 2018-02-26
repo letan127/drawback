@@ -12,5 +12,9 @@ Online, collaborative whiteboard written in Angular.
 - Colors - Can draw in red, blue, black, green, brown
 - Clear - Removes all marks from the canvas
 - Undo - Removes the last stroke done on the canvas
-- Eraser - Will draw white on the canvas 
+- Eraser - Will draw white on the canvas
 - Pens - Has different size pen widths
+
+## Sources
+- `W3` for its great front-end tutorials
+- `AwwApp` for inspiration

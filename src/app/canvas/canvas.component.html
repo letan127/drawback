@@ -28,7 +28,7 @@
         </div>
     </div>
     <!-- Main toolbar with Drawings Tools -->
-    <div class="toolbar flex-container canvas-component">
+    <div class="tool-menu toolbar flex-container canvas-component">
         <div id="pen" class="tool-button tool-tip active" (click)="selectPen()">
             <i class="fa fa-pencil">
                 <span class="tool-tip-text">Pen</span>
@@ -103,6 +103,19 @@
             <i class="fa fa-trash">
                 <span class="tool-tip-text">Clear</span>
             </i>
+        </div>
+    </div>
+    <div class="navigation-bar toolbar flex-container canvas-component">
+        <div id="zoom-in" class="tool-button">
+            <i class="fa fa-plus"></i>
+        </div>
+        <div id="zoom-amount" class="tools-text">100%</div>
+        <div id="zoom-out" class="tool-button">
+            <i class="fa fa-minus"></i>
+        </div>
+        <div class="tools-separator"></div>
+        <div id="move" class="tool-button">
+            <i class="fa fa-hand-paper-o"></i>
         </div>
     </div>
 </div>

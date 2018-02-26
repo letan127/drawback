@@ -7,7 +7,6 @@ html body {
 }
 .canvas-component {
     position: absolute;
-    cursor: pointer;
 }
 .flex-container {
     display: flex;
@@ -21,7 +20,7 @@ html body {
     flex-direction: row;
     display: flex;
     top: 20px;
-    left:60px;
+    left:100px;
     background-color: #f1f1f1;
     border:1px solid #ddd;
     border-radius:8px;
@@ -31,37 +30,42 @@ html body {
 }
 .title-name {
     background:0 0;
-    border:1px solid transparent;
-    padding:0 3px;
+    border: 1px solid transparent;
+    padding: 0 3px;
 }
 .dropdown-symbol {
     align-items: center;
     margin-left: 15px;
     padding-right: 15px;
-    border-right:1px solid #ddd
+    border-right: 1px solid #ddd;
+    cursor: pointer;
 }
 .copy-clipboard {
     align-items: center;
     margin-left: 15px;
     padding-right: 15px;
+    cursor: pointer;
 }
 
 /* Toolbar */
 .toolbar {
     flex-direction: column;
-    top: 100px;
-    left: 10px;
-    width: 60px;
+    width: 50px;
     height: auto;
     background-color: #555;
     border-radius: 8px;
 }
+.tool-menu {
+    top: 100px;
+    left: 10px;
+}
 .tool-button {
+    cursor: pointer;
     text-align: center;
-    padding: 10px;
-    margin: 5px;
+    padding: 5px;
+    margin: 10px;
     color: white;
-    font-size: 20px;
+    font-size: 15px;
     transition: all 0.3s ease;
 }
 .tool-button:hover {
@@ -129,4 +133,21 @@ html body {
 }
 .size-menu {
     color: black;
+}
+
+/* Navigation Bar */
+.navigation-bar {
+    top: 100px;
+    right: 10px;
+}
+.tools-text {
+    text-align: center;
+    color: gray;
+    font-size: 12px;
+}
+.tools-separator {
+    width: inherit;
+    height:1px;
+    background-color:#dedede;
+    margin-bottom:8px;
 }

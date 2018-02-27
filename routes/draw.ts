@@ -27,6 +27,7 @@ io.on('connection', (socket) => {
             strokeIDMap.set(room, 0);
             strokeArrays[room] = new Array<Stroke>();
         }
+        io.to(socket.id).emit('newUser', strokeArrays[room]);
     });
 
     // When the server receives a stroke from a client, it sends the stroke

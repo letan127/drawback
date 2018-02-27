@@ -100,5 +100,12 @@ export class DrawService {
             });
         });
     }
+    public newUser = () => {
+        return Observable.create((observer) => {
+            this.socket.on('newUser', (strokeArray) => {
+                observer.next(strokeArray);
+            });
+        });
+    }
 
 }

@@ -58,6 +58,11 @@ export class CanvasComponent implements OnInit {
             strokes[strokeID].draw = true;
             this.drawAll();
         })
+
+        this.drawService.newUser().subscribe(strokeArray => {
+            strokes = strokeArray;
+            this.drawAll();
+        })
     }
 
     // Set callback functions for mouse events

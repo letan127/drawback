@@ -49,6 +49,18 @@ io.on('connection', (socket) => {
     socket.on('clear', (room) => {
         socket.to(room).emit('clear');
     });
+
+    socket.on('undo', (undoStroke) => {
+       socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
+       strokeArrays[undoStroke.room][undoStroke.strokeID].draw = false;
+   });
+
+   // When a client clicks redo, tell all other clients in the room to redo
+   // that stroke
+   socket.on('redo', (redoStroke) => {
+       socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
+       strokeArrays[redoStroke.room][redoStroke.strokeID].draw = true;
+   });
 });
 
 module.exports = router;

@@ -1,5 +1,6 @@
 html body {
     font-family: sans-serif;
+    overflow: hidden;
 }
 #canvas {
     position: relative;
@@ -149,8 +150,58 @@ html body {
     background-color: gray;
     border-radius: 8px;
 }
-.size-menu {
+.slider-menu {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.slider-value {
     color: black;
+    width: 33px;
+    height: 21px;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 5px;
+    margin-left: 10px;
+}
+.slider-box {
+    padding: 5px;
+    margin: 5px;
+}
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    margin: 0 10 0 5px;
+}
+.slider:hover {
+    opacity: 1;
+}
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
 }
 
 /* Navigation Bar */

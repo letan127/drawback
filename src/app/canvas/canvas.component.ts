@@ -76,6 +76,12 @@ export class CanvasComponent implements OnInit {
                 this.className += " active";
             });
         }
+
+        // Set slider display and pen size to the default slider value
+        var slider = <HTMLInputElement>document.getElementById("pen-size-slider");
+        var display = document.getElementById("pen-slider-value");
+        display.innerHTML = slider.value;
+        currentPenSize = +slider.value;
     }
 
     // When the window is resized, reset the canvas size and redraw it
@@ -190,33 +196,34 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    // Change the pen size
-    changeSize(event) {
-        var size;
-        if (event.target.tagName.toLowerCase() === "i")
-            size = event.currentTarget.id; // Get parent's ID
-        else
-            size = event.target.id;
-
+    // Change the pen size and slider display
+    changeSize($event) {
+        // Need to convert HTMLELement into an InputElement to access value
+        var size = +(<HTMLInputElement>event.target).value; // +: string to num
         switch(size) {
-            case "pen-1":
+            case 1:
                 currentPenSize = 2;
                 break;
-            case "pen-2":
+            case 2:
                 currentPenSize= 8;
                 break;
-            case "pen-3":
+            case 3:
                 currentPenSize = 15;
                 break;
-            case "pen-4":
+            case 4:
                 currentPenSize = 30;
                 break;
-            case "pen-5":
+            case 5:
+                currentPenSize = 45;
+                break;
+            case 6:
                 currentPenSize = 60;
                 break;
             default:
                 currentPenSize = 8;
         }
+        // Change the slider display
+        document.getElementById("pen-slider-value").innerHTML = ""+size; // num to string
     }
 
     // Start drawing a stroke

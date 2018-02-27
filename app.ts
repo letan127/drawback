@@ -4,7 +4,7 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var engines = require('consolidate');
 
-var draw = require('./routes/draw');
+var draw = require('./routes/draw.ts');
 var app = express();
 
 
@@ -22,11 +22,11 @@ app.get('*', (req, res) => {
 
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
+// app.use(function(req, res, next) {
+//   var err = new Error('Not Found');
+//   err.status = 404;
+//   next(err);
+// });
 
 // error handler
 app.use(function(err, req, res, next) {

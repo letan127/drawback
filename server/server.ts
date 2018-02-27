@@ -2,7 +2,7 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var app = require('../app.ts');
 var debug = require('debug')('mean-app:server');
 var http = require('http');
 

@@ -1,3 +1,4 @@
+import { Stroke } from '../src/app/stroke';
 let express = require('express');
 let router = express.Router();
 let app = express();
@@ -7,6 +8,7 @@ let socketIO = require('socket.io');
 let io = socketIO(server);
 //const port = process.env.PORT || 3000;
 let strokeIDMap = new Map();
+let strokeArrays = {};
 
 server.listen(4000);
 
@@ -14,43 +16,37 @@ router.get('/', (req, res) => {
     res.send('api works');
 });
 
-// Begin listening for requests when a client connects
+// Begin listening for message when a client connects to the server
 io.on('connection', (socket) => {
     console.log('user connected');
 
     // When the server receives a room ID, it will add the client to that room
     socket.on('room', function(room) {
         socket.join(room);
-        if (!strokeIDMap.has(room))
+        if (!strokeIDMap.has(room)) {
             strokeIDMap.set(room, 0);
+            strokeArrays[room] = new Array<Stroke>();
+        }
     });
 
-    // When a client sends a stroke, send it to all other clients in that room
+    // When the server receives a stroke from a client, it sends the stroke
+    // to all clients in that room except for the sender
     socket.on('stroke', (strokeMessage) => {
         socket.to(strokeMessage.room).emit('stroke', strokeMessage);
+        strokeArrays[strokeMessage.room].push(strokeMessage.stroke);
     });
 
-    // When a client requests a strokeID, send an available ID for that room
+    // When the server recieves a strokeID request from a client, it sends
+    // an available ID in that room to the sender
     socket.on('strokeID', (room) => {
         socket.emit('strokeID', strokeIDMap.get(room));
         strokeIDMap.set(room, strokeIDMap.get(room) + 1);
     });
 
-    // When a client clicks clear, tell all other clients to clear
+    // When the server receives a clear from a client in a certain room,
+    // it sends a clear event back to all clients in that room except for the sender
     socket.on('clear', (room) => {
         socket.to(room).emit('clear');
-    });
-
-    // When a client clicks undo, tell all other clients in the room to undo
-    // that stroke
-    socket.on('undo', (undoStroke) => {
-        socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
-    });
-
-    // When a client clicks redo, tell all other clients in the room to redo
-    // that stroke
-    socket.on('redo', (redoStroke) => {
-        socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
     });
 });
 

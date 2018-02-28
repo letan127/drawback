@@ -9,12 +9,28 @@ let io = socketIO(server);
 //const port = process.env.PORT || 3000;
 let strokeIDMap = new Map();
 let strokeArrays = {};
+let currentRooms = {};
+var alphabet = '0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+function generateID() {
+    do {
+        var url = '';
+        for (var i = 0; i < 5; i++) {
+            url += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+        }
+    }
+    while(url in currentRooms);
+    return url;
+}
 
 server.listen(4000);
 
-router.get('/', (req, res) => {
-    res.send('api works');
-});
+router.get('', (req, res) => {
+    var url = generateID();
+    currentRooms[url] = true;
+    var fullurl = '/rooms/' + url;
+    res.redirect(fullurl);
+})
 
 // Begin listening for message when a client connects to the server
 io.on('connection', (socket) => {

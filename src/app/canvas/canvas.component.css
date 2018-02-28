@@ -9,19 +9,24 @@ html body {
 .canvas-component {
     position: absolute;
 }
-.flex-container {
+.flex-horizontal {
     display: flex;
+    flex-direction: row;
+    align-items: center;
 }
-.flex {
+.flex-vertical {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 /* Header */
+.top-bar {
+    top: 15px;
+    height: 53px;
+}
 .header-bar {
-    flex-direction: row;
-    display: flex;
-    top: 20px;
-    left:100px;
+    left: 70px;
     background-color: #555;
     border:1px solid #ddd;
     border-radius:8px;
@@ -29,6 +34,7 @@ html body {
 }
 .title-menu {
     border-radius: 8px;
+    cursor: pointer;
 }
 .title-box {
     padding: 5px 10px 5px 10px;
@@ -48,25 +54,16 @@ html body {
     color: #b3b3b3;
 }
 .dropdown-symbol {
-    align-items: center;
     margin-left: 15px;
     padding-right: 15px;
-    cursor: pointer;
 }
 
 /* Share Bar */
 .top-right-bar {
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    top: 20px;
     right: 10px;
 }
 .bar {
-    flex-direction: row;
-    align-items: center;
-    display: flex;
-    height: 53px;
+    height: inherit;
     background-color: #555;
     border:1px solid #ddd;
     border-radius:8px;
@@ -81,6 +78,9 @@ html body {
 .bar-button:hover {
     background-color: gray;
 }
+#signup-login {
+    margin-right: 0px!important;
+}
 .bar-separator {
     width: 1px;
     height: 60%;
@@ -89,14 +89,13 @@ html body {
 
 /* Toolbar */
 .toolbar {
-    flex-direction: column;
     width: 50px;
     height: auto;
     background-color: #555;
     border-radius: 8px;
 }
 .tool-menu {
-    top: 100px;
+    top: 85px;
     left: 10px;
 }
 .tool-button {
@@ -150,8 +149,6 @@ html body {
 .dropdown-menu {
     visibility: hidden;
     position: absolute;
-    flex-direction: row;
-    justify-content: space-between;
     top: 5px;
     left: 45px;
     background-color: #f9f9f9;
@@ -173,9 +170,6 @@ html body {
 }
 .slider-menu {
     width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
 }
 .slider-value {
     color: black;
@@ -196,7 +190,7 @@ html body {
 .slider {
     -webkit-appearance: none;
     width: 100%;
-    height: 15px;
+    height: 7px;
     border-radius: 5px;
     background: #d3d3d3;
     outline: none;
@@ -211,15 +205,15 @@ html body {
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 25px;
-    height: 25px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #4CAF50;
     cursor: pointer;
 }
 .slider::-moz-range-thumb {
-    width: 25px;
-    height: 25px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #4CAF50;
     cursor: pointer;
@@ -227,7 +221,7 @@ html body {
 
 /* Navigation Bar */
 .navigation-bar {
-    top: 100px;
+    top: 85px;
     right: 10px;
 }
 .tools-text {
@@ -235,9 +229,11 @@ html body {
     color: gray;
     font-size: 12px;
 }
-.tools-separator {
-    width: inherit;
-    height:1px;
+.vertical-separator {
+    align-items: center;
+}
+.tool-separator {
+    width: 60%;
+    height: 1px;
     background-color:#dedede;
-    margin-bottom:8px;
 }

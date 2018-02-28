@@ -1,10 +1,10 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Stroke } from '../stroke';
 import { Position } from '../position';
-import * as socketIo from 'socket.io-client';
 import { DrawService } from '../draw.service';
-import * as moment from 'moment';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute} from '@angular/router';
+import { DOCUMENT } from '@angular/platform-browser';
+import { Inject } from '@angular/core';
 
 @Component({
     selector: 'app-canvas',
@@ -16,8 +16,9 @@ import { ActivatedRoute } from '@angular/router';
 export class CanvasComponent implements OnInit {
     title = 'app';
     id = '';
+    url = '';
 
-    constructor(private drawService: DrawService, private route: ActivatedRoute) {
+    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document) {
     }
 
     ngOnInit(): void {
@@ -26,8 +27,11 @@ export class CanvasComponent implements OnInit {
             this.id = params['id'];
         })
 
+        this.url = this.document.location.href;
         // Send the room ID to the server
         this.drawService.sendRoom(this.id);
+
+
 
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
@@ -188,6 +192,11 @@ export class CanvasComponent implements OnInit {
             strokes[undoIDs[undoIDs.length - 1]].draw = false;
             this.drawAll();
         }
+    }
+
+    copyURL() {
+        //TODO: create a popup that has this url
+        console.log(this.url);
     }
 
     // Redoes the latest undone stroke

@@ -40,11 +40,11 @@ export class CanvasComponent implements OnInit {
         this.drawService.getStrokeID().subscribe(strokeID => {
             if(!orphanedStrokes.length)
                 return;
+            if(orphanCount >= orphanedStrokes.length)
+                orphanCount = orphanedStrokes.length;
             // Determine which stack to add the strokeID to
             if (!orphanedStrokes[0].draw) {
-                undoStrokes.push(strokeID);
-                // If no more orphaned strokes can be undone, mark the index as -1
-                orphanUndoIndex = -1;
+                undoStrokes.unshift(strokeID);
             }
             else
                 myStrokes.push(strokeID);
@@ -52,10 +52,14 @@ export class CanvasComponent implements OnInit {
             this.drawService.sendStroke(strokes[strokeID], strokeID, this.id);
         })
 
-        // When the server sends a clear event, clear the canvas
+        // When the server sends a clear event, clear the canvas, and reset values
         this.drawService.getClear().subscribe(() => {
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             strokes = [];
+            myStrokes = [];
+            undoStrokes = [];
+            orphanedStrokes = [];
+            orphanCount = 0;
         })
 
         this.drawService.getUndo().subscribe(strokeID => {
@@ -157,21 +161,25 @@ export class CanvasComponent implements OnInit {
         myStrokes = [];
         undoStrokes = [];
         orphanedStrokes = [];
-        orphanUndoIndex = 0;
+        orphanCount = 0;
         this.drawService.sendClear(this.id);
     }
 
     // Undoes the latest stroke
     undo() {
         // If there are orphaned strokes that can be undone, undo them first
-        if(orphanedStrokes.length && orphanUndoIndex > -1) {
-            // If the orphanUndoIndex is set, just decrement it
-            if(orphanUndoIndex)
-                orphanUndoIndex--;
-            else
-                // This is the first time undoing, so set the orphanUndoIndex index
-                orphanUndoIndex = orphanedStrokes.length - 1;
-            orphanedStrokes[orphanUndoIndex].draw = false;
+        // if(orphanedStrokes.length && orphanUndoIndex > -1) {
+        //     // If the orphanUndoIndex is set, just decrement it
+        //     if(orphanUndoIndex)
+        //         orphanUndoIndex--;
+        //     else
+        //         // This is the first time undoing, so set the orphanUndoIndex index
+        //         orphanUndoIndex = orphanedStrokes.length - 1;
+        //     orphanedStrokes[orphanUndoIndex].draw = false;
+        // }
+        if(orphanedStrokes.length && orphanedStrokes.length - orphanCount > 0) {
+            orphanedStrokes[orphanedStrokes.length - orphanCount].draw = false;
+            orphanCount++;
         }
         // Undo my strokes
         else {
@@ -256,8 +264,7 @@ export class CanvasComponent implements OnInit {
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
         // Discard stored undos
-        orphanedStrokes.splice(orphanUndoIndex + 1, orphanedStrokes.length - 1 - orphanUndoIndex)
-        orphanUndoIndex = 0;
+        orphanedStrokes.splice(orphanedStrokes.length - orphanCount, orphanCount);
         if(undoStrokes.length) {
             //TODO: remove the stroke from stroke array?
             undoStrokes = [];
@@ -319,4 +326,4 @@ var myStrokes = new Array<number>();    // IDs of strokes drawn by user
 var undoStrokes = new Array<number>();  // Contains every stroke that was undid and won't be drawn
 var drag = false; // True if we should be drawing to the canvas (after a mouse down)
 var curStroke; // The current stroke being drawn
-var orphanUndoIndex = 0;
+var orphanCount = 0;

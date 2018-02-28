@@ -49,6 +49,7 @@ io.on('connection', (socket) => {
     socket.on('clear', (room) => {
         socket.to(room).emit('clear');
         strokeArrays[room] = [];
+        strokeIDMap.set(room, 0);
     });
 
     // When a client clicks undo, tell all other clients in the room to undo

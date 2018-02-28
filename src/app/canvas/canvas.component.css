@@ -55,6 +55,13 @@ html body {
 }
 
 /* Share Bar */
+.top-right-bar {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    top: 20px;
+    right: 10px;
+}
 .bar {
     flex-direction: row;
     align-items: center;
@@ -64,10 +71,6 @@ html body {
     border:1px solid #ddd;
     border-radius:8px;
     color: white;
-}
-.share-bar {
-    top: 20px;
-    right: 100px;
 }
 .bar-button {
     padding:5px 10px 5px 10px;

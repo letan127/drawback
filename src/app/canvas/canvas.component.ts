@@ -85,7 +85,7 @@ export class CanvasComponent implements OnInit {
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
 
-	canvas.addEventListener("touchstart", function (e) {
+        canvas.addEventListener("touchstart", function (e) {
             e.preventDefault();
               var touch = e.touches[0];
               var mouseEvent = new MouseEvent("mousedown", {
@@ -93,19 +93,17 @@ export class CanvasComponent implements OnInit {
                 clientY: touch.clientY
               });
               canvas.dispatchEvent(mouseEvent);
-            }, false);
+        }, false);
         canvas.addEventListener("touchend", function (e) {
             e.preventDefault();
               var mouseEvent = new MouseEvent("mouseup", {});
               canvas.dispatchEvent(mouseEvent);
-            }, false);
+        }, false);
         canvas.addEventListener("touchcancel",function (e) {
             e.preventDefault();
               var mouseEvent = new MouseEvent("mouseleave", {});
               canvas.dispatchEvent(mouseEvent);
-
-
-            }, false);
+        }, false);
         canvas.addEventListener("touchmove", function (e) {
           e.preventDefault();
               var touch = e.touches[0];
@@ -114,9 +112,8 @@ export class CanvasComponent implements OnInit {
                 clientY: touch.clientY
               });
               canvas.dispatchEvent(mouseEvent);
-            }, false);
-
-	context = canvas.getContext("2d");
+        }, false);
+        context = canvas.getContext("2d");
     }
 
     // Draws a single stroke that is passed in as an argument

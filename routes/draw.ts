@@ -51,6 +51,8 @@ io.on('connection', (socket) => {
         strokeArrays[room] = [];
     });
 
+    // When a client clicks undo, tell all other clients in the room to undo
+    // that stroke
     socket.on('undo', (undoStroke) => {
        socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
        strokeArrays[undoStroke.room][undoStroke.strokeID].draw = false;

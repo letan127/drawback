@@ -51,19 +51,37 @@ html body {
     align-items: center;
     margin-left: 15px;
     padding-right: 15px;
-    border-right: 1px solid #ddd;
     cursor: pointer;
 }
-.copy-clipboard {
+
+/* Share Bar */
+.bar {
+    flex-direction: row;
     align-items: center;
     display: flex;
-    padding:5px 10px 5px 10px;
-    margin:5px 10px 5px 10px;
-    cursor: pointer;
-    border-radius: 8px;
+    height: 53px;
+    background-color: #555;
+    border:1px solid #ddd;
+    border-radius:8px;
+    color: white;
 }
-.copy-clipboard:hover {
+.share-bar {
+    top: 20px;
+    right: 100px;
+}
+.bar-button {
+    padding:5px 10px 5px 10px;
+    margin:5px 5px 5px 5px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.bar-button:hover {
     background-color: gray;
+}
+.bar-separator {
+    width: 1px;
+    height: 60%;
+    background-color:#dedede;
 }
 
 /* Toolbar */
@@ -97,26 +115,26 @@ html body {
 }
 .tool-tip {
     position: relative;
-    display: inline-block;
 }
 .tool-tip-text {
     visibility: hidden;
-    min-width: 50px;
-    background-color: black;
-    color: #fff;
     text-align: center;
+    font-size: 12px;
+    font-style: normal;
+    color: #fff;
+    background-color: black;
+    padding: 5px;
     border-radius: 6px;
-    padding: 5px 0;
+    white-space: nowrap; /* Keep the text in one line */
 
-    /* Position the tooltip on top of the tool icon */
+    /* Position the tooltip on top of and centered on the tool icon */
     position: absolute;
-    z-index: 1;
+    z-index: 2;
     bottom: 100%;
     left: 50%;
-    margin-left: -25px; /* Use half of the width (120/2 = 60), to center the tooltip */
+    transform: translateX(-50%);
 }
 .tool-tip:hover .tool-tip-text {
-    font-size: 12px;
     visibility: visible;
 }
 .dropdown-caret {

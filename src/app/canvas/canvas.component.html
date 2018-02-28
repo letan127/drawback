@@ -21,12 +21,21 @@
                 <i class="fa fa-caret-down"></i>
             </div>
         </div>
-        <div class="flex copy-clipboard">
-            <div class="tool-tip">
-                <i class="fa fa-clipboard">
-                    <span class="tool-tip-text">Copy URL</span>
-                </i>
-            </div>
+    </div>
+    <!-- Copy URL, Upload, and Download Bar -->
+    <div class="share-bar bar flex-container canvas-component">
+        <div id="copy" class="bar-button tool-tip">
+            <i class="fa fa-clipboard"></i>
+            <span class="tool-tip-text">Copy URL</span>
+        </div>
+        <div class="bar-separator"></div>
+        <div class="bar-button tool-tip">
+            <i id="download" class="fa fa-download"></i>
+            <span class="tool-tip-text">Download</span>
+        </div>
+        <div class="bar-button tool-tip">
+            <i id="upload" class="fa fa-upload"></i>
+            <span class="tool-tip-text">Upload</span>
         </div>
     </div>
     <!-- Main toolbar with Drawings Tools -->

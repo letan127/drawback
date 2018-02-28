@@ -48,6 +48,7 @@ io.on('connection', (socket) => {
     // it sends a clear event back to all clients in that room except for the sender
     socket.on('clear', (room) => {
         socket.to(room).emit('clear');
+        strokeArrays[room] = [];
     });
 
     socket.on('undo', (undoStroke) => {

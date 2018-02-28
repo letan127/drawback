@@ -152,6 +152,12 @@ export class CanvasComponent implements OnInit {
             if (strokes[i])
                 this.draw(strokes[i]);
         }
+
+        // Draw local orphan strokes
+        for (var j = 0; j < orphanedStrokes.length; j++) {
+            if (orphanedStrokes[j])
+                this.draw(orphanedStrokes[j]);
+        }
     }
 
     // Removes everything from the canvas and sends a clear message to the server

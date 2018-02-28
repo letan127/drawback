@@ -40,8 +40,8 @@ export class CanvasComponent implements OnInit {
         this.drawService.getStrokeID().subscribe(strokeID => {
             if(!orphanedStrokes.length)
                 return;
-            if(orphanCount >= orphanedStrokes.length)
-                orphanCount = orphanedStrokes.length;
+            if(orphanUndoCount >= orphanedStrokes.length)
+                orphanUndoCount = orphanedStrokes.length;
             // Determine which stack to add the strokeID to
             if (!orphanedStrokes[0].draw) {
                 undoStrokes.unshift(strokeID);
@@ -59,7 +59,7 @@ export class CanvasComponent implements OnInit {
             myStrokes = [];
             undoStrokes = [];
             orphanedStrokes = [];
-            orphanCount = 0;
+            orphanUndoCount = 0;
         })
 
         this.drawService.getUndo().subscribe(strokeID => {
@@ -129,7 +129,7 @@ export class CanvasComponent implements OnInit {
         myStrokes = [];
         undoStrokes = [];
         orphanedStrokes = [];
-        orphanCount = 0;
+        orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
     }
 
@@ -145,9 +145,9 @@ export class CanvasComponent implements OnInit {
         //         orphanUndoIndex = orphanedStrokes.length - 1;
         //     orphanedStrokes[orphanUndoIndex].draw = false;
         // }
-        if(orphanedStrokes.length && orphanedStrokes.length - orphanCount > 0) {
-            orphanedStrokes[orphanedStrokes.length - orphanCount].draw = false;
-            orphanCount++;
+        if(orphanedStrokes.length && orphanedStrokes.length - orphanUndoCount > 0) {
+            orphanedStrokes[orphanedStrokes.length - orphanUndoCount - 1].draw = false;
+            orphanUndoCount++;
         }
         // Undo my strokes
         else {
@@ -162,14 +162,21 @@ export class CanvasComponent implements OnInit {
 
     // Redoes the latest undone stroke
     redo() {
-        if(!undoStrokes.length)
-            return;
-
-        var redoStroke = undoStrokes.pop();
-        myStrokes.push(redoStroke);
-        this.drawService.sendRedo(this.id, redoStroke);
-        strokes[redoStroke].draw = true;
-        this.draw(strokes[redoStroke]);
+        // If strokes with IDS can't be redone, check if orphaned strokes can
+        if(!undoStrokes.length && orphanUndoCount) {
+            orphanedStrokes[orphanedStrokes.length - orphanUndoCount].draw = true;
+            orphanUndoCount--;
+        }
+        else {
+            // Check if strokes with IDs can be undone
+            if(!undoStrokes.length)
+                return;
+            var redoStroke = undoStrokes.pop();
+            myStrokes.push(redoStroke);
+            this.drawService.sendRedo(this.id, redoStroke);
+            strokes[redoStroke].draw = true;
+            this.draw(strokes[redoStroke]);
+        }
     }
 
     // Set the pen color to the color of the background
@@ -232,7 +239,7 @@ export class CanvasComponent implements OnInit {
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
         // Discard stored undos
-        orphanedStrokes.splice(orphanedStrokes.length - orphanCount, orphanCount);
+        orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
         if(undoStrokes.length) {
             //TODO: remove the stroke from stroke array?
             undoStrokes = [];
@@ -294,4 +301,4 @@ var myStrokes = new Array<number>();    // IDs of strokes drawn by user
 var undoStrokes = new Array<number>();  // Contains every stroke that was undid and won't be drawn
 var drag = false; // True if we should be drawing to the canvas (after a mouse down)
 var curStroke; // The current stroke being drawn
-var orphanCount = 0;
+var orphanUndoCount = 0;

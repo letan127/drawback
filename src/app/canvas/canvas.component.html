@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
-
 <div>
     <canvas id='canvas'></canvas>
     <!-- Header -->
@@ -22,10 +21,11 @@
             </div>
         </div>
     </div>
+    <!-- Sharing and User Bar -->
     <div class="top-bar top-right-bar flex-horizontal canvas-component">
         <!-- Copy URL, Upload, and Download Bar -->
         <div class="bar flex-horizontal">
-            <div id="copy" class="bar-button tool-tip">
+            <div class="bar-button tool-tip" (click)="copyURL()">
                 <i class="fa fa-clipboard"></i>
                 <span class="tool-tip-text">Copy URL</span>
             </div>
@@ -44,22 +44,20 @@
     <!-- Main toolbar with Drawings Tools -->
     <div class="tool-menu toolbar flex-vertical canvas-component">
         <div id="pen" class="tool-button tool-tip active" (click)="selectPen()">
-            <i class="fa fa-pencil">
-                <span class="tool-tip-text">Pen</span>
-            </i>
+            <i class="fa fa-pencil"></i>
+            <span class="tool-tip-text">Pen</span>
         </div>
-        <div id="eraser" class="tool-button tool-tip" (click)="erase()">
-            <i class="fa fa-eraser">
-                <span class="tool-tip-text">Eraser</span>
-            </i>
+        <div id="eraser" class="tool-button tool-tip" (click)="selectEraser()">
+            <i class="fa fa-eraser"></i>
+            <span class="tool-tip-text">Eraser</span>
         </div>
         <div id="colors" class="tool-button tool-tip" (click)="showColors()">
             <i class="fa fa-paint-brush">
                 <div class="dropdown-caret">
                     <i class="fa fa-caret-right"></i>
                 </div>
-                <span class="tool-tip-text">Colors</span>
             </i>
+            <span class="tool-tip-text">Colors</span>
             <div class="dropdown-menu flex-horizontal">
                 <div id="black" class="dropdown-item" style="color:black" (click)="changeColor($event)">
                     <i class="fa fa-circle"></i>
@@ -83,8 +81,8 @@
                 <div class="dropdown-caret">
                     <i class="fa fa-caret-right"></i>
                 </div>
-                <span class="tool-tip-text">Sizes</span>
             </i>
+            <span class="tool-tip-text">Sizes</span>
             <div class="slider-menu dropdown-menu flex-horizontal">
                 <div id="pen-slider-value" class="slider-value"></div>
                 <div class="slider-box">
@@ -93,21 +91,19 @@
             </div>
         </div>
         <div id="undo" class="tool-button tool-tip" (click)="undo()">
-            <i class="fa fa-undo">
-                <span class="tool-tip-text">Undo</span>
-            </i>
+            <i class="fa fa-undo"></i>
+            <span class="tool-tip-text">Undo</span>
         </div>
-        <div id="redo" class="tool-button tool-tip">
-            <i class="fa fa-repeat">
-                <span class="tool-tip-text">Redo</span>
-            </i>
+        <div id="redo" class="tool-button tool-tip" (click)="redo()">
+            <i class="fa fa-repeat"></i>
+            <span class="tool-tip-text">Redo</span>
         </div>
         <div id="clear" class="tool-button tool-tip" (click)="clear()">
-            <i class="fa fa-trash">
-                <span class="tool-tip-text">Clear</span>
-            </i>
+            <i class="fa fa-trash"></i>
+            <span class="tool-tip-text">Clear</span>
         </div>
     </div>
+    <!-- Navigation Bar  -->
     <div class="navigation-bar toolbar flex-vertical canvas-component">
         <div id="zoom-in" class="tool-button tool-tip">
             <i class="fa fa-search-plus"></i>

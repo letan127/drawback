@@ -1,10 +1,10 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Stroke } from '../stroke';
 import { Position } from '../position';
-import * as socketIo from 'socket.io-client';
 import { DrawService } from '../draw.service';
-import * as moment from 'moment';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute} from '@angular/router';
+import { DOCUMENT } from '@angular/platform-browser';
+import { Inject } from '@angular/core';
 
 @Component({
     selector: 'app-canvas',
@@ -15,14 +15,16 @@ import { ActivatedRoute } from '@angular/router';
 
 export class CanvasComponent implements OnInit {
     title = 'app';
-    message: Stroke;
-    messages = [];
     id = '';
+    url = '';
 
-    constructor(private drawService: DrawService, private route: ActivatedRoute) {
+    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document) {
     }
 
     ngOnInit(): void {
+        // Get the full URL of this room
+        this.url = this.document.location.href;
+
         // Get the room number/id from the URL
         this.route.params.subscribe(params => {
             this.id = params['id'];
@@ -31,18 +33,53 @@ export class CanvasComponent implements OnInit {
         // Send the room ID to the server
         this.drawService.sendRoom(this.id);
 
-        // When the server sends a stroke, add it to our list of strokes and redraw everything
+        // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
-            strokes.push(message.stroke);
-            context.clearRect(0, 0, canvasWidth, canvasHeight);
-            context.lineJoin = "round";
-            this.draw();
+            strokes[message.strokeID] = message.stroke;
+            this.draw(message.stroke);
         })
 
-        // When the server sends a clear event, clear the canvas
+        // When the server sends a strokeID, give it to the earliest orphaned stroke
+        // and send the stroke to everyone else
+        this.drawService.getStrokeID().subscribe(strokeID => {
+            if(!orphanedStrokes.length)
+                return;
+            // Determine which stack to add the strokeID to
+            if (!orphanedStrokes[0].draw) {
+                undoIDs.unshift(strokeID);
+            }
+            else
+                myIDs.push(strokeID);
+            strokes[strokeID] = orphanedStrokes.shift();
+            this.drawService.sendStroke(strokes[strokeID], strokeID, this.id);
+        })
+
+        // When the server sends a clear event, clear the canvas, and reset values
         this.drawService.getClear().subscribe(() => {
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             strokes = [];
+            myIDs = [];
+            undoIDs = [];
+            orphanedStrokes = [];
+            orphanUndoCount = 0;
+        })
+
+        // Received another client's undo; don't draw that stroke
+        this.drawService.getUndo().subscribe(strokeID => {
+            strokes[strokeID].draw = false;
+            this.drawAll();
+        })
+
+        // Received another client's redo; draw that stroke
+        this.drawService.getRedo().subscribe(strokeID => {
+            strokes[strokeID].draw = true;
+            this.drawAll();
+        })
+
+        // This client is a new user; give them the current canvas state to draw
+        this.drawService.newUser().subscribe(strokeArray => {
+            strokes = strokeArray;
+            this.drawAll();
         })
     }
 
@@ -56,6 +93,35 @@ export class CanvasComponent implements OnInit {
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
         context = canvas.getContext("2d");
+
+        canvas.addEventListener("touchstart", function (e) {
+            e.preventDefault();
+              var touch = e.touches[0];
+              var mouseEvent = new MouseEvent("mousedown", {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+              });
+              canvas.dispatchEvent(mouseEvent);
+        }, false);
+        canvas.addEventListener("touchend", function (e) {
+            e.preventDefault();
+              var mouseEvent = new MouseEvent("mouseup", {});
+              canvas.dispatchEvent(mouseEvent);
+        }, false);
+        canvas.addEventListener("touchcancel",function (e) {
+            e.preventDefault();
+              var mouseEvent = new MouseEvent("mouseleave", {});
+              canvas.dispatchEvent(mouseEvent);
+        }, false);
+        canvas.addEventListener("touchmove", function (e) {
+          e.preventDefault();
+              var touch = e.touches[0];
+              var mouseEvent = new MouseEvent("mousemove", {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+              });
+              canvas.dispatchEvent(mouseEvent);
+        }, false);
 
         /* When user clicks a tool, that tool's icon will become active */
         // Get all the tools from the toolbar
@@ -81,7 +147,7 @@ export class CanvasComponent implements OnInit {
         var slider = <HTMLInputElement>document.getElementById("pen-size-slider");
         var display = document.getElementById("pen-slider-value");
         display.innerHTML = slider.value;
-        currentPenSize = +slider.value;
+        currentPenSize = +slider.value * 4;
     }
 
     // When the window is resized, reset the canvas size and redraw it
@@ -92,8 +158,14 @@ export class CanvasComponent implements OnInit {
         canvasHeight = canvas.height;
 
         if (strokes.length > 0)
-            this.draw();
+            this.drawAll();
     }
+
+    copyURL() {
+        //TODO: create a popup that has this url
+        console.log(this.url);
+    }
+
     /* When the user clicks on the button, toggle between hiding and showing the dropdown content */
     showColors() {
         document.getElementById("colors").classList.toggle("show");
@@ -103,36 +175,58 @@ export class CanvasComponent implements OnInit {
         document.getElementById("sizes").classList.toggle("show");
     }
 
+    // Pen tool was clicked; get out of erase mode
+    selectPen() {
+        mode = "source-over";
+    }
+
+    // Set the pen color to the color of the background
+    selectEraser() {
+        mode = "destination-out";
+    }
+
+    // Draws a single stroke that is passed in as an argument
+    draw(stroke) {
+        if(!stroke.draw)
+            return;
+
+        context.strokeStyle = stroke.color;
+        context.lineWidth = stroke.size;
+        context.globalCompositeOperation = stroke.mode;
+        context.lineJoin = "round";
+        // Draw the first pixel in the stroke
+        context.beginPath();
+        context.moveTo(stroke.pos[0].x-1, stroke.pos[0].y);
+        context.lineTo(stroke.pos[0].x, stroke.pos[0].y);
+        context.closePath();
+        context.stroke();
+
+        // Draw the rest of the pixels in the stroke
+        for (var j = 1; j < stroke.pos.length; j++) {
+            // Create a smooth path from the previous pixel to the current pixel
+            context.beginPath();
+            context.moveTo(stroke.pos[j-1].x, stroke.pos[j-1].y);
+            context.lineTo(stroke.pos[j].x, stroke.pos[j].y);
+            context.closePath();
+            context.stroke();
+        }
+    }
+
     // Clears the canvas and redraws every stroke in our list of strokes
-    draw() {
+    drawAll() {
         // Clear the canvas
         context.clearRect(0, 0, canvasWidth, canvasHeight);
-        // Set the pen type
-        context.lineJoin = "round";
-
 
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < strokes.length; i++) {
-            context.strokeStyle = strokes[i].color;
-            context.lineWidth = strokes[i].size;
-            context.globalCompositeOperation = strokes[i].mode;
+            if (strokes[i])
+                this.draw(strokes[i]);
+        }
 
-            // Draw the first pixel in the stroke
-            context.beginPath();
-            context.moveTo(strokes[i].pos[0].x-1, strokes[i].pos[0].y);
-            context.lineTo(strokes[i].pos[0].x, strokes[i].pos[0].y);
-            context.closePath();
-            context.stroke();
-
-            // Draw the rest of the pixels in the stroke
-            for (var j = 1; j < strokes[i].pos.length; j++) {
-                // Create a smooth path from the previous pixel to the current pixel
-                context.beginPath();
-                context.moveTo(strokes[i].pos[j-1].x, strokes[i].pos[j-1].y);
-                context.lineTo(strokes[i].pos[j].x, strokes[i].pos[j].y);
-                context.closePath();
-                context.stroke();
-            }
+        // Draw local orphan strokes
+        for (var j = 0; j < orphanedStrokes.length; j++) {
+            if (orphanedStrokes[j])
+                this.draw(orphanedStrokes[j]);
         }
     }
 
@@ -140,31 +234,48 @@ export class CanvasComponent implements OnInit {
     clear() {
         context.clearRect(0, 0, canvasWidth, canvasHeight);
         strokes = [];
+        myIDs = [];
+        undoIDs = [];
+        orphanedStrokes = [];
+        orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
     }
 
     // Undoes the latest stroke
     undo() {
-        // console.log(currentStroke);
-        // if(currentStroke == 0) {
-        //     return;
-        // }
-        // currentStroke -= 1;
-        // for(var i = paintArray.length - 1; i >= 0; i--) {
-        //     if(paintArray[i].stroke == currentStroke) {
-        //         paintArray.splice(i,1);
-        //     }
-        // }
+        // If there are orphaned strokes that can be undone, undo them first
+        if(orphanedStrokes.length && orphanedStrokes.length - orphanUndoCount > 0) {
+            orphanedStrokes[orphanedStrokes.length - orphanUndoCount - 1].draw = false;
+            orphanUndoCount++;
+        }
+        // Undo my strokes
+        else {
+            if(!myIDs.length)
+                return;
+            undoIDs.push(myIDs.pop());
+            this.drawService.sendUndo(this.id, undoIDs[undoIDs.length - 1]);
+            strokes[undoIDs[undoIDs.length - 1]].draw = false;
+            this.drawAll();
+        }
     }
 
-    // Pen tool was clicked; get out of erase mode
-    selectPen() {
-        mode = "source-over";
-    }
-
-    // Erase tool was clicked; enter erase mode
-    erase() {
-        mode = "destination-out";
+    // Redoes the latest undone stroke
+    redo() {
+        // If strokes with IDS can't be redone, check if orphaned strokes can
+        if(!undoIDs.length && orphanUndoCount) {
+            orphanedStrokes[orphanedStrokes.length - orphanUndoCount].draw = true;
+            orphanUndoCount--;
+        }
+        else {
+            // Check if strokes with IDs can be undone
+            if(!undoIDs.length)
+                return;
+            var redoStroke = undoIDs.pop();
+            myIDs.push(redoStroke);
+            this.drawService.sendRedo(this.id, redoStroke);
+            strokes[redoStroke].draw = true;
+            this.draw(strokes[redoStroke]);
+        }
     }
 
     // Change the tool color
@@ -228,23 +339,31 @@ export class CanvasComponent implements OnInit {
 
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
+        // Discard stored undos
+        orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
+        if(undoIDs.length) {
+            //TODO: remove the stroke from stroke array?
+            undoIDs = [];
+        }
+
         // Get the cursor's current position
         x = event.x - canvas.offsetLeft;
         y = event.y - canvas.offsetTop;
 
         // Add the stroke's pixels and tool settings
-        strokes.push(new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode));
+        curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
         // Get the first pixel in the new stroke
-        strokes[strokes.length-1].pos.push(new Position(x,y));
-
+        curStroke.pos.push(new Position(x,y));
         drag = true;
-        this.draw();
+        this.draw(curStroke);
     }
 
-    // Stop drawing and send this latest stroke to the server
+    // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
     mouseUp(event: MouseEvent): void {
         drag = false;
-        this.drawService.sendStroke(strokes[strokes.length-1], this.id);
+        this.drawService.reqStrokeID(this.id);
+        // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
+        orphanedStrokes.push(curStroke);
     }
 
     // Continue updating and drawing the current stroke
@@ -252,9 +371,9 @@ export class CanvasComponent implements OnInit {
         if (drag == true) {
             var x = event.x - canvas.offsetLeft;
             var y = event.y - canvas.offsetTop;
-
-            strokes[strokes.length-1].pos.push(new Position(x,y));
-            this.draw();
+            curStroke.pos.push(new Position(x,y));
+            this.draw(curStroke);
+            //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
     }
 
@@ -265,17 +384,21 @@ export class CanvasComponent implements OnInit {
 }
 
 // Global canvas data
-var canvasHeight;
-var canvasWidth;
 var canvas: HTMLCanvasElement;
 var context; // Contains a reference to the canvas element
-
-// Global stroke data
-var strokes = new Array<Stroke>(); // Contains every stroke on the canvas
-var drag = false; // True if we should be drawing to the canvas (after a mouse down)
+var canvasHeight;
+var canvasWidth;
 var currentPaintColor = "black";
 var currentPenSize = 8;
-var currentStroke = 0; // Keeps count of the current stroke number
 var x;
 var y;
-var mode = "source-over"; // Default drawing mode
+var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
+
+// Global stroke data
+var strokes = new Array<Stroke>();      // Contains every stroke on the canvas
+var orphanedStrokes = new Array<Stroke>(); // Contains every stroke that needs an ID from the server
+var myIDs= new Array<number>();    // IDs of strokes drawn by user
+var undoIDs = new Array<number>();  // Contains every stroke that was undid and won't be drawn
+var drag = false; // True if we should be drawing to the canvas (after a mouse down)
+var curStroke; // The current stroke being drawn
+var orphanUndoCount = 0; //a count to figure out how many undos in the orphanedStrokes we've done

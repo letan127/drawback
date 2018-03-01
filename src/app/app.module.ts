@@ -11,8 +11,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 
 const appRoutes: Routes = [
-    {path: '', redirectTo: '/draw/rooms/1', pathMatch: 'full'},
-    {path: 'draw/rooms/:id', component: CanvasComponent},
+    {path: 'rooms/:id', component: CanvasComponent},
 ];
 
 

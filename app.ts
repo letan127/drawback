@@ -4,7 +4,7 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var engines = require('consolidate');
 
-var draw = require('./routes/draw');
+var draw = require('./routes/draw.ts');
 var app = express();
 
 
@@ -12,20 +12,12 @@ app.set('view engine', 'html');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({'extended':'false'}));
+
+
+app.use('', draw);
 app.use(express.static(path.join(__dirname, 'dist')));
-
-
-app.use('/draw', draw);
-app.get('*', (req, res) => {
+app.get('/rooms/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist/index.html'));
-});
-
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
 });
 
 // error handler

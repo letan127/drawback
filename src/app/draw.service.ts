@@ -18,10 +18,11 @@ export class DrawService {
         this.socket.emit('room', room);
     }
 
-    // Send a stroke object and the client's room ID to the server
-    public sendStroke(stroke, roomID) {
+    // Send a stroke object, its ID, and the client's room ID to the server
+    public sendStroke(stroke, strokeID, roomID) {
         var strokeWithRoom = {
             stroke: stroke,
+            strokeID: strokeID,
             room: roomID
         };
         this.socket.emit('stroke', strokeWithRoom);
@@ -36,12 +37,26 @@ export class DrawService {
         });
     }
 
+    // Ask the server for a strokeID
+    public reqStrokeID(room) {
+        this.socket.emit('strokeID', room);
+    }
+
+    // When the server sends a strokeID, send it to our subscribed observers
+    public getStrokeID = () => {
+        return Observable.create((observer) => {
+            this.socket.on('strokeID', (strokeID) => {
+                observer.next(strokeID);
+            });
+        });
+    }
+
     // Tell server that the client clicked the clear button
     public sendClear(room) {
         this.socket.emit('clear', room);
     }
 
-    // When the server emits a clear message, subscribed observers will execute their functions
+    // Notify subscribed observers when server sends a clear event
     public getClear = () => {
         return Observable.create((observer) => {
             this.socket.on('clear', (room) => {
@@ -49,4 +64,48 @@ export class DrawService {
             });
         });
     }
+
+    // Tell the server that the client clicked the undo button
+    public sendUndo(room, strokeID) {
+        var undoStroke = {
+            room: room,
+            strokeID: strokeID
+        };
+        this.socket.emit('undo', undoStroke);
+    }
+
+    // Notify subscribed observers when the server sends an undo event and passes the strokeID
+    public getUndo = () => {
+        return Observable.create((observer) => {
+            this.socket.on('undo', (strokeID) => {
+                observer.next(strokeID);
+            });
+        });
+    }
+
+    // Tell the server that the client clicked the redo button
+    public sendRedo(room, strokeID) {
+        var redoStroke = {
+            room: room,
+            strokeID: strokeID
+        };
+        this.socket.emit('redo', redoStroke);
+    }
+
+    // Notify subscribed observers when the server sends a redo event and passes the strokeID
+    public getRedo = () => {
+        return Observable.create((observer) => {
+            this.socket.on('redo', (strokeID) => {
+                observer.next(strokeID);
+            });
+        });
+    }
+    public newUser = () => {
+        return Observable.create((observer) => {
+            this.socket.on('newUser', (strokeArray) => {
+                observer.next(strokeArray);
+            });
+        });
+    }
+
 }

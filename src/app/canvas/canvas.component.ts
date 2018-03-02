@@ -22,16 +22,16 @@ export class CanvasComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        // Get the full URL of this room
+        this.url = this.document.location.href;
+
         // Get the room number/id from the URL
         this.route.params.subscribe(params => {
             this.id = params['id'];
         })
 
-        this.url = this.document.location.href;
         // Send the room ID to the server
         this.drawService.sendRoom(this.id);
-
-
 
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
@@ -60,34 +60,39 @@ export class CanvasComponent implements OnInit {
             strokes = [];
             myIDs = [];
             undoIDs = [];
-
             orphanedStrokes = [];
             orphanUndoCount = 0;
         })
 
+        // Received another client's undo; don't draw that stroke
         this.drawService.getUndo().subscribe(strokeID => {
             strokes[strokeID].draw = false;
             this.drawAll();
         })
 
+        // Received another client's redo; draw that stroke
         this.drawService.getRedo().subscribe(strokeID => {
             strokes[strokeID].draw = true;
             this.drawAll();
         })
 
+        // This client is a new user; give them the current canvas state to draw
         this.drawService.newUser().subscribe(strokeArray => {
             strokes = strokeArray;
             this.drawAll();
         })
     }
 
-    // Set callback functions for mouse events
     ngAfterViewInit() {
-        canvas = <HTMLCanvasElement>document.getElementById("jamboard");
+        // Set callback functions for canvas mouse events
+        canvas = <HTMLCanvasElement>document.getElementById("canvas");
+        this.resize();
+        window.addEventListener("resize", this.resize.bind(this), false);
         canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
+        context = canvas.getContext("2d");
 
         canvas.addEventListener("touchstart", function (e) {
             e.preventDefault();
@@ -117,7 +122,67 @@ export class CanvasComponent implements OnInit {
               });
               canvas.dispatchEvent(mouseEvent);
         }, false);
-        context = canvas.getContext("2d");
+
+        /* When user clicks a tool, that tool's icon will become active */
+        // Get all the tools from the toolbar
+        var tools = document.getElementsByClassName("tool-button");
+
+        // Set callback functions for each tool; tool becomes active when clicked
+        for (var i = 0; i < tools.length; i++) {
+            tools[i].addEventListener("click", function() {
+                var actives = document.getElementsByClassName("active");
+
+                // Always keep either the pen or eraser active but switch other tools' actives
+                if (this.id === "pen" || this.id === "eraser")
+                    actives[0].className = actives[0].className.replace(" active", "");
+                else if (actives.length > 1 &&
+                        (actives[0].id === "pen" || actives[0].id === "eraser"))
+                    actives[1].className = actives[1].className.replace(" active", "");
+
+                this.className += " active";
+            });
+        }
+
+        // Set slider display and pen size to the default slider value
+        var slider = <HTMLInputElement>document.getElementById("pen-size-slider");
+        var display = document.getElementById("pen-slider-value");
+        display.innerHTML = slider.value;
+        currentPenSize = +slider.value * 4;
+    }
+
+    // When the window is resized, reset the canvas size and redraw it
+    resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvasWidth = canvas.width;
+        canvasHeight = canvas.height;
+
+        if (strokes.length > 0)
+            this.drawAll();
+    }
+
+    copyURL() {
+        //TODO: create a popup that has this url
+        console.log(this.url);
+    }
+
+    /* When the user clicks on the button, toggle between hiding and showing the dropdown content */
+    showColors() {
+        document.getElementById("colors").classList.toggle("show");
+    }
+
+    showSizes() {
+        document.getElementById("sizes").classList.toggle("show");
+    }
+
+    // Pen tool was clicked; get out of erase mode
+    selectPen() {
+        mode = "source-over";
+    }
+
+    // Set the pen color to the color of the background
+    selectEraser() {
+        mode = "destination-out";
     }
 
     // Draws a single stroke that is passed in as an argument
@@ -194,11 +259,6 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    copyURL() {
-        //TODO: create a popup that has this url
-        console.log(this.url);
-    }
-
     // Redoes the latest undone stroke
     redo() {
         // If strokes with IDS can't be redone, check if orphaned strokes can
@@ -218,18 +278,14 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    // Set the pen color to the color of the background
-    erase() {
-        // toggle erase
-        if (mode === "destination-out")
-            mode = "source-over";
+    // Change the tool color
+    changeColor(event) {
+        var color;
+        if (event.target.tagName.toLowerCase() === "i")
+            color = event.currentTarget.id; // Get parent's ID
         else
-            mode = "destination-out";
-    }
+            color = event.target.id;
 
-    // Change the pen color
-    change_color(event) {
-        var color = event.target.id;
         switch(color) {
             case "blue":
                 currentPaintColor = "blue";
@@ -251,28 +307,34 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    // Change the pen size
-    change_pen(event) {
-        var color = event.target.id;
-        switch(color) {
-            case "pen-1":
+    // Change the pen size and slider display
+    changeSize($event) {
+        // Need to convert HTMLELement into an InputElement to access value
+        var size = +(<HTMLInputElement>event.target).value; // +: string to num
+        switch(size) {
+            case 1:
                 currentPenSize = 2;
                 break;
-            case "pen-2":
+            case 2:
                 currentPenSize= 8;
                 break;
-            case "pen-3":
+            case 3:
                 currentPenSize = 15;
                 break;
-            case "pen-4":
+            case 4:
                 currentPenSize = 30;
                 break;
-            case "pen-5":
+            case 5:
+                currentPenSize = 45;
+                break;
+            case 6:
                 currentPenSize = 60;
                 break;
             default:
                 currentPenSize = 8;
         }
+        // Change the slider display
+        document.getElementById("pen-slider-value").innerHTML = ""+size; // num to string
     }
 
     // Start drawing a stroke
@@ -324,8 +386,8 @@ export class CanvasComponent implements OnInit {
 // Global canvas data
 var canvas: HTMLCanvasElement;
 var context; // Contains a reference to the canvas element
-var canvasHeight = 500;
-var canvasWidth = 1000;
+var canvasHeight;
+var canvasWidth;
 var currentPaintColor = "black";
 var currentPenSize = 8;
 var x;

@@ -1,73 +1,127 @@
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a href="#" class="navbar-brand">Drawback</a>
-        </div>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="nav navbar-nav">
-                <li>
-                    <button (click)="clear()">Clear Drawing</button>
-                </li>
-                <li>
-                    <button (click)="undo()">Undo</button>
-                </li>
-                <li>
-                    <button (click)="redo()">Redo</button>
-                </li>
-                <li>
-                    <button (click)="erase()">Eraser</button>
-                </li>
-                <li>
-                    <button (click)="copyURL()">Share</button>
-                </li>
-                <li class="dropdown" appDropdown>
-                    <a role="button" class="dropdown-toggle" appDropdown>
-                        Colors <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a id="blue" (click)="change_color($event)"> Blue <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Solid_blue.svg/225px-Solid_blue.svg.png" width="24px" height="19px" vertical-align:middle></a>
-                        </li>
-                        <li>
-                            <a id="black" (click)="change_color($event)"> Black <img src="http://www.color-hex.com/palettes/7449.png" width="24px" height="19px" vertical-align:middle> </a>
-                        </li>
-                        <li>
-                            <a id="green" (click)="change_color($event)"> Green <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Flag_of_Libya_%281977-2011%29.svg/2000px-Flag_of_Libya_%281977-2011%29.svg.png" width="24px" height="19px" vertical-align:middle></a>
-                        </li>
-                        <li>
-                            <a id="brown" (click)="change_color($event)"> Brown <img src="https://i.pinimg.com/originals/34/a1/13/34a1137416f3b698eb4a9c67a1bc877b.jpg" width="24px" height="19px" vertical-align:middle></a>
-                        </li>
-                        <li>
-                            <a id="red" (click)="change_color($event)">Red<img src="https://vignette.wikia.nocookie.net/phobia/images/5/5a/Red.jpg/revision/latest?cb=20161109225243" width="24px" height="19px" vertical-align:middle></a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="dropdown" appDropdown>
-                    <a role="button" class="dropdown-toggle" appDropdown>
-                        Pens <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a id="pen-1" (click)="change_pen($event)">Pen 1<img src="https://www.andacod.com/images/articles/compendium/methods/drawing/as1100/lines_linestyle/thickline.png" width="100px" height="25px" vertical-align:middle></a>
-                        </li>
-                        <li>
-                            <a id="pen-2" (click)="change_pen($event)">Pen 2<img src="https://mpnforum.files.wordpress.com/2012/10/line-thick.jpg?w=375" width="100px" height="25px" vertical-align:middle> </a>
-                        </li>
-                        <li>
-                            <a id="pen-3" (click)="change_pen($event)">Pen 3<img src="http://laoblogger.com/images/thick-black-line-clipart-7.jpg" width="100px" height="25px" vertical-align:middle></a>
-                        </li>
-                        <li>
-                            <a id="pen-4" (click)="change_pen($event)">Pen 4<img src="http://laoblogger.com/images/thick-black-line-clipart-6.jpg" width="100px" height="25px" vertical-align:middle></a>
-                        </li>
-                        <li>
-                            <a id="pen-5" (click)="change_pen($event)">Pen 5<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Counting_rod_horizontal_black_1.svg/1280px-Counting_rod_horizontal_black_1.svg.png" width="100px" height="25px" vertical-align:middle></a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Drawback</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<div>
+    <canvas id='canvas'></canvas>
+    <!-- Header -->
+    <div class="top-bar header-bar flex-horizontal canvas-component">
+        <div class="title-menu flex-horizontal">
+            <div class="title-box">
+                <input class="canvas-name" type="text" value="Untitled Canvas"/>
+                <div class="title-text">Some words from our sponsors</div>
+            </div>
+            <div class="dropdown-symbol">
+                <i class="fa fa-caret-down"></i>
+            </div>
         </div>
     </div>
-</nav>
-<canvas id="jamboard" width="1000" height="500"></canvas>
-<script src="canvas.component.ts"></script>
+    <!-- Sharing and User Bar -->
+    <div class="top-bar top-right-bar flex-horizontal canvas-component">
+        <!-- Copy URL, Upload, and Download Bar -->
+        <div class="bar flex-horizontal">
+            <div class="bar-button tool-tip" (click)="copyURL()">
+                <i class="fa fa-clipboard"></i>
+                <span class="tool-tip-text">Copy URL</span>
+            </div>
+            <div class="bar-separator"></div>
+            <div class="bar-button tool-tip">
+                <i id="download" class="fa fa-download"></i>
+                <span class="tool-tip-text">Download</span>
+            </div>
+            <div class="bar-button tool-tip">
+                <i id="upload" class="fa fa-upload"></i>
+                <span class="tool-tip-text">Upload</span>
+            </div>
+        </div>
+        <div id="signup-login" class="bar bar-button flex-horizontal">Sign Up or Login</div>
+    </div>
+    <!-- Main toolbar with Drawings Tools -->
+    <div class="tool-menu toolbar flex-vertical canvas-component">
+        <div id="pen" class="tool-button tool-tip active" (click)="selectPen()">
+            <i class="fa fa-pencil"></i>
+            <span class="tool-tip-text">Pen</span>
+        </div>
+        <div id="eraser" class="tool-button tool-tip" (click)="selectEraser()">
+            <i class="fa fa-eraser"></i>
+            <span class="tool-tip-text">Eraser</span>
+        </div>
+        <div id="colors" class="tool-button tool-tip" (click)="showColors()">
+            <i class="fa fa-paint-brush">
+                <div class="dropdown-caret">
+                    <i class="fa fa-caret-right"></i>
+                </div>
+            </i>
+            <span class="tool-tip-text">Colors</span>
+            <div class="dropdown-menu flex-horizontal">
+                <div id="black" class="dropdown-item" style="color:black" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="red" class="dropdown-item" style="color:red" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="blue" class="dropdown-item" style="color:blue" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="green" class="dropdown-item" style="color:green" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="brown" class="dropdown-item" style="color:brown" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div id="sizes" class="tool-button tool-tip" (click)="showSizes()">
+            <i class="fa fa-window-minimize">
+                <div class="dropdown-caret">
+                    <i class="fa fa-caret-right"></i>
+                </div>
+            </i>
+            <span class="tool-tip-text">Sizes</span>
+            <div class="slider-menu dropdown-menu flex-horizontal">
+                <div id="pen-slider-value" class="slider-value"></div>
+                <div class="slider-box">
+                    <input id="pen-size-slider" type="range" class="slider" min="1" max="6" value="2" (input)="changeSize($event)">
+                </div>
+            </div>
+        </div>
+        <div id="undo" class="tool-button tool-tip" (click)="undo()">
+            <i class="fa fa-undo"></i>
+            <span class="tool-tip-text">Undo</span>
+        </div>
+        <div id="redo" class="tool-button tool-tip" (click)="redo()">
+            <i class="fa fa-repeat"></i>
+            <span class="tool-tip-text">Redo</span>
+        </div>
+        <div id="clear" class="tool-button tool-tip" (click)="clear()">
+            <i class="fa fa-trash"></i>
+            <span class="tool-tip-text">Clear</span>
+        </div>
+    </div>
+    <!-- Navigation Bar  -->
+    <div class="navigation-bar toolbar flex-vertical canvas-component">
+        <div id="zoom-in" class="tool-button tool-tip">
+            <i class="fa fa-search-plus"></i>
+            <span class="tool-tip-text">Zoom In</span>
+        </div>
+        <div id="zoom-amount" class="tools-text">100%</div>
+        <div id="zoom-out" class="tool-button tool-tip">
+            <i class="fa fa-search-minus"></i>
+            <span class="tool-tip-text">Zoom Out</span>
+        </div>
+        <div class="vertical-separator flex-vertical">
+            <div class="tool-separator"></div>
+        </div>
+        <div id="move" class="tool-button tool-tip">
+            <i class="fa fa-hand-paper-o"></i>
+            <span class="tool-tip-text">Move</span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

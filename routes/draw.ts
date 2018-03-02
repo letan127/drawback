@@ -6,12 +6,12 @@ let http = require('http');
 let server = http.Server(app);
 let socketIO = require('socket.io');
 let io = socketIO(server);
-//const port = process.env.PORT || 3000;
 let strokeIDMap = new Map();
 let strokeArrays = {};
 let currentRooms = {};
 var alphabet = '0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+// Generates a unique and random room ID
 function generateID() {
     do {
         var url = '';
@@ -32,11 +32,12 @@ router.get('', (req, res) => {
     res.redirect(fullurl);
 })
 
-// Begin listening for message when a client connects to the server
+// Begin listening for requests when a client connects
 io.on('connection', (socket) => {
     console.log('user connected');
 
     // When the server receives a room ID, it will add the client to that room
+    // and give them the current state of the canvas
     socket.on('room', function(room) {
         socket.join(room);
         if (!strokeIDMap.has(room)) {
@@ -46,22 +47,19 @@ io.on('connection', (socket) => {
         io.to(socket.id).emit('newUser', strokeArrays[room]);
     });
 
-    // When the server receives a stroke from a client, it sends the stroke
-    // to all clients in that room except for the sender
+    // When a client sends a stroke, send it to all other clients in that room
     socket.on('stroke', (strokeMessage) => {
         socket.to(strokeMessage.room).emit('stroke', strokeMessage);
         strokeArrays[strokeMessage.room].push(strokeMessage.stroke);
     });
 
-    // When the server recieves a strokeID request from a client, it sends
-    // an available ID in that room to the sender
+    // When a client requests a strokeID, send an available ID for that room
     socket.on('strokeID', (room) => {
         socket.emit('strokeID', strokeIDMap.get(room));
         strokeIDMap.set(room, strokeIDMap.get(room) + 1);
     });
 
-    // When the server receives a clear from a client in a certain room,
-    // it sends a clear event back to all clients in that room except for the sender
+    // When a client clicks clear, tell all other clients to clear
     socket.on('clear', (room) => {
         socket.to(room).emit('clear');
         strokeArrays[room] = [];

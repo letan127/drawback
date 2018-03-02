@@ -177,6 +177,8 @@ export class CanvasComponent implements OnInit {
 
     // Pen tool was clicked; get out of erase mode
     selectPen() {
+        console.log('hi');
+        draw = true;
         mode = "source-over";
     }
 
@@ -339,28 +341,41 @@ export class CanvasComponent implements OnInit {
 
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
-        // Discard stored undos
-        orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
-        if(undoIDs.length) {
-            //TODO: remove the stroke from stroke array?
-            undoIDs = [];
+        //if draw
+        if(draw) {
+            console.log("In mouse down, should be drawing");
+            // Discard stored undos
+            orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
+            if(undoIDs.length) {
+                //TODO: remove the stroke from stroke array?
+                undoIDs = [];
+            }
+
+            // Get the cursor's current position
+            x = event.x - canvas.offsetLeft;
+            y = event.y - canvas.offsetTop;
+
+            // Add the stroke's pixels and tool settings
+            curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
+            // Get the first pixel in the new stroke
+            curStroke.pos.push(new Position(x,y));
+            drag = true;
+            this.draw(curStroke);
         }
-
-        // Get the cursor's current position
-        x = event.x - canvas.offsetLeft;
-        y = event.y - canvas.offsetTop;
-
-        // Add the stroke's pixels and tool settings
-        curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
-        // Get the first pixel in the new stroke
-        curStroke.pos.push(new Position(x,y));
-        drag = true;
-        this.draw(curStroke);
+        //if panning
+        else {
+            console.log('In mouse down, should be panning');
+            originalPosition.x = event.x - canvas.offsetLeft;
+            originalPosition.y = event.y - canvas.offsetTop;
+            drag = true;
+        }
     }
 
     // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
     mouseUp(event: MouseEvent): void {
         drag = false;
+        originalPosition.x = 0;
+        originalPosition.y = 0;
         this.drawService.reqStrokeID(this.id);
         // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
         orphanedStrokes.push(curStroke);
@@ -368,18 +383,50 @@ export class CanvasComponent implements OnInit {
 
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
-        if (drag == true) {
+        if (drag == true && draw) {
+            console.log("mouse should be drawing and moving");
             var x = event.x - canvas.offsetLeft;
             var y = event.y - canvas.offsetTop;
             curStroke.pos.push(new Position(x,y));
             this.draw(curStroke);
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
+        else if (drag && !draw) {
+                console.log("I'm in mouse move");
+                var offsetX = event.x - canvas.offsetLeft;
+                var offsetY = event.y - canvas.offsetTop;
+                var totalOffsetX = originalPosition.x - offsetX;
+                var totalOffsetY = originalPosition.y - offsetY;
+                context.translate(totalOffsetX, totalOffsetY);
+                this.drawAll();
+        }
+        // else {
+        //     console.log("I'm in mouse move");
+        //     var offsetX = event.x - canvas.offsetLeft;
+        //     var offsetY = event.y - canvas.offsetTop;
+        //     var totalOffsetX = originalPosition.x - offsetX;
+        //     var totalOffsetY = originalPosition.y - offsetY;
+        //     context.translate(totalOffsetX, totalOffsetY);
+        //     this.drawAll();
+        // }
     }
 
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
         drag = false;
+    }
+    zoomIn() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.scale(2,2);
+        this.drawAll();
+    }
+    zoomOut() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.scale(0.5,0.5);
+        this.drawAll();
+    }
+    setPan() {
+        draw = false;
     }
 }
 
@@ -393,6 +440,9 @@ var currentPenSize = 8;
 var x;
 var y;
 var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
+var draw = true;
+var originalPosition: Position = new Position(0,0);
+var movedPosition: Position = new Position(0,0);;
 
 // Global stroke data
 var strokes = new Array<Stroke>();      // Contains every stroke on the canvas

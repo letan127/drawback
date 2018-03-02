@@ -105,19 +105,19 @@
     </div>
     <!-- Navigation Bar  -->
     <div class="navigation-bar toolbar flex-vertical canvas-component">
-        <div id="zoom-in" class="tool-button tool-tip">
+        <div id="zoom-in" class="tool-button tool-tip" (click) = "zoomIn()">
             <i class="fa fa-search-plus"></i>
             <span class="tool-tip-text">Zoom In</span>
         </div>
         <div id="zoom-amount" class="tools-text">100%</div>
-        <div id="zoom-out" class="tool-button tool-tip">
+        <div id="zoom-out" class="tool-button tool-tip" (click) = "zoomOut()">
             <i class="fa fa-search-minus"></i>
             <span class="tool-tip-text">Zoom Out</span>
         </div>
         <div class="vertical-separator flex-vertical">
             <div class="tool-separator"></div>
         </div>
-        <div id="move" class="tool-button tool-tip">
+        <div id="move" class="tool-button tool-tip" (click) = "setPan()">
             <i class="fa fa-hand-paper-o"></i>
             <span class="tool-tip-text">Move</span>
         </div>

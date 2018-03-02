@@ -34,16 +34,33 @@ router.get('', (req, res) => {
 
 // Begin listening for requests when a client connects
 io.on('connection', (socket) => {
-    console.log('user connected');
+    console.log('user ' + socket.id + ' connected\n');
+
+    // Remove user's data from all of their rooms before they disconnect
+    socket.on('disconnecting', () => {
+        Object.keys(socket.rooms).forEach(function(room) {
+            if (room in rooms) {
+                // Socket connections may be made before being redirected
+                rooms[room].removeUser(socket.id);
+                console.log("Removing " + socket.id + " from room " + room + '\n');
+            }
+        });
+    });
+
+    // Client has already left their rooms
+    socket.on('disconnect', () => {
+        console.log('user ' + socket.id + ' disconnected\n');
+    });
 
     // When the server receives a room ID, it will add the client to that room
     // and give them the current state of the canvas
-    socket.on('room', function(room) {
+    socket.on('room', (room) => {
         socket.join(room);
         if (!(room in rooms)) {
             // Only happens when user manually types a room URL
             rooms[room] = new Room();
         }
+        rooms[room].addUser(socket.id);
         socket.emit('newUser', rooms[room].getStrokes());
     });
 
@@ -72,12 +89,16 @@ io.on('connection', (socket) => {
        rooms[undoStroke.room].setDraw(undoStroke.strokeID, false);
    });
 
-   // When a client clicks redo, tell all other clients in the room to redo
-   // that stroke
-   socket.on('redo', (redoStroke) => {
+    // When a client clicks redo, tell all other clients in the room to redo
+    // that stroke
+    socket.on('redo', (redoStroke) => {
        socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
        rooms[redoStroke.room].setDraw(redoStroke.strokeID, true);
-   });
+    });
+
+    socket.on('color', (colorMessage) => {
+       rooms[colorMessage.room].changeColor(socket.id, colorMessage.color);
+    });
 });
 
 module.exports = router;

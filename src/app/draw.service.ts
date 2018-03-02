@@ -13,6 +13,15 @@ export class DrawService {
         this.socket = io(this.url);
     }
 
+    // Give the new user the current state of the canvas
+    public newUser = () => {
+        return Observable.create((observer) => {
+            this.socket.on('newUser', (strokeArray) => {
+                observer.next(strokeArray);
+            });
+        });
+    }
+
     // Send the server our room ID
     public sendRoom(room){
         this.socket.emit('room', room);
@@ -100,12 +109,13 @@ export class DrawService {
             });
         });
     }
-    public newUser = () => {
-        return Observable.create((observer) => {
-            this.socket.on('newUser', (strokeArray) => {
-                observer.next(strokeArray);
-            });
-        });
-    }
 
+    // Tell the server that the client changed their color
+    public sendColor(room, color) {
+        var colorMessage = {
+            room: room,
+            color: color
+        };
+        this.socket.emit('color', colorMessage);
+    }
 }

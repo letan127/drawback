@@ -278,13 +278,12 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    // Change the tool color
+    // Change the pen color and notify the server
     changeColor(event) {
-        var color;
         if (event.target.tagName.toLowerCase() === "i")
-            color = event.currentTarget.id; // Get parent's ID
+            var color = event.currentTarget.id; // Get parent's ID
         else
-            color = event.target.id;
+            var color = event.target.id;
 
         switch(color) {
             case "blue":
@@ -305,6 +304,7 @@ export class CanvasComponent implements OnInit {
             default:
                 currentPaintColor = "black";
         }
+        this.drawService.sendColor(this.id, color);
     }
 
     // Change the pen size and slider display

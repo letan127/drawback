@@ -25,6 +25,10 @@ function generateID() {
 
 server.listen(4000);
 
+app.get('')
+
+
+
 router.get('', (req, res) => {
     var url = generateID();
     currentRooms[url] = true;

@@ -12,6 +12,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 const appRoutes: Routes = [
     {path: 'rooms/:id', component: CanvasComponent},
+    //{path: '/login/', component: LoginComponent}
 ];
 
 

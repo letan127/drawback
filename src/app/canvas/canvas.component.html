@@ -58,7 +58,7 @@
                 </div>
             </i>
             <span class="tool-tip-text">Colors</span>
-            <div class="dropdown-menu flex-horizontal">
+            <div class="dropdown-menu drop-right flex-horizontal">
                 <div id="black" class="dropdown-item" style="color:black" (click)="changeColor($event)">
                     <i class="fa fa-circle"></i>
                 </div>
@@ -83,7 +83,7 @@
                 </div>
             </i>
             <span class="tool-tip-text">Sizes</span>
-            <div class="slider-menu dropdown-menu flex-horizontal">
+            <div class="slider-menu dropdown-menu drop-right flex-horizontal">
                 <div id="pen-slider-value" class="slider-value"></div>
                 <div class="slider-box">
                     <input id="pen-size-slider" type="range" class="slider" min="1" max="6" value="2" (input)="changeSize($event)">
@@ -120,6 +120,14 @@
         <div id="move" class="tool-button tool-tip">
             <i class="fa fa-hand-paper-o"></i>
             <span class="tool-tip-text">Move</span>
+        </div>
+    </div>
+    <!-- User Count -->
+    <div class="bottom-right-bar bar flex-horizontal canvas-component">
+        <div id="num-users-text" class="bar-text"></div>
+        <div class="bar-separator"></div>
+        <div id="num-users" class="bar-button">
+            <i class="fa fa-user-circle"></i>
         </div>
     </div>
 </div>

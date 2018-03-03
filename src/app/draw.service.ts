@@ -14,12 +14,21 @@ export class DrawService {
     }
 
     // Give the new user the current state of the canvas
-    public newUser = () => {
+    public initUser = () => {
         return Observable.create((observer) => {
-            this.socket.on('newUser', (strokeArray) => {
-                observer.next(strokeArray);
+            this.socket.on('initUser', (init) => {
+                observer.next(init);
             });
         });
+    }
+
+    // Notify current clients that a new user entered the room
+    public newUser = () => {
+        return Observable.create((observer) => {
+            this.socket.on('newUser', () => {
+                observer.next();
+            })
+        })
     }
 
     // Send the server our room ID
@@ -108,14 +117,5 @@ export class DrawService {
                 observer.next(strokeID);
             });
         });
-    }
-
-    // Tell the server that the client changed their color
-    public sendColor(room, color) {
-        var colorMessage = {
-            room: room,
-            color: color
-        };
-        this.socket.emit('color', colorMessage);
     }
 }

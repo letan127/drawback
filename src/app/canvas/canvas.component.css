@@ -149,11 +149,13 @@ html body {
 .dropdown-menu {
     visibility: hidden;
     position: absolute;
-    top: 5px;
-    left: 45px;
     background-color: #f9f9f9;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
+}
+.drop-right {
+    top: 5px;
+    left: 45px;
 }
 .show .dropdown-menu {
     visibility: visible;
@@ -236,4 +238,15 @@ html body {
     width: 60%;
     height: 1px;
     background-color:#dedede;
+}
+
+/* User Count */
+.bottom-right-bar {
+    bottom: 10px;
+    right: 10px;
+    height: 42px;
+}
+.bar-text {
+    padding:5px 10px 5px 10px;
+    margin:5px 5px 5px 5px;
 }

@@ -42,7 +42,6 @@ io.on('connection', (socket) => {
             if (room in rooms) {
                 // Socket connections may be made before being redirected
                 rooms[room].removeUser(socket.id);
-                console.log("Removing " + socket.id + " from room " + room + '\n');
             }
         });
     });
@@ -52,8 +51,8 @@ io.on('connection', (socket) => {
         console.log('user ' + socket.id + ' disconnected\n');
     });
 
-    // When the server receives a room ID, it will add the client to that room
-    // and give them the current state of the canvas
+    // When the server receives a room ID, it will add the client to that room,
+    // give them the current state of the canvas, and notify all other clients
     socket.on('room', (room) => {
         socket.join(room);
         if (!(room in rooms)) {
@@ -61,7 +60,12 @@ io.on('connection', (socket) => {
             rooms[room] = new Room();
         }
         rooms[room].addUser(socket.id);
-        socket.emit('newUser', rooms[room].getStrokes());
+        var init = {
+            numUsers: rooms[room].getUsers(),
+            strokes: rooms[room].getStrokes()
+        };
+        socket.emit('initUser', init);
+        socket.to(room).emit('newUser');
     });
 
     // When a client sends a stroke, send it to all other clients in that room
@@ -94,10 +98,6 @@ io.on('connection', (socket) => {
     socket.on('redo', (redoStroke) => {
        socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
        rooms[redoStroke.room].setDraw(redoStroke.strokeID, true);
-    });
-
-    socket.on('color', (colorMessage) => {
-       rooms[colorMessage.room].changeColor(socket.id, colorMessage.color);
     });
 });
 

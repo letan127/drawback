@@ -17,6 +17,7 @@ export class CanvasComponent implements OnInit {
     title = 'app';
     id = '';
     url = '';
+    numUsers = 1;
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document) {
     }
@@ -32,6 +33,20 @@ export class CanvasComponent implements OnInit {
 
         // Send the room ID to the server
         this.drawService.sendRoom(this.id);
+
+        // This client is a new user; give them the current canvas state to draw
+        this.drawService.initUser().subscribe(init => {
+            this.numUsers = init.numUsers;
+            strokes = init.strokes;
+            this.updateUserCount();
+            this.drawAll();
+        })
+
+        // New user entered a room, so increment our user count
+        this.drawService.newUser().subscribe(() => {
+            this.numUsers++;
+            this.updateUserCount();
+        })
 
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
@@ -73,12 +88,6 @@ export class CanvasComponent implements OnInit {
         // Received another client's redo; draw that stroke
         this.drawService.getRedo().subscribe(strokeID => {
             strokes[strokeID].draw = true;
-            this.drawAll();
-        })
-
-        // This client is a new user; give them the current canvas state to draw
-        this.drawService.newUser().subscribe(strokeArray => {
-            strokes = strokeArray;
             this.drawAll();
         })
     }
@@ -143,6 +152,9 @@ export class CanvasComponent implements OnInit {
             });
         }
 
+        // Set the displayed user count
+        this.updateUserCount();
+
         // Set slider display and pen size to the default slider value
         var slider = <HTMLInputElement>document.getElementById("pen-size-slider");
         var display = document.getElementById("pen-slider-value");
@@ -164,6 +176,11 @@ export class CanvasComponent implements OnInit {
     copyURL() {
         //TODO: create a popup that has this url
         console.log(this.url);
+    }
+
+    // When a new user enters the room, update the displayed user count
+    updateUserCount() {
+        document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
     }
 
     /* When the user clicks on the button, toggle between hiding and showing the dropdown content */
@@ -304,7 +321,6 @@ export class CanvasComponent implements OnInit {
             default:
                 currentPaintColor = "black";
         }
-        this.drawService.sendColor(this.id, color);
     }
 
     // Change the pen size and slider display

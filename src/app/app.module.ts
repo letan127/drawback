@@ -7,12 +7,13 @@ import { AppComponent } from './app.component';
 import { DropDownDirective } from './shared/dropdown.directive';
 import { HoverClassDirective } from './shared/hover-class.directive';
 import { CanvasComponent } from './canvas/canvas.component';
+import { LoginComponent } from './login/login.component';
 import { Routes, RouterModule } from '@angular/router';
 
 
 const appRoutes: Routes = [
     {path: 'rooms/:id', component: CanvasComponent},
-    //{path: '/login/', component: LoginComponent}
+    {path: 'login', component: LoginComponent}
 ];
 
 
@@ -21,7 +22,8 @@ const appRoutes: Routes = [
         AppComponent,
         DropDownDirective,
         HoverClassDirective,
-        CanvasComponent
+        CanvasComponent,
+        LoginComponent
     ],
     imports: [
         BrowserModule,

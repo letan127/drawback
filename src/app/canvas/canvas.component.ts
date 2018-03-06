@@ -5,6 +5,7 @@ import { DrawService } from '../draw.service';
 import { ActivatedRoute} from '@angular/router';
 import { DOCUMENT } from '@angular/platform-browser';
 import { Inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-canvas',
@@ -19,7 +20,7 @@ export class CanvasComponent implements OnInit {
     url = '';
     numUsers = 1;
 
-    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document) {
+    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router) {
     }
 
     ngOnInit(): void {
@@ -351,6 +352,12 @@ export class CanvasComponent implements OnInit {
         }
         // Change the slider display
         document.getElementById("pen-slider-value").innerHTML = ""+size; // num to string
+    }
+
+    login(){
+      console.log("hello")
+      //console.log(this.route);
+      this.router.navigate(['../login']);
     }
 
     // Start drawing a stroke

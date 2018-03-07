@@ -177,7 +177,6 @@ export class CanvasComponent implements OnInit {
 
     // Pen tool was clicked; get out of erase mode
     selectPen() {
-        console.log('hi');
         draw = true;
         mode = "source-over";
     }
@@ -217,7 +216,7 @@ export class CanvasComponent implements OnInit {
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
         // Clear the canvas
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        context.clearRect(0, 0, canvasWidth*100, canvasHeight*100);
 
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < strokes.length; i++) {
@@ -343,7 +342,6 @@ export class CanvasComponent implements OnInit {
     mouseDown(event: MouseEvent): void {
         //if draw
         if(draw) {
-            console.log("In mouse down, should be drawing");
             // Discard stored undos
             orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
             if(undoIDs.length) {
@@ -352,9 +350,8 @@ export class CanvasComponent implements OnInit {
             }
 
             // Get the cursor's current position
-            x = event.x - canvas.offsetLeft;
-            y = event.y - canvas.offsetTop;
-
+            x = event.x - canvas.offsetLeft - offSet.x;
+            y = event.y - canvas.offsetTop - offSet.y;
             // Add the stroke's pixels and tool settings
             curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
             // Get the first pixel in the new stroke
@@ -364,9 +361,10 @@ export class CanvasComponent implements OnInit {
         }
         //if panning
         else {
-            console.log('In mouse down, should be panning');
             originalPosition.x = event.x - canvas.offsetLeft;
             originalPosition.y = event.y - canvas.offsetTop;
+            currentPosition.x = event.x - canvas.offsetLeft;
+            currentPosition.y = event.y - canvas.offsetTop;
             drag = true;
         }
     }
@@ -374,31 +372,44 @@ export class CanvasComponent implements OnInit {
     // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
     mouseUp(event: MouseEvent): void {
         drag = false;
-        originalPosition.x = 0;
-        originalPosition.y = 0;
         this.drawService.reqStrokeID(this.id);
         // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
         orphanedStrokes.push(curStroke);
+        if(!draw) {
+            var offsetX = event.x;
+            var offsetY = event.y;
+            var totalOffsetX = originalPosition.x - offsetX;
+            var totalOffsetY = originalPosition.y - offsetY;
+            totalOffSet.x = totalOffSet.x + totalOffsetX;
+            totalOffSet.y = totalOffSet.y + totalOffsetY;
+            offSet.x = totalOffSet.x;
+            offSet.y = totalOffSet.y;
+        }
+        originalPosition.x = 0;
+        originalPosition.y = 0;
     }
 
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (drag == true && draw) {
-            console.log("mouse should be drawing and moving");
-            var x = event.x - canvas.offsetLeft;
-            var y = event.y - canvas.offsetTop;
+            var x = event.x - canvas.offsetLeft - offSet.x;
+            var y = event.y - canvas.offsetTop - offSet.y;
             curStroke.pos.push(new Position(x,y));
+            console.log(x);
             this.draw(curStroke);
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
         else if (drag && !draw) {
-                console.log("I'm in mouse move");
-                var offsetX = event.x - canvas.offsetLeft;
-                var offsetY = event.y - canvas.offsetTop;
-                var totalOffsetX = originalPosition.x - offsetX;
-                var totalOffsetY = originalPosition.y - offsetY;
-                context.translate(totalOffsetX, totalOffsetY);
-                this.drawAll();
+            var offsetX = event.x - canvas.offsetLeft;
+            var offsetY = event.y - canvas.offsetTop;
+            var changeX = currentPosition.x - offsetX;
+            var changeY = currentPosition.y - offsetY;
+            currentPosition.x = offsetX;
+            currentPosition.y = offsetY;
+            offSet.x = offSet.x + changeX;
+            offSet.y = offSet.y + changeY;
+            context.translate(changeX, changeY);
+            this.drawAll();
         }
         // else {
         //     console.log("I'm in mouse move");
@@ -442,7 +453,9 @@ var y;
 var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
 var draw = true;
 var originalPosition: Position = new Position(0,0);
-var movedPosition: Position = new Position(0,0);;
+var currentPosition: Position = new Position(0,0);
+var offSet: Position = new Position(0,0);
+var totalOffSet: Position = new Position(0,0);
 
 // Global stroke data
 var strokes = new Array<Stroke>();      // Contains every stroke on the canvas

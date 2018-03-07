@@ -3,7 +3,7 @@ html body {
     overflow: hidden;
 }
 #canvas {
-    position: relative;
+    position: absolute;
     cursor: crosshair;
 }
 .canvas-component {

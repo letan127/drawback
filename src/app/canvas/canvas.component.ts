@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Stroke } from '../stroke';
 import { Position } from '../position';
 import { DrawService } from '../draw.service';
+import { LoginService } from '../login.service';
 import { ActivatedRoute} from '@angular/router';
 import { DOCUMENT } from '@angular/platform-browser';
 import { Inject } from '@angular/core';
@@ -20,10 +21,11 @@ export class CanvasComponent implements OnInit {
     url = '';
     numUsers = 1;
 
-    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router) {
+    constructor(private drawService: DrawService, private loginService: LoginService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router) {
     }
 
     ngOnInit(): void {
+
         // Get the full URL of this room
         this.url = this.document.location.href;
 
@@ -31,6 +33,8 @@ export class CanvasComponent implements OnInit {
         this.route.params.subscribe(params => {
             this.id = params['id'];
         })
+
+        this.loginService.setRoomID(this.id);
 
         // Send the room ID to the server
         this.drawService.sendRoom(this.id);
@@ -355,8 +359,7 @@ export class CanvasComponent implements OnInit {
     }
 
     login(){
-      console.log("hello")
-      //console.log(this.route);
+      this.loginService.setRoomID(this.id);
       this.router.navigate(['../login']);
     }
 

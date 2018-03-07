@@ -13,13 +13,15 @@ export class LoginComponent implements OnInit {
 
   error: any;
   roomID: string;
+  url: string;
   constructor(public af: AngularFireAuth,private router: Router,private loginService: LoginService) {
+    this.roomID = this.loginService.getRoomID()
+    this.url = '/rooms/' + this.roomID;
     this.af.authState.subscribe(authState => {
       if(authState) {
-        this.router.navigateByUrl('/members');
+        this.router.navigateByUrl(this.url);
       }
     });
-    console.log('login roomID:',this.loginService.getRoomID());
   }
 
   ngOnInit() {
@@ -29,7 +31,7 @@ export class LoginComponent implements OnInit {
     this.af.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
     .then(
         (success) => {
-        this.router.navigate(['/members']);
+        this.router.navigate([this.url]);
       }).catch(
         (err) => {
         this.error = err;
@@ -40,11 +42,15 @@ export class LoginComponent implements OnInit {
     this.af.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .then(
         (success) => {
-        this.router.navigate(['/members']);
+        this.router.navigate([this.url]);
       }).catch(
         (err) => {
         this.error = err;
       })
+  }
+
+  Back() {
+    this.router.navigate([this.url]);
   }
 
 }

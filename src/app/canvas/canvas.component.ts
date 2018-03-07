@@ -56,7 +56,7 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a clear event, clear the canvas, and reset values
         this.drawService.getClear().subscribe(() => {
-            context.clearRect(0, 0, canvasWidth, canvasHeight);
+            context.clearRect(0, 0, canvasWidth*100, canvasHeight*100);
             strokes = [];
             myIDs = [];
             undoIDs = [];
@@ -215,7 +215,7 @@ export class CanvasComponent implements OnInit {
 
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
-        // Clear the canvas
+        // Clear the canvas and also offscreen
         context.clearRect(0, 0, canvasWidth*100, canvasHeight*100);
 
         // Draw each stroke/path from our list of pixel data
@@ -350,8 +350,8 @@ export class CanvasComponent implements OnInit {
             }
 
             // Get the cursor's current position
-            x = event.x - canvas.offsetLeft - offSet.x;
-            y = event.y - canvas.offsetTop - offSet.y;
+            x = ((event.x - canvas.offsetLeft)/scaleValue) - offSet.x;
+            y = ((event.y - canvas.offsetTop)/scaleValue) - offSet.y;
             // Add the stroke's pixels and tool settings
             curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
             // Get the first pixel in the new stroke
@@ -375,6 +375,7 @@ export class CanvasComponent implements OnInit {
         this.drawService.reqStrokeID(this.id);
         // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
         orphanedStrokes.push(curStroke);
+        //update totalOffset from previous ones. Unsure if needed.
         if(!draw) {
             var offsetX = event.x;
             var offsetY = event.y;
@@ -392,8 +393,8 @@ export class CanvasComponent implements OnInit {
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (drag == true && draw) {
-            var x = event.x - canvas.offsetLeft - offSet.x;
-            var y = event.y - canvas.offsetTop - offSet.y;
+            var x = ((event.x - canvas.offsetLeft)/scaleValue) - offSet.x;
+            var y = ((event.y - canvas.offsetTop)/scaleValue) - offSet.y;
             curStroke.pos.push(new Position(x,y));
             console.log(x);
             this.draw(curStroke);
@@ -427,13 +428,19 @@ export class CanvasComponent implements OnInit {
         drag = false;
     }
     zoomIn() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, canvas.width*100, canvas.height*100);
         context.scale(2,2);
+        scaleValue = scaleValue * 2;
         this.drawAll();
+        offSet.x = offSet.x/2;
+        offSet.y = offSet.y/2;
     }
     zoomOut() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, canvas.width*100, canvas.height*100);
         context.scale(0.5,0.5);
+        scaleValue = scaleValue * 0.5;
+        offSet.x = offSet.x/0.5;
+        offSet.y = offSet.y/0.5;
         this.drawAll();
     }
     setPan() {
@@ -456,6 +463,7 @@ var originalPosition: Position = new Position(0,0);
 var currentPosition: Position = new Position(0,0);
 var offSet: Position = new Position(0,0);
 var totalOffSet: Position = new Position(0,0);
+var scaleValue = 1;
 
 // Global stroke data
 var strokes = new Array<Stroke>();      // Contains every stroke on the canvas

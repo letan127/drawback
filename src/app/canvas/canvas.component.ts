@@ -303,20 +303,26 @@ export class CanvasComponent implements OnInit {
             var color = event.target.id;
 
         switch(color) {
-            case "blue":
-                currentPaintColor = "blue";
-                break;
-            case "brown":
-                currentPaintColor = "brown";
+            case "black":
+                currentPaintColor = "black";
                 break;
             case "red":
                 currentPaintColor = "red";
                 break;
+            case "orange":
+                currentPaintColor = "orange";
+                break;
+            case "yellow":
+                currentPaintColor = "yellow";
+                break;
             case "green":
                 currentPaintColor = "green";
                 break;
-            case "black":
-                currentPaintColor = "black";
+            case "blue":
+                currentPaintColor = "blue";
+                break;
+            case "darkMagenta":
+                currentPaintColor = "darkMagenta";
                 break;
             default:
                 currentPaintColor = "black";

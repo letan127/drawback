@@ -173,9 +173,16 @@ export class CanvasComponent implements OnInit {
             this.drawAll();
     }
 
+    // Copy the room's URL to clipboard
     copyURL() {
-        //TODO: create a popup that has this url
-        console.log(this.url);
+        // Create a dummy element to store the URL in
+        var dummy = document.createElement("input");
+        document.body.appendChild(dummy);
+        dummy.setAttribute("value", this.url);
+        // Select the dummy element and copy from it
+        dummy.select();
+        document.execCommand("Copy");
+        document.body.removeChild(dummy);
     }
 
     // When a new user enters the room, update the displayed user count

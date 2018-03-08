@@ -25,9 +25,9 @@
     <div class="top-bar top-right-bar flex-horizontal canvas-component">
         <!-- Copy URL, Upload, and Download Bar -->
         <div class="bar flex-horizontal">
-            <div class="bar-button tool-tip" (click)="copyURL()">
+            <div class="bar-button tool-tip" (click)="copyURL()" (mouseleave)="resetTooltip()">
                 <i class="fa fa-clipboard"></i>
-                <span class="tool-tip-text">Copy URL</span>
+                <span id="copy-tooltip" class="tool-tip-text">Copy URL</span>
             </div>
             <div class="bar-separator"></div>
             <div class="bar-button tool-tip">

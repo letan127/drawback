@@ -183,6 +183,14 @@ export class CanvasComponent implements OnInit {
         dummy.select();
         document.execCommand("Copy");
         document.body.removeChild(dummy);
+
+        // Update tooltip to show URL was copied
+        document.getElementById("copy-tooltip").innerHTML = "Copied to clipboard";
+    }
+
+    // Reset the copy URL button's tooltip text
+    resetTooltip() {
+        document.getElementById("copy-tooltip").innerHTML = "Copy URL";
     }
 
     // When a new user enters the room, update the displayed user count

@@ -188,14 +188,24 @@ export class CanvasComponent implements OnInit {
         document.getElementById("copy-tooltip").innerHTML = "Copied to clipboard";
     }
 
-    // Reset the copy URL button's tooltip text
-    resetTooltip() {
-        document.getElementById("copy-tooltip").innerHTML = "Copy URL";
-    }
-
     // When a new user enters the room, update the displayed user count
     updateUserCount() {
         document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
+    }
+
+    showShareModal() {
+        var modal = document.getElementById("share-modal");
+        modal.style.display = "block";
+    }
+
+    closeShareModal() {
+        var modal = document.getElementById("share-modal");
+        modal.style.display = "none";
+    }
+
+    // Reset the copy URL button's tooltip text
+    resetTooltip() {
+        document.getElementById("copy-tooltip").innerHTML = "Copy URL";
     }
 
     /* When the user clicks on the button, toggle between hiding and showing the dropdown content */

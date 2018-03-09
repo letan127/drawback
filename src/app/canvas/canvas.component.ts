@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Stroke } from '../stroke';
 import { Position } from '../position';
 import { DrawService } from '../draw.service';
-import { ActivatedRoute} from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DOCUMENT } from '@angular/platform-browser';
 import { Inject } from '@angular/core';
 
@@ -19,7 +19,7 @@ export class CanvasComponent implements OnInit {
     url = '';
     numUsers = 1;
 
-    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document) {
+    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router) {
     }
 
     ngOnInit(): void {
@@ -194,6 +194,16 @@ export class CanvasComponent implements OnInit {
         urlElement.select();
         document.execCommand("Copy");
         document.getElementById("copy-button").innerHTML = "Copied!";
+    }
+
+    // Move user to the indicated room
+    changeRoom() {
+        // Remove the current room ID from the URL
+        var idIndex = this.url.indexOf("/rooms");
+        var url = this.url.slice(0, idIndex);
+        // Move to the new room
+        var newRoomID = <HTMLInputElement>document.getElementById("new-room-id");
+        document.getElementById("change-room-button").setAttribute("href", url + "/rooms/" + newRoomID.value);
     }
 
     // When a new user enters the room, update the displayed user count

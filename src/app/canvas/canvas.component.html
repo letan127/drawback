@@ -27,7 +27,7 @@
         <div class="bar flex-horizontal">
             <div class="bar-button tool-tip" (click)="showShareModal()">
                 <i class="fa fa-clipboard"></i>
-                <span id="copy-tooltip" class="tool-tip-text">Copy URL</span>
+                <span id="copy-tooltip" class="tool-tip-text">Share Room</span>
             </div>
 
             <div class="bar-separator"></div>
@@ -146,9 +146,12 @@
             <h2>Invite or Join Others</h2>
         </div>
         <div class="modal-body">
-            <div>This Room's URL</div>
+            <div class="modal-text">Current Room URL</div>
             <input id="room-url" type="text" size="40" readonly>
             <span id="copy-button" class="bar bar-button" (click)="copyURL()">Copy URL</span>
+            <div class="modal-text">Enter new room</div>
+            <input id="new-room-id" type="text" size="40">
+            <a id="change-room-button" class="bar bar-button" (click)="changeRoom()">Change Room</a>
         </div>
     </div>
 </div>

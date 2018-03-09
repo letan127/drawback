@@ -267,7 +267,7 @@ html body {
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 40%;
+    width: 42%;
 }
 .modal-header {
     color: white;
@@ -277,6 +277,10 @@ html body {
 .modal-body {
     padding: 2px 16px;
     margin: 16px 16px;
+}
+.modal-text {
+    padding: 20px 0px 0px 0px;
+    color: gray;
 }
 .close {
     color: white;

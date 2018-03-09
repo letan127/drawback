@@ -152,6 +152,9 @@ export class CanvasComponent implements OnInit {
             });
         }
 
+        // Set the displayed room URL in the modal to the current room's URL
+        document.getElementById("room-url").setAttribute("value", this.url);
+
         // Set the displayed user count
         this.updateUserCount();
 
@@ -173,26 +176,6 @@ export class CanvasComponent implements OnInit {
             this.drawAll();
     }
 
-    // Copy the room's URL to clipboard
-    copyURL() {
-        // Create a dummy element to store the URL in
-        var dummy = document.createElement("input");
-        document.body.appendChild(dummy);
-        dummy.setAttribute("value", this.url);
-        // Select the dummy element and copy from it
-        dummy.select();
-        document.execCommand("Copy");
-        document.body.removeChild(dummy);
-
-        // Update tooltip to show URL was copied
-        document.getElementById("copy-tooltip").innerHTML = "Copied to clipboard";
-    }
-
-    // When a new user enters the room, update the displayed user count
-    updateUserCount() {
-        document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
-    }
-
     showShareModal() {
         var modal = document.getElementById("share-modal");
         modal.style.display = "block";
@@ -201,11 +184,21 @@ export class CanvasComponent implements OnInit {
     closeShareModal() {
         var modal = document.getElementById("share-modal");
         modal.style.display = "none";
+        // Reset the copy button's text
+        document.getElementById("copy-button").innerHTML = "Copy URL";
     }
 
-    // Reset the copy URL button's tooltip text
-    resetTooltip() {
-        document.getElementById("copy-tooltip").innerHTML = "Copy URL";
+    // Copy the room's URL to clipboard
+    copyURL() {
+        var urlElement = <HTMLInputElement>document.getElementById("room-url");
+        urlElement.select();
+        document.execCommand("Copy");
+        document.getElementById("copy-button").innerHTML = "Copied!";
+    }
+
+    // When a new user enters the room, update the displayed user count
+    updateUserCount() {
+        document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
     }
 
     /* When the user clicks on the button, toggle between hiding and showing the dropdown content */

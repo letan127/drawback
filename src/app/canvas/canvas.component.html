@@ -25,8 +25,7 @@
     <div class="top-bar top-right-bar flex-horizontal canvas-component">
         <!-- Copy URL, Upload, and Download Bar -->
         <div class="bar flex-horizontal">
-            <!-- <div class="bar-button tool-tip" (click)="copyURL()" (mouseleave)="resetTooltip()"> -->
-            <div class="bar-button tool-tip" (click)="showShareModal()" (mouseleave)="resetTooltip()">
+            <div class="bar-button tool-tip" (click)="showShareModal()">
                 <i class="fa fa-clipboard"></i>
                 <span id="copy-tooltip" class="tool-tip-text">Copy URL</span>
             </div>
@@ -142,8 +141,15 @@
 <!-- Share Modal -->
 <div id="share-modal" class="modal">
     <div class="modal-content">
-        <span class="close" (click)="closeShareModal()">&times;</span>
-        <p>Some text in the Modal..</p>
+        <div class="modal-header">
+            <div class="close" (click)="closeShareModal()">&times;</div>
+            <h2>Invite or Join Others</h2>
+        </div>
+        <div class="modal-body">
+            <div>This Room's URL</div>
+            <input id="room-url" type="text" size="40" readonly>
+            <span id="copy-button" class="bar bar-button" (click)="copyURL()">Copy URL</span>
+        </div>
     </div>
 </div>
 </body>

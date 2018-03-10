@@ -56,7 +56,7 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a clear event, clear the canvas, and reset values
         this.drawService.getClear().subscribe(() => {
-            context.clearRect(0, 0, canvasWidth*100, canvasHeight*100);
+            context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
             strokes = [];
             myIDs = [];
             undoIDs = [];
@@ -216,7 +216,7 @@ export class CanvasComponent implements OnInit {
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
         // Clear the canvas and also offscreen
-        context.clearRect(0, 0, canvasWidth*100, canvasHeight*100);
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
 
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < strokes.length; i++) {
@@ -233,7 +233,7 @@ export class CanvasComponent implements OnInit {
 
     // Removes everything from the canvas and sends a clear message to the server
     clear() {
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*25, canvasHeight*25);
         strokes = [];
         myIDs = [];
         undoIDs = [];
@@ -377,14 +377,14 @@ export class CanvasComponent implements OnInit {
         orphanedStrokes.push(curStroke);
         //update totalOffset from previous ones. Unsure if needed.
         if(!draw) {
-            var offsetX = event.x;
-            var offsetY = event.y;
-            var totalOffsetX = originalPosition.x - offsetX;
-            var totalOffsetY = originalPosition.y - offsetY;
-            totalOffSet.x = totalOffSet.x + totalOffsetX;
-            totalOffSet.y = totalOffSet.y + totalOffsetY;
-            offSet.x = totalOffSet.x;
-            offSet.y = totalOffSet.y;
+            // var offsetX = event.x;
+            // var offsetY = event.y;
+            // var totalOffsetX = originalPosition.x - offsetX;
+            // var totalOffsetY = originalPosition.y - offsetY;
+            // totalOffSet.x = totalOffSet.x + totalOffsetX;
+            // totalOffSet.y = totalOffSet.y + totalOffsetY;
+            // offSet.x = totalOffSet.x;
+            // offSet.y = totalOffSet.y;
         }
         originalPosition.x = 0;
         originalPosition.y = 0;
@@ -396,7 +396,7 @@ export class CanvasComponent implements OnInit {
             var x = ((event.x - canvas.offsetLeft)/scaleValue) - offSet.x;
             var y = ((event.y - canvas.offsetTop)/scaleValue) - offSet.y;
             curStroke.pos.push(new Position(x,y));
-            console.log(x);
+            // console.log(x);
             this.draw(curStroke);
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
@@ -428,20 +428,35 @@ export class CanvasComponent implements OnInit {
         drag = false;
     }
     zoomIn() {
-        context.clearRect(0, 0, canvas.width*100, canvas.height*100);
-        context.scale(2,2);
         scaleValue = scaleValue * 2;
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
+        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
+        context.scale(2,2);
+        context.translate(-canvas.width/4 + offSet.x/2, -canvas.height/4 + offSet.y/2);
+        // context.translate(canvas.width/2, canvas.height/2);
         this.drawAll();
-        offSet.x = offSet.x/2;
-        offSet.y = offSet.y/2;
+
+        // Update displayed zoom amount
+        document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
+        // offSet.x = offSet.x/2;
+        // offSet.y = offSet.y/2;
     }
     zoomOut() {
-        context.clearRect(0, 0, canvas.width*100, canvas.height*100);
-        context.scale(0.5,0.5);
         scaleValue = scaleValue * 0.5;
-        offSet.x = offSet.x/0.5;
-        offSet.y = offSet.y/0.5;
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
+        context.scale(0.5,0.5);
+        context.translate(canvas.width/2 - offSet.x, canvas.height/2 - offSet.y);
+        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
+        // context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
+        // offSet.x = offSet.x + scaleValue*(canvas.width - offSet.x);
+        // offSet.y = offSet.y + scaleValue*(canvas.height - offSet.y);
         this.drawAll();
+
+        // Update displayed zoom amount
+        document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
+        // offSet.x = offSet.x + canvas.width/2;
+        // offSet.y = offSet.y + canvas.width/2;
+
     }
     setPan() {
         draw = false;

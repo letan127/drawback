@@ -25,11 +25,10 @@
     <div class="top-bar top-right-bar flex-horizontal canvas-component">
         <!-- Copy URL, Upload, and Download Bar -->
         <div class="bar flex-horizontal">
-            <div class="bar-button tool-tip" (click)="showShareModal()">
-                <i class="fa fa-clipboard"></i>
+            <div id="share-button" class="bar-button tool-tip" (click)="showShareModal()">
+                <i class="fa fa-user-plus"></i>
                 <span id="copy-tooltip" class="tool-tip-text">Share Room</span>
             </div>
-
             <div class="bar-separator"></div>
             <div class="bar-button tool-tip">
                 <i id="download" class="fa fa-download"></i>
@@ -148,13 +147,17 @@
         <div class="modal-body">
             <div class="modal-item">
                 <div class="modal-text">Current Room URL</div>
-                <input id="room-url" type="text" size="40" readonly>
-                <span id="copy-button" class="bar bar-button" (click)="copyURL()">Copy</span>
+                <div class="flex-horizontal">
+                    <input id="room-url" type="text" class="input-bar" readonly>
+                    <span id="copy-button" class="bar bar-button" (click)="copyURL()">Copy</span>
+                </div>
             </div>
             <div class="modal-item">
                 <div class="modal-text">Enter an existing room ID</div>
-                <input id="new-room-id" type="text" maxlength="5" autocomplete="off" (input)="resetError()" >
-                <a id="change-room-button" class="bar bar-button" (click)="changeRoom()">Change Room</a>
+                <div class="flex-horizontal">
+                    <input id="new-room-id" type="text" class="input-bar" maxlength="5" autocomplete="off" (input)="resetError()" >
+                    <a id="change-room-button" class="bar bar-button" (click)="changeRoom()">Change Room</a>
+                </div>
                 <div id="error-message" class="error"></div>
             </div>
         </div>

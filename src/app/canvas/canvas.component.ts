@@ -170,7 +170,13 @@ export class CanvasComponent implements OnInit {
 
         // Set the displayed room URL in the modal to the current room's URL
         document.getElementById("room-url").setAttribute("value", this.url);
-        document.getElementById("new-room-id").setAttribute("placeholder", this.id);
+        var newRoom = document.getElementById("new-room-id");
+        newRoom.setAttribute("placeholder", this.id);
+        // Press enter to change rooms
+        newRoom.addEventListener("keypress", function(e) {
+            if (e.keyCode === 13)
+                document.getElementById("change-room-button").click();
+        });
 
         // Set the displayed user count
         this.updateUserCount();
@@ -221,10 +227,10 @@ export class CanvasComponent implements OnInit {
 
         // Check for incorrect room IDs
         if (newRoomID.value.length < 5) {
-            errorMsg.innerHTML = "Not enough characters. ID must have at least 5 characters.";
+            errorMsg.innerHTML = "ID must have 5 characters. Please try again.";
         }
         else if (newRoomID.value === this.id) {
-            errorMsg.innerHTML = "Already in this room. Please try again."
+            errorMsg.innerHTML = "Already in this room. Please try again.";
         }
         else
             // Check if the room exists

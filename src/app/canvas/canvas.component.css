@@ -290,6 +290,9 @@ html body {
     color: red;
     font-size: 12px;
 }
+.input-bar {
+    width: 70%;
+}
 .close {
     color: white;
     float: right;

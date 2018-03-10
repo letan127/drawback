@@ -275,12 +275,20 @@ html body {
     border-radius: 8px;
 }
 .modal-body {
-    padding: 2px 16px;
-    margin: 16px 16px;
+    padding: 2px;
+    margin: 2px;
+}
+.modal-item {
+    padding: 2px;
+    margin: 2px;
 }
 .modal-text {
-    padding: 20px 0px 0px 0px;
+    padding: 10px 0px 0px 0px;
     color: gray;
+}
+.error {
+    color: red;
+    font-size: 12px;
 }
 .close {
     color: white;

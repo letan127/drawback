@@ -90,6 +90,22 @@ export class CanvasComponent implements OnInit {
             strokes[strokeID].draw = true;
             this.drawAll();
         })
+
+        // Move to the requested room if it exists; otherwise show an error message
+        this.drawService.getRoomCheck().subscribe(checkRoom => {
+            if (checkRoom.hasRoom) {
+                // Remove the current room ID from the URL
+                var idIndex = this.url.indexOf("/rooms");
+                var url = this.url.slice(0, idIndex);
+
+                // Move to the room
+                var moveButton = document.createElement("a");
+                moveButton.setAttribute("href", url + "/rooms/" + checkRoom.newRoom);
+                moveButton.click();
+            }
+            else
+                document.getElementById("error-message").innerHTML = "This room does not exist. Please try again.";
+        })
     }
 
     ngAfterViewInit() {
@@ -154,6 +170,7 @@ export class CanvasComponent implements OnInit {
 
         // Set the displayed room URL in the modal to the current room's URL
         document.getElementById("room-url").setAttribute("value", this.url);
+        document.getElementById("new-room-id").setAttribute("placeholder", this.id);
 
         // Set the displayed user count
         this.updateUserCount();
@@ -178,14 +195,15 @@ export class CanvasComponent implements OnInit {
 
     showShareModal() {
         var modal = document.getElementById("share-modal");
-        modal.style.display = "block";
+        // Reset values inside the share modal on open
+        document.getElementById("copy-button").innerHTML = "Copy URL";
+        document.getElementById("new-room-id").focus();
+        modal.style.display = "block"; // Show modal
     }
 
     closeShareModal() {
         var modal = document.getElementById("share-modal");
         modal.style.display = "none";
-        // Reset the copy button's text
-        document.getElementById("copy-button").innerHTML = "Copy URL";
     }
 
     // Copy the room's URL to clipboard
@@ -196,14 +214,26 @@ export class CanvasComponent implements OnInit {
         document.getElementById("copy-button").innerHTML = "Copied!";
     }
 
-    // Move user to the indicated room
+    // Check if inputted room ID is valid
     changeRoom() {
-        // Remove the current room ID from the URL
-        var idIndex = this.url.indexOf("/rooms");
-        var url = this.url.slice(0, idIndex);
-        // Move to the new room
         var newRoomID = <HTMLInputElement>document.getElementById("new-room-id");
-        document.getElementById("change-room-button").setAttribute("href", url + "/rooms/" + newRoomID.value);
+        var errorMsg = document.getElementById("error-message");
+
+        // Check for incorrect room IDs
+        if (newRoomID.value.length < 5) {
+            errorMsg.innerHTML = "Not enough characters. ID must have at least 5 characters.";
+        }
+        else if (newRoomID.value === this.id) {
+            errorMsg.innerHTML = "Already in this room. Please try again."
+        }
+        else
+            // Check if the room exists
+            this.drawService.requestRoomCheck(newRoomID.value);
+    }
+
+    // Remove error message for changing rooms when user retypes id
+    resetError() {
+        document.getElementById("error-message").innerHTML = "";
     }
 
     // When a new user enters the room, update the displayed user count

@@ -111,12 +111,12 @@
     </div>
     <!-- Navigation Bar  -->
     <div class="navigation-bar toolbar flex-vertical canvas-component">
-        <div id="zoom-in" class="tool-button tool-tip" (click) = "zoomIn()">
+        <div id="zoom-in" class="tool-button tool-tip" (click) = "zoom(1.5)">
             <i class="fa fa-search-plus"></i>
             <span class="tool-tip-text">Zoom In</span>
         </div>
         <div id="zoom-amount" class="tools-text">100%</div>
-        <div id="zoom-out" class="tool-button tool-tip" (click) = "zoomOut()">
+        <div id="zoom-out" class="tool-button tool-tip" (click) = "zoom(1/1.5)">
             <i class="fa fa-search-minus"></i>
             <span class="tool-tip-text">Zoom Out</span>
         </div>

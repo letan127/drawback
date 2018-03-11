@@ -429,10 +429,8 @@ export class CanvasComponent implements OnInit {
         draw = false;
     }
 
-    // Zoom in by 2x
-    zoomIn() {
-        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
-        scaleValue = scaleValue * 2;
+    zoom(amount) {
+        scaleValue *= amount;
         //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
         context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
         context.translate(offset.x, offset.y)
@@ -441,22 +439,7 @@ export class CanvasComponent implements OnInit {
         this.drawAll();
 
         // Update displayed zoom amount
-        document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
-    }
-
-    // Zoom out by 2x
-    zoomOut() {
-        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
-        scaleValue = scaleValue * 0.5;
-        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
-        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * (canvas.width/2), -(scaleValue - 1) * (canvas.height/2));
-        context.translate(offset.x, offset.y)
-        drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
-        drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
-        this.drawAll();
-
-        // Update displayed zoom amount
-        document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
+        document.getElementById("zoom-amount").innerHTML = ""+Math.round(100 * scaleValue) + "%";
     }
 
     // Start drawing a stroke

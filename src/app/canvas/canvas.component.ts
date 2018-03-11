@@ -473,7 +473,7 @@ export class CanvasComponent implements OnInit {
             x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
             y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
             // Add the stroke's pixels and tool settings
-            curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
+            curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize/scaleValue, mode, true);
             curStroke.pos.push(new Position(x,y));
             drag = true;
             this.draw(curStroke);

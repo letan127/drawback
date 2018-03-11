@@ -314,7 +314,7 @@ export class CanvasComponent implements OnInit {
 
     // Removes everything from the canvas and sends a clear message to the server
     clear() {
-        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*25, canvasHeight*25);
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
         strokes = [];
         myIDs = [];
         undoIDs = [];

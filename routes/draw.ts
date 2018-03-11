@@ -109,9 +109,9 @@ io.on('connection', (socket) => {
             var hasRoom = false;
 
         var checkRoom = {
-            newRoom = newRoom,
-            hasRoom = hasRoom
-        }
+            newRoom: newRoom,
+            hasRoom: hasRoom
+        };
         socket.emit('check', checkRoom);
     });
 });

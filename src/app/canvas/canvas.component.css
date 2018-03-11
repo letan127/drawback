@@ -48,6 +48,9 @@ html body {
     padding: 0 2px;
     font-size: 10px;
     color: #b3b3b3;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 1s, visibility 1s;
 }
 
 /* Share Bar */

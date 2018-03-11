@@ -53,6 +53,7 @@ export class CanvasComponent implements OnInit {
             var name = <HTMLInputElement>document.getElementById("canvas-name");
             name.value = title;
             document.getElementById("title-text").innerHTML = "Canvas renamed to " + name.value + ".";
+            this.fade();
         })
 
         // When the server sends a stroke, add it to our list of strokes and draw it
@@ -85,6 +86,7 @@ export class CanvasComponent implements OnInit {
             orphanedStrokes = [];
             orphanUndoCount = 0;
             document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
+            this.fade();
         })
 
         // Received another client's undo; don't draw that stroke
@@ -187,6 +189,7 @@ export class CanvasComponent implements OnInit {
                 this.drawService.sendTitle(this.id, name.value);
                 document.getElementById("title-text").innerHTML = "Canvas renamed to " + name.value + ".";
                 name.blur(); // Unfocus
+                this.fade();
             }
         });
 
@@ -208,8 +211,18 @@ export class CanvasComponent implements OnInit {
         var display = document.getElementById("pen-slider-value");
         display.innerHTML = slider.value;
         currentPenSize = +slider.value * 4;
+        this.fade();
     }
 
+    fade() {
+        //make it so text shows first
+        document.getElementById('title-text').style.opacity = "1";
+        document.getElementById('title-text').style.visibility = "visible";
+        setTimeout(function() {
+            document.getElementById('title-text').style.opacity = "0";
+            document.getElementById('title-text').style.visibility = "hidden";
+        }, 3000);
+    }
     // When the window is resized, reset the canvas size and redraw it
     resize() {
         canvas.width = window.innerWidth;
@@ -343,6 +356,7 @@ export class CanvasComponent implements OnInit {
         orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
         document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
+        this.fade()
     }
 
     // Undoes the latest stroke

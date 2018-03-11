@@ -43,12 +43,12 @@ html body {
 .title-menu:hover {
     background-color: gray;
 }
-.canvas-name {
+#canvas-name {
     background: 0 0;
     border: 1px solid transparent;
     font-weight: bold;
 }
-.title-text {
+#title-text {
     padding: 0 2px;
     font-size: 10px;
     color: #b3b3b3;

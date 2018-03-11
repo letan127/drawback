@@ -14,7 +14,6 @@ import { Inject } from '@angular/core';
 })
 
 export class CanvasComponent implements OnInit {
-    title = 'app';
     id = '';
     url = '';
     numUsers = 1;
@@ -46,6 +45,13 @@ export class CanvasComponent implements OnInit {
         this.drawService.newUser().subscribe(() => {
             this.numUsers++;
             this.updateUserCount();
+        })
+
+        // Update canvas title
+        this.drawService.getTitle().subscribe(title => {
+            var name = <HTMLInputElement>document.getElementById("canvas-name");
+            name.value = title;
+            document.getElementById("title-text").innerHTML = "Canvas renamed to " + name.value + ".";
         })
 
         // When the server sends a stroke, add it to our list of strokes and draw it
@@ -167,6 +173,20 @@ export class CanvasComponent implements OnInit {
                 this.className += " active";
             });
         }
+
+        var name = <HTMLInputElement>document.getElementById("canvas-name");
+        // Click canvas name to highlight all the text
+        name.addEventListener("click", function() {
+            this.select();
+        });
+        // Press enter to change canvas name and update other users
+        name.addEventListener("keypress", (e) => {
+            if (e.keyCode === 13) {
+                this.drawService.sendTitle(this.id, name.value);
+                document.getElementById("title-text").innerHTML = "Canvas renamed to " + name.value + ".";
+                name.blur(); // Unfocus
+            }
+        });
 
         // Set the displayed room URL in the modal to the current room's URL
         document.getElementById("room-url").setAttribute("value", this.url);

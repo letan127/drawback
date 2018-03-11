@@ -69,6 +69,11 @@ io.on('connection', (socket) => {
         socket.to(room).emit('newUser');
     });
 
+    // When a client sends a new title, send it to all other clients in that room
+    socket.on('title', (roomTitle) => {
+        socket.to(roomTitle.room).emit('title', roomTitle.title);
+    })
+
     // When a client sends a stroke, send it to all other clients in that room
     socket.on('stroke', (strokeMessage) => {
         socket.to(strokeMessage.room).emit('stroke', strokeMessage);

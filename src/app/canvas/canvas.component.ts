@@ -350,8 +350,8 @@ export class CanvasComponent implements OnInit {
             }
 
             // Get the cursor's current position
-            x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue);
-            y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue);
+            x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
+            y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
             // Add the stroke's pixels and tool settings
             curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
             // Get the first pixel in the new stroke
@@ -374,25 +374,29 @@ export class CanvasComponent implements OnInit {
         // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
         orphanedStrokes.push(curStroke);
         //update totalOffset from previous ones. Unsure if needed.
+        scaledPosition.x = 0;
+        scaledPosition.y = 0;
     }
 
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (drag == true && draw) {
-            var x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue);
-            var y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue);
+            var x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
+            var y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
             curStroke.pos.push(new Position(x,y));
             this.draw(curStroke);
             console.log("location: (" + x + "," + y + ")");
+            console.log("drawPosition: (" + drawPosition.x + "," + drawPosition.y + ")");
+
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
         else if (drag && !draw) {
             //translate the context by how much is moved
             var currentPosition = new Position(event.x - canvas.offsetLeft, event.y - canvas.offsetTop);
             var changePosition  = new Position(previousPosition.x - currentPosition.x, previousPosition.y - currentPosition.y);
+            scaledPosition.add(changePosition.x*scaleValue, changePosition.y*scaleValue);
             previousPosition = currentPosition;
             offset.add(changePosition);
-            drawPosition.add(changePosition);
             context.translate(changePosition.x, changePosition.y);
             this.drawAll();
         }
@@ -428,8 +432,8 @@ export class CanvasComponent implements OnInit {
         //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
         context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * (canvas.width/2), -(scaleValue - 1) * (canvas.height/2));
         context.translate(offset.x, offset.y)
-        drawPosition.x = -offset.x + -(scaleValue - 1) * (canvas.width/2);
-        drawPosition.y = -  offset.y + -(scaleValue - 1) * (canvas.height/2);
+        drawPosition.x = (-(scaleValue - 1) * (canvas.width/2));
+        drawPosition.y = (-(scaleValue - 1) * (canvas.height/2));
         console.log("offset: (" + offset.x + "," + offset.y + ")");
         console.log("draw: (" + drawPosition.x + "," + drawPosition.y + ")");
         // offset.x = -(scaleValue - 1) * (canvas.width/2 - offset.x);
@@ -466,6 +470,7 @@ var draw = true;
 var previousPosition: Position = new Position(0,0);
 var offset: Position = new Position(0,0); // offset relative to current origin
 var scaleValue = 1;
+var scaledPosition: Position = new Position(0,0);
 var drawPosition: Position = new Position(0,0); // Draw positoin relative to original origin
 
 // Global stroke data

@@ -83,6 +83,7 @@ export class CanvasComponent implements OnInit {
             undoIDs = [];
             orphanedStrokes = [];
             orphanUndoCount = 0;
+            document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
         })
 
         // Received another client's undo; don't draw that stroke
@@ -340,6 +341,7 @@ export class CanvasComponent implements OnInit {
         orphanedStrokes = [];
         orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
+        document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
     }
 
     // Undoes the latest stroke

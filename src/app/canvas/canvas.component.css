@@ -34,14 +34,10 @@ html body {
 }
 .title-menu {
     border-radius: 8px;
-    cursor: pointer;
 }
 .title-box {
     padding: 5px 10px 5px 10px;
     margin-bottom: 5px;
-}
-.title-menu:hover {
-    background-color: gray;
 }
 #canvas-name {
     background: 0 0;
@@ -52,10 +48,6 @@ html body {
     padding: 0 2px;
     font-size: 10px;
     color: #b3b3b3;
-}
-.dropdown-symbol {
-    margin-left: 15px;
-    padding-right: 15px;
 }
 
 /* Share Bar */

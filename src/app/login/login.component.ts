@@ -12,7 +12,8 @@ import * as firebase from 'firebase/app';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-
+  email: any;
+  password: any;
   error: any;
   roomID: string;
   url: string;
@@ -62,10 +63,10 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(formData) {
-    var email = formData.value.email;
-    var password = formData.value.password;
+    this.email = formData.value.email;
+    this.password = formData.value.password;
     if(formData.valid) {
-      this.af.auth.createUserWithEmailAndPassword(email, password).then(
+      this.af.auth.createUserWithEmailAndPassword(this.email, this.password).then(
         (success) => {
         console.log(success);
       }).catch(

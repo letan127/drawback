@@ -6,4 +6,9 @@ export class Position {
         this.x = x;
         this.y = y;
     }
+
+    add(position: Position) {
+        this.x += position.x;
+        this.y += position.y;
+    }
 }

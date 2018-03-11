@@ -350,8 +350,8 @@ export class CanvasComponent implements OnInit {
             }
 
             // Get the cursor's current position
-            x = ((event.x - canvas.offsetLeft)/scaleValue) - offSet.x;
-            y = ((event.y - canvas.offsetTop)/scaleValue) - offSet.y;
+            x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue);
+            y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue);
             // Add the stroke's pixels and tool settings
             curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
             // Get the first pixel in the new stroke
@@ -361,10 +361,8 @@ export class CanvasComponent implements OnInit {
         }
         //if panning
         else {
-            originalPosition.x = event.x - canvas.offsetLeft;
-            originalPosition.y = event.y - canvas.offsetTop;
-            currentPosition.x = event.x - canvas.offsetLeft;
-            currentPosition.y = event.y - canvas.offsetTop;
+            previousPosition.x = event.x - canvas.offsetLeft;
+            previousPosition.y = event.y - canvas.offsetTop;
             drag = true;
         }
     }
@@ -376,87 +374,78 @@ export class CanvasComponent implements OnInit {
         // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
         orphanedStrokes.push(curStroke);
         //update totalOffset from previous ones. Unsure if needed.
-        if(!draw) {
-            // var offsetX = event.x;
-            // var offsetY = event.y;
-            // var totalOffsetX = originalPosition.x - offsetX;
-            // var totalOffsetY = originalPosition.y - offsetY;
-            // totalOffSet.x = totalOffSet.x + totalOffsetX;
-            // totalOffSet.y = totalOffSet.y + totalOffsetY;
-            // offSet.x = totalOffSet.x;
-            // offSet.y = totalOffSet.y;
-        }
-        originalPosition.x = 0;
-        originalPosition.y = 0;
     }
 
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (drag == true && draw) {
-            var x = ((event.x - canvas.offsetLeft)/scaleValue) - offSet.x;
-            var y = ((event.y - canvas.offsetTop)/scaleValue) - offSet.y;
+            var x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue);
+            var y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue);
             curStroke.pos.push(new Position(x,y));
-            // console.log(x);
             this.draw(curStroke);
+            console.log("location: (" + x + "," + y + ")");
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
         else if (drag && !draw) {
-            var offsetX = event.x - canvas.offsetLeft;
-            var offsetY = event.y - canvas.offsetTop;
-            var changeX = currentPosition.x - offsetX;
-            var changeY = currentPosition.y - offsetY;
-            currentPosition.x = offsetX;
-            currentPosition.y = offsetY;
-            offSet.x = offSet.x + changeX;
-            offSet.y = offSet.y + changeY;
-            context.translate(changeX, changeY);
+            //translate the context by how much is moved
+            var currentPosition = new Position(event.x - canvas.offsetLeft, event.y - canvas.offsetTop);
+            var changePosition  = new Position(previousPosition.x - currentPosition.x, previousPosition.y - currentPosition.y);
+            previousPosition = currentPosition;
+            offset.add(changePosition);
+            drawPosition.add(changePosition);
+            context.translate(changePosition.x, changePosition.y);
             this.drawAll();
         }
-        // else {
-        //     console.log("I'm in mouse move");
-        //     var offsetX = event.x - canvas.offsetLeft;
-        //     var offsetY = event.y - canvas.offsetTop;
-        //     var totalOffsetX = originalPosition.x - offsetX;
-        //     var totalOffsetY = originalPosition.y - offsetY;
-        //     context.translate(totalOffsetX, totalOffsetY);
-        //     this.drawAll();
-        // }
+
     }
 
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
         drag = false;
     }
+
     zoomIn() {
         scaleValue = scaleValue * 2;
         context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
         //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
-        context.scale(2,2);
-        context.translate(-canvas.width/4 + offSet.x/2, -canvas.height/4 + offSet.y/2);
+        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
+        // context.scale(2,2);
+        // context.translate(-canvas.width/4 + offset.x/2, -canvas.height/4 + offset.y/2);
         // context.translate(canvas.width/2, canvas.height/2);
         this.drawAll();
 
         // Update displayed zoom amount
         document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
-        // offSet.x = offSet.x/2;
-        // offSet.y = offSet.y/2;
+        // offset.x = offset.x - canvas.width/4;
+        // offset.y = offset.y - canvas.height/4;
     }
+
     zoomOut() {
-        scaleValue = scaleValue * 0.5;
         context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
-        context.scale(0.5,0.5);
-        context.translate(canvas.width/2 - offSet.x, canvas.height/2 - offSet.y);
+        // context.scale(0.5,0.5);
+        // context.translate(canvas.width*scaleValue - offset.x/2, canvas.height/2 - offset.y/2);
+        scaleValue = scaleValue * 0.5;
         //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
-        // context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
-        // offSet.x = offSet.x + scaleValue*(canvas.width - offSet.x);
-        // offSet.y = offSet.y + scaleValue*(canvas.height - offSet.y);
+        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * (canvas.width/2), -(scaleValue - 1) * (canvas.height/2));
+        context.translate(offset.x, offset.y)
+        drawPosition.x = -offset.x + -(scaleValue - 1) * (canvas.width/2);
+        drawPosition.y = -  offset.y + -(scaleValue - 1) * (canvas.height/2);
+        console.log("offset: (" + offset.x + "," + offset.y + ")");
+        console.log("draw: (" + drawPosition.x + "," + drawPosition.y + ")");
+        // offset.x = -(scaleValue - 1) * (canvas.width/2 - offset.x);
+        // offset.y = -(scaleValue - 1) * (canvas.height/2 - offset.y);
+        // context.setTransform(1, 0, 0, 1, offset.x, offset.y);
+        // context.translate(offset.x, offset.y);
+
+        // context.translate(-(scaleValue - 1) * (canvas.width/2), -(scaleValue - 1) * (canvas.height/2));
+        // offset.x = -(scaleValue - 1) * (canvas.width/2);
+        // offset.y = -(scaleValue - 1) * (canvas.height/2);
         this.drawAll();
 
         // Update displayed zoom amount
         document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
-        // offSet.x = offSet.x + canvas.width/2;
-        // offSet.y = offSet.y + canvas.width/2;
-
+        // offset.x = offset.x + canvas.width/2;
+        // offset.y = offset.y + canvas.height/2;
     }
     setPan() {
         draw = false;
@@ -474,11 +463,10 @@ var x;
 var y;
 var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
 var draw = true;
-var originalPosition: Position = new Position(0,0);
-var currentPosition: Position = new Position(0,0);
-var offSet: Position = new Position(0,0);
-var totalOffSet: Position = new Position(0,0);
+var previousPosition: Position = new Position(0,0);
+var offset: Position = new Position(0,0); // offset relative to current origin
 var scaleValue = 1;
+var drawPosition: Position = new Position(0,0); // Draw positoin relative to original origin
 
 // Global stroke data
 var strokes = new Array<Stroke>();      // Contains every stroke on the canvas

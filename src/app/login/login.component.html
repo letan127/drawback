@@ -1,12 +1,27 @@
-<div class="form-container">
-  <!-- <img src="assets/images/lock.svg" id="lock"> -->
+<!DOCTYPE html>
+<html>
 
-    <span class="error" *ngIf="error">{{ error }}</span>
+<head>
+  <meta charset="UTF-8">
+  <title>Drawback</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
-  <button (click)="loginFb()" id="fb">Login With Facebook</button><br>
-  <button (click)="loginGoogle()" id="google">Login With Google</button><br>
-  <button (click)="Back()">Go Back</button><br>
-  <!-- <button routerLink="/login-email" id="email">Email</button> -->
+<body>
+    <div class="main flex-container">
+        <span class="error" *ngIf="error">{{ error }}</span>
+        <div class="sign">Drawback</div>
+        <div class="flex-element1">
+          <button (click)="loginFb()" id="fb"></button><br>
+          <button (click)="loginGoogle()" id="google"></button>
+        </div>
+        <div class="flex-element">
+          <input class="un" type="text" placeholder="Username">
+          <input class="pass" type="password"  placeholder="Password">
+          <input class="submit" type="submit" value="Sign in" align="center">
+        </div>
+    </div>
 
-  <!-- <a routerLink="/signup" routerLinkActive="active" class="alc">No account? <strong>Create one here</strong></a> -->
-</div>
+</body>
+
+</html>

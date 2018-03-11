@@ -117,6 +117,7 @@ export class CanvasComponent implements OnInit {
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
+        canvas.addEventListener("wheel",  this.mouseWheel.bind(this), false);
         context = canvas.getContext("2d");
 
         canvas.addEventListener("touchstart", function (e) {
@@ -429,7 +430,7 @@ export class CanvasComponent implements OnInit {
         draw = false;
     }
 
-    zoom(amount) {
+    zoom(amount: number) {
         scaleValue *= amount;
         //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
         context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
@@ -499,6 +500,15 @@ export class CanvasComponent implements OnInit {
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
         drag = false;
+    }
+
+    mouseWheel(event): void {
+        // https://stackoverflow.com/questions/6775168/zooming-with-canvas
+        var mousex = event.clientX - canvas.offsetLeft;
+        var mousey = event.clientY - canvas.offsetTop;
+        var wheel = event.wheelDelta/120;//n or -n
+        var scaleAmount = 1 + wheel/2;
+        this.zoom(scaleAmount);
     }
 }
 

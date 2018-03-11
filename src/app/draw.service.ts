@@ -118,4 +118,17 @@ export class DrawService {
             });
         });
     }
+
+    // Ask the server if the room the client wants to move to exists
+    public requestRoomCheck(newRoom) {
+        this.socket.emit('check', newRoom);
+    }
+
+    public getRoomCheck = () => {
+        return Observable.create((observer) => {
+            this.socket.on('check', (checkRoom) => {
+                observer.next(checkRoom);
+            });
+        });
+    }
 }

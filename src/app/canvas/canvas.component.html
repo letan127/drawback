@@ -25,9 +25,9 @@
     <div class="top-bar top-right-bar flex-horizontal canvas-component">
         <!-- Copy URL, Upload, and Download Bar -->
         <div class="bar flex-horizontal">
-            <div class="bar-button tool-tip" (click)="copyURL()">
-                <i class="fa fa-clipboard"></i>
-                <span class="tool-tip-text">Copy URL</span>
+            <div id="share-button" class="bar-button tool-tip" (click)="showShareModal()">
+                <i class="fa fa-user-plus"></i>
+                <span id="copy-tooltip" class="tool-tip-text">Share Room</span>
             </div>
             <div class="bar-separator"></div>
             <div class="bar-button tool-tip">
@@ -65,13 +65,19 @@
                 <div id="red" class="dropdown-item" style="color:red" (click)="changeColor($event)">
                     <i class="fa fa-circle"></i>
                 </div>
-                <div id="blue" class="dropdown-item" style="color:blue" (click)="changeColor($event)">
+                <div id="orange" class="dropdown-item" style="color:orange" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="yellow" class="dropdown-item" style="color:yellow" (click)="changeColor($event)">
                     <i class="fa fa-circle"></i>
                 </div>
                 <div id="green" class="dropdown-item" style="color:green" (click)="changeColor($event)">
                     <i class="fa fa-circle"></i>
                 </div>
-                <div id="brown" class="dropdown-item" style="color:brown" (click)="changeColor($event)">
+                <div id="blue" class="dropdown-item" style="color:blue" (click)="changeColor($event)">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div id="darkMagenta" class="dropdown-item" style="color:darkMagenta" (click)="changeColor($event)">
                     <i class="fa fa-circle"></i>
                 </div>
             </div>
@@ -128,6 +134,32 @@
         <div class="bar-separator"></div>
         <div id="num-users" class="bar-button">
             <i class="fa fa-user-circle"></i>
+        </div>
+    </div>
+</div>
+<!-- Share Modal -->
+<div id="share-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="close" (click)="closeShareModal()">&times;</div>
+            <h2>Invite or Join Others</h2>
+        </div>
+        <div class="modal-body">
+            <div class="modal-item">
+                <div class="modal-text">Current Room URL</div>
+                <div class="flex-horizontal">
+                    <input id="room-url" type="text" class="input-bar" readonly>
+                    <span id="copy-button" class="bar bar-button" (click)="copyURL()">Copy</span>
+                </div>
+            </div>
+            <div class="modal-item">
+                <div class="modal-text">Enter an existing room ID</div>
+                <div class="flex-horizontal">
+                    <input id="new-room-id" type="text" class="input-bar" maxlength="5" autocomplete="off" (input)="resetError()" >
+                    <a id="change-room-button" class="bar bar-button" (click)="changeRoom()">Change Room</a>
+                </div>
+                <div id="error-message" class="error"></div>
+            </div>
         </div>
     </div>
 </div>

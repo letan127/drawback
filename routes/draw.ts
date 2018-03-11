@@ -58,6 +58,7 @@ io.on('connection', (socket) => {
     socket.on('room', (room) => {
         socket.join(room);
         if (!(room in rooms)) {
+            // TODO: Remove this to ensure users can't create new rooms by changing URL
             // Only happens when user manually types a room URL
             rooms[room] = new Room();
         }
@@ -100,6 +101,20 @@ io.on('connection', (socket) => {
     socket.on('redo', (redoStroke) => {
        socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
        rooms[redoStroke.room].setDraw(redoStroke.strokeID, true);
+    });
+
+    // Let client know if the room they want to move to exists
+    socket.on('check', (newRoom) => {
+        if (newRoom in rooms)
+            var hasRoom = true;
+        else
+            var hasRoom = false;
+
+        var checkRoom = {
+            newRoom = newRoom,
+            hasRoom = hasRoom
+        }
+        socket.emit('check', checkRoom);
     });
 });
 

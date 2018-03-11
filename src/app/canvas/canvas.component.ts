@@ -3,10 +3,9 @@ import { Stroke } from '../stroke';
 import { Position } from '../position';
 import { DrawService } from '../draw.service';
 import { LoginService } from '../login.service';
-import { ActivatedRoute} from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DOCUMENT } from '@angular/platform-browser';
 import { Inject } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { AngularFireAuth } from 'angularfire2/auth';
 
@@ -42,7 +41,7 @@ export class CanvasComponent implements OnInit {
                 //this.logout();
             }
         });
-        
+
         // Get the full URL of this room
         this.url = this.document.location.href;
 
@@ -112,6 +111,22 @@ export class CanvasComponent implements OnInit {
             strokes[strokeID].draw = true;
             this.drawAll();
         })
+
+        // Move to the requested room if it exists; otherwise show an error message
+        this.drawService.getRoomCheck().subscribe(checkRoom => {
+            if (checkRoom.hasRoom) {
+                // Remove the current room ID from the URL
+                var idIndex = this.url.indexOf("/rooms");
+                var url = this.url.slice(0, idIndex);
+
+                // Move to the room
+                var moveButton = document.createElement("a");
+                moveButton.setAttribute("href", url + "/rooms/" + checkRoom.newRoom);
+                moveButton.click();
+            }
+            else
+                document.getElementById("error-message").innerHTML = "This room does not exist. Please try again.";
+        })
     }
 
     ngAfterViewInit() {
@@ -174,6 +189,16 @@ export class CanvasComponent implements OnInit {
             });
         }
 
+        // Set the displayed room URL in the modal to the current room's URL
+        document.getElementById("room-url").setAttribute("value", this.url);
+        var newRoom = document.getElementById("new-room-id");
+        newRoom.setAttribute("placeholder", this.id);
+        // Press enter to change rooms
+        newRoom.addEventListener("keypress", function(e) {
+            if (e.keyCode === 13)
+                document.getElementById("change-room-button").click();
+        });
+
         // Set the displayed user count
         this.updateUserCount();
 
@@ -195,9 +220,47 @@ export class CanvasComponent implements OnInit {
             this.drawAll();
     }
 
+    showShareModal() {
+        var modal = document.getElementById("share-modal");
+        // Reset values inside the share modal on open
+        document.getElementById("copy-button").innerHTML = "Copy URL";
+        document.getElementById("new-room-id").focus();
+        modal.style.display = "block"; // Show modal
+    }
+
+    closeShareModal() {
+        var modal = document.getElementById("share-modal");
+        modal.style.display = "none";
+    }
+
+    // Copy the room's URL to clipboard
     copyURL() {
-        //TODO: create a popup that has this url
-        console.log(this.url);
+        var urlElement = <HTMLInputElement>document.getElementById("room-url");
+        urlElement.select();
+        document.execCommand("Copy");
+        document.getElementById("copy-button").innerHTML = "Copied!";
+    }
+
+    // Check if inputted room ID is valid
+    changeRoom() {
+        var newRoomID = <HTMLInputElement>document.getElementById("new-room-id");
+        var errorMsg = document.getElementById("error-message");
+
+        // Check for incorrect room IDs
+        if (newRoomID.value.length < 5) {
+            errorMsg.innerHTML = "ID must have 5 characters. Please try again.";
+        }
+        else if (newRoomID.value === this.id) {
+            errorMsg.innerHTML = "Already in this room. Please try again.";
+        }
+        else
+            // Check if the room exists
+            this.drawService.requestRoomCheck(newRoomID.value);
+    }
+
+    // Remove error message for changing rooms when user retypes id
+    resetError() {
+        document.getElementById("error-message").innerHTML = "";
     }
 
     // When a new user enters the room, update the displayed user count
@@ -325,20 +388,26 @@ export class CanvasComponent implements OnInit {
             var color = event.target.id;
 
         switch(color) {
-            case "blue":
-                currentPaintColor = "blue";
-                break;
-            case "brown":
-                currentPaintColor = "brown";
+            case "black":
+                currentPaintColor = "black";
                 break;
             case "red":
                 currentPaintColor = "red";
                 break;
+            case "orange":
+                currentPaintColor = "orange";
+                break;
+            case "yellow":
+                currentPaintColor = "yellow";
+                break;
             case "green":
                 currentPaintColor = "green";
                 break;
-            case "black":
-                currentPaintColor = "black";
+            case "blue":
+                currentPaintColor = "blue";
+                break;
+            case "darkMagenta":
+                currentPaintColor = "darkMagenta";
                 break;
             default:
                 currentPaintColor = "black";

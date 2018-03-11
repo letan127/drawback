@@ -338,9 +338,43 @@ export class CanvasComponent implements OnInit {
         document.getElementById("pen-slider-value").innerHTML = ""+size; // num to string
     }
 
+    // Clicked panning button
+    setPan() {
+        draw = false;
+    }
+
+    // Zoom in by 2x
+    zoomIn() {
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
+        scaleValue = scaleValue * 2;
+        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
+        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
+        context.translate(offset.x, offset.y)
+        drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
+        drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
+        this.drawAll();
+
+        // Update displayed zoom amount
+        document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
+    }
+
+    // Zoom out by 2x
+    zoomOut() {
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
+        scaleValue = scaleValue * 0.5;
+        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
+        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * (canvas.width/2), -(scaleValue - 1) * (canvas.height/2));
+        context.translate(offset.x, offset.y)
+        drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
+        drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
+        this.drawAll();
+
+        // Update displayed zoom amount
+        document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
+    }
+
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
-        //if draw
         if(draw) {
             // Discard stored undos
             orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
@@ -354,13 +388,12 @@ export class CanvasComponent implements OnInit {
             y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
             // Add the stroke's pixels and tool settings
             curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
-            // Get the first pixel in the new stroke
             curStroke.pos.push(new Position(x,y));
             drag = true;
             this.draw(curStroke);
         }
-        //if panning
         else {
+            // Panning
             previousPosition.x = event.x - canvas.offsetLeft;
             previousPosition.y = event.y - canvas.offsetTop;
             drag = true;
@@ -371,88 +404,32 @@ export class CanvasComponent implements OnInit {
     mouseUp(event: MouseEvent): void {
         drag = false;
         this.drawService.reqStrokeID(this.id);
-        // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
         orphanedStrokes.push(curStroke);
-        //update totalOffset from previous ones. Unsure if needed.
-        scaledPosition.x = 0;
-        scaledPosition.y = 0;
     }
 
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
-        if (drag == true && draw) {
+        if (drag && draw) {
             var x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
             var y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
             curStroke.pos.push(new Position(x,y));
             this.draw(curStroke);
-            console.log("location: (" + x + "," + y + ")");
-            console.log("drawPosition: (" + drawPosition.x + "," + drawPosition.y + ")");
-
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
         else if (drag && !draw) {
-            //translate the context by how much is moved
+            // Translate the context by how much is moved
             var currentPosition = new Position(event.x - canvas.offsetLeft, event.y - canvas.offsetTop);
             var changePosition  = new Position(previousPosition.x - currentPosition.x, previousPosition.y - currentPosition.y);
-            scaledPosition.add(changePosition.x*scaleValue, changePosition.y*scaleValue);
             previousPosition = currentPosition;
             offset.add(changePosition);
             context.translate(changePosition.x, changePosition.y);
             this.drawAll();
         }
-
     }
 
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
         drag = false;
-    }
-
-    zoomIn() {
-        scaleValue = scaleValue * 2;
-        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
-        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
-        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
-        // context.scale(2,2);
-        // context.translate(-canvas.width/4 + offset.x/2, -canvas.height/4 + offset.y/2);
-        // context.translate(canvas.width/2, canvas.height/2);
-        this.drawAll();
-
-        // Update displayed zoom amount
-        document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
-        // offset.x = offset.x - canvas.width/4;
-        // offset.y = offset.y - canvas.height/4;
-    }
-
-    zoomOut() {
-        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
-        // context.scale(0.5,0.5);
-        // context.translate(canvas.width*scaleValue - offset.x/2, canvas.height/2 - offset.y/2);
-        scaleValue = scaleValue * 0.5;
-        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
-        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * (canvas.width/2), -(scaleValue - 1) * (canvas.height/2));
-        context.translate(offset.x, offset.y)
-        drawPosition.x = (-(scaleValue - 1) * (canvas.width/2));
-        drawPosition.y = (-(scaleValue - 1) * (canvas.height/2));
-        console.log("offset: (" + offset.x + "," + offset.y + ")");
-        console.log("draw: (" + drawPosition.x + "," + drawPosition.y + ")");
-        // offset.x = -(scaleValue - 1) * (canvas.width/2 - offset.x);
-        // offset.y = -(scaleValue - 1) * (canvas.height/2 - offset.y);
-        // context.setTransform(1, 0, 0, 1, offset.x, offset.y);
-        // context.translate(offset.x, offset.y);
-
-        // context.translate(-(scaleValue - 1) * (canvas.width/2), -(scaleValue - 1) * (canvas.height/2));
-        // offset.x = -(scaleValue - 1) * (canvas.width/2);
-        // offset.y = -(scaleValue - 1) * (canvas.height/2);
-        this.drawAll();
-
-        // Update displayed zoom amount
-        document.getElementById("zoom-amount").innerHTML = ""+(100 * scaleValue) + "%";
-        // offset.x = offset.x + canvas.width/2;
-        // offset.y = offset.y + canvas.height/2;
-    }
-    setPan() {
-        draw = false;
     }
 }
 
@@ -470,7 +447,6 @@ var draw = true;
 var previousPosition: Position = new Position(0,0);
 var offset: Position = new Position(0,0); // offset relative to current origin
 var scaleValue = 1;
-var scaledPosition: Position = new Position(0,0);
 var drawPosition: Position = new Position(0,0); // Draw positoin relative to original origin
 
 // Global stroke data

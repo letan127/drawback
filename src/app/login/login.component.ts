@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../login.service';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Router } from '@angular/router';
+import { DOCUMENT } from '@angular/platform-browser';
+import { Inject } from '@angular/core';
 import * as firebase from 'firebase/app';
 
 @Component({
@@ -14,7 +16,7 @@ export class LoginComponent implements OnInit {
   error: any;
   roomID: string;
   url: string;
-  constructor(public af: AngularFireAuth,private router: Router,private loginService: LoginService) {
+  constructor(public af: AngularFireAuth,private router: Router,private loginService: LoginService, @Inject(DOCUMENT) private document: Document) {
     this.roomID = this.loginService.getRoomID()
     this.url = '/rooms/' + this.roomID;
     this.af.authState.subscribe(authState => {
@@ -49,8 +51,29 @@ export class LoginComponent implements OnInit {
       })
   }
 
-  Back() {
-    this.router.navigate([this.url]);
+  showShareModal() {
+      var modal = document.getElementById("share-modal");
+      modal.style.display = "flex";
+   }
+
+  closeShareModal() {
+      var modal = document.getElementById("share-modal");
+      modal.style.display = "none";
+  }
+
+  onSubmit(formData) {
+    var email = formData.value.email;
+    var password = formData.value.password;
+    if(formData.valid) {
+      this.af.auth.createUserWithEmailAndPassword(email, password).then(
+        (success) => {
+        console.log(success);
+      }).catch(
+        (err) => {
+        console.log(err);
+        this.error = err;
+      })
+    }
   }
 
 }

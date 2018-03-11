@@ -1,11 +1,11 @@
 export class LoginService {
 
   private roomID:string;
+  private root:string;
 
   constructor(){
     this.roomID = '';
   }
-
   setRoomID(roomID: string) {
     this.roomID = roomID
   }

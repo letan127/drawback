@@ -2,14 +2,21 @@ import { Stroke } from './stroke';
 
 // Server-side copy of a room's properties
 export class Room {
+    private name: string;
     private latestStrokeID: number;
     private strokes: Stroke[];
     private numUsers: number;
 
     constructor() {
+        this.name = "Untitled Canvas";
         this.latestStrokeID = 0;
         this.strokes = [];
         this.numUsers = 0;
+    }
+
+    // Returns the name of the canvas
+    getName(): string {
+        return this.name;
     }
 
     // Returns a new stroke ID (one larger than the previous ID)
@@ -25,6 +32,11 @@ export class Room {
     // Returns the total number of users in the room
     getUsers(): number {
         return this.numUsers;
+    }
+
+    // Change the canvas name
+    rename(name: string): void {
+        this.name = name;
     }
 
     // Increment the strokeID (after giving an ID out) so that it will be unique

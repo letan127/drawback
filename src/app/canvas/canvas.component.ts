@@ -35,6 +35,7 @@ export class CanvasComponent implements OnInit {
 
         // This client is a new user; give them the current canvas state to draw
         this.drawService.initUser().subscribe(init => {
+            (<HTMLInputElement>document.getElementById("canvas-name")).value = init.name;
             this.numUsers = init.numUsers;
             strokes = init.strokes;
             this.updateUserCount();
@@ -175,8 +176,8 @@ export class CanvasComponent implements OnInit {
             });
         }
 
-        var name = <HTMLInputElement>document.getElementById("canvas-name");
         // Click canvas name to highlight all the text
+        var name = <HTMLInputElement>document.getElementById("canvas-name");
         name.addEventListener("click", function() {
             this.select();
         });

@@ -62,6 +62,7 @@ io.on('connection', (socket) => {
         }
         rooms[room].addUser(socket.id);
         var init = {
+            name: rooms[room].getName(),
             numUsers: rooms[room].getUsers(),
             strokes: rooms[room].getStrokes()
         };
@@ -71,6 +72,7 @@ io.on('connection', (socket) => {
 
     // When a client sends a new title, send it to all other clients in that room
     socket.on('title', (roomTitle) => {
+        rooms[roomTitle.room].rename(roomTitle.title);
         socket.to(roomTitle.room).emit('title', roomTitle.title);
     })
 

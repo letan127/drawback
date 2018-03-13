@@ -195,7 +195,8 @@ export class CanvasComponent implements OnInit {
         canvas.height = window.innerHeight;
         canvasWidth = canvas.width;
         canvasHeight = canvas.height;
-
+        drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
+        drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
         if (strokes.length > 0)
             this.drawAll();
     }
@@ -431,6 +432,9 @@ export class CanvasComponent implements OnInit {
     }
 
     zoom(amount: number) {
+        if(scaleValue * amount > 5 || scaleValue * amount < .1) {
+            return;
+        }
         scaleValue *= amount;
         //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
         context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);

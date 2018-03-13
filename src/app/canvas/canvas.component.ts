@@ -111,7 +111,6 @@ export class CanvasComponent implements OnInit {
     ngAfterViewInit() {
         // Set callback functions for canvas mouse events
         canvas = <HTMLCanvasElement>document.getElementById("canvas");
-        this.resize();
         window.addEventListener("resize", this.resize.bind(this), false);
         canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
@@ -119,6 +118,7 @@ export class CanvasComponent implements OnInit {
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
         canvas.addEventListener("wheel",  this.mouseWheel.bind(this), false);
         context = canvas.getContext("2d");
+        this.resize();
 
         canvas.addEventListener("touchstart", function (e) {
             e.preventDefault();
@@ -195,10 +195,11 @@ export class CanvasComponent implements OnInit {
         canvas.height = window.innerHeight;
         canvasWidth = canvas.width;
         canvasHeight = canvas.height;
+        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
+        context.translate(offset.x, offset.y)
         drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
         drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
-        if (strokes.length > 0)
-            this.drawAll();
+        this.drawAll()
     }
 
     showShareModal() {

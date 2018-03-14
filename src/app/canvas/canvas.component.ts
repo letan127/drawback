@@ -22,23 +22,19 @@ export class CanvasComponent implements OnInit {
     url = '';
     numUsers = 1;
     loginState = true;
-
+    loginButton = "Sign Up or Login";
     constructor(private drawService: DrawService, private loginService: LoginService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router, public af: AngularFireAuth) {
-
     }
 
     ngOnInit(): void {
         this.af.authState.subscribe(authState => {
-            var login = document.getElementById("signup-login")
             if(!authState) {
-                login.innerHTML = "Sign up or Login";
+                this.loginButton = "Sign Up or Login"
                 this.loginState = true;
             }
             else{
-                //login button
-                login.innerHTML = "Logout";
+                this.loginButton = "Logout";
                 this.loginState = false;
-                //this.logout();
             }
         });
 

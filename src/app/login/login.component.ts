@@ -15,19 +15,21 @@ export class LoginComponent implements OnInit {
   email: any;
   password: any;
   error: any;
+  signupError: any;
   roomID: string;
   url: string;
   constructor(public af: AngularFireAuth,private router: Router,private loginService: LoginService, @Inject(DOCUMENT) private document: Document) {
     this.roomID = this.loginService.getRoomID()
     this.url = '/rooms/' + this.roomID;
-    this.af.authState.subscribe(authState => {
-      if(authState) {
-        this.router.navigateByUrl(this.url);
-      }
-    });
   }
 
   ngOnInit() {
+      
+      this.af.authState.subscribe(authState => {
+        if(authState) {
+          this.router.navigateByUrl(this.url);
+        }
+      });
   }
 
   loginFb() {
@@ -63,6 +65,7 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(formData) {
+    console.log("log out")
     this.email = formData.value.email;
     this.password = formData.value.password;
     if(formData.valid) {
@@ -72,7 +75,23 @@ export class LoginComponent implements OnInit {
       }).catch(
         (err) => {
         console.log(err);
-        this.error = err;
+        this.signupError = err;
+      })
+    }
+  }
+
+  loginSubmit(formData) {
+    console.log("login");
+    this.email = formData.value.email;
+    this.password = formData.value.password;
+    if(formData.valid) {
+      this.af.auth.signInWithEmailAndPassword(this.email, this.password).then(
+        (success) => {
+        console.log(success);
+      }).catch(
+        (err) => {
+        console.log("hello",err);
+        this.error = "Account with that username and password does not exist.";
       })
     }
   }

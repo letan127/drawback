@@ -9,7 +9,7 @@
 
 <body>
     <div class="main flex-container">
-        <span class="error" *ngIf="error">{{ error }}</span>
+        <!-- <span class="error" *ngIf="error">{{ error }}</span> -->
         <div class="sign">Drawback</div>
         <div class="flex-element1">
           <div (click)="loginFb()" id="fb">
@@ -18,10 +18,14 @@
           <div (click)="loginGoogle()" id="google"></div>
         </div>
         <div class="flex-element">
-          <input class="un" type="text" placeholder="Username">
-          <input class="pass" type="password"  placeholder="Password">
-          <input class="submit" type="submit" value="Sign in" align="center">
-          <a id='back' style="color: darkblue; cursor: pointer; margin-top: 30px" (click)="showShareModal()">No account? <strong>Create one here</strong></a>
+          <form #f='ngForm' (ngSubmit)="loginSubmit(f)" class="flex-element">
+              <input class="un" type="text" placeholder="Username" (ngModel)="email" name="email" required>
+              <input class="pass" type="password"  placeholder="Password" (ngModel)="password" name="password" required>
+              <button type="submit" [disabled]="!f.valid" class="submit">Sign in</button>
+          </form>
+          <span class="error" *ngIf="error">{{ error }}</span>
+          <a id='back' style="color: darkblue; cursor: pointer; margin-top: 15px" (click)="showShareModal()">No account? <strong>Create one here</strong></a>
+
         </div>
     </div>
 
@@ -35,6 +39,7 @@
               <input class="signup-pass" type="password"  placeholder="Password" (ngModel)="password" name="password" required>
               <button type="submit" [disabled]="!formData.valid" class="signup-submit">Create my account</button>
             </form>
+            <span class="error" *ngIf="signupError">{{ signupError }}</span>
           </div>
         </div>
       </div>

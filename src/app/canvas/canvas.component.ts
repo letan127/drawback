@@ -43,8 +43,8 @@ export class CanvasComponent implements OnInit {
         })
 
         // New user entered a room, so increment our user count
-        this.drawService.newUser().subscribe(() => {
-            this.numUsers++;
+        this.drawService.updateUserCount().subscribe(amount => {
+            this.numUsers += amount;
             this.updateUserCount();
         })
 

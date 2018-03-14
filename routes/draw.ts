@@ -38,12 +38,12 @@ io.on('connection', (socket) => {
 
     // Remove user's data from all of their rooms before they disconnect
     socket.on('disconnecting', () => {
-        Object.keys(socket.rooms).forEach(function(room) {
-            if (room in rooms) {
-                // Socket connections may be made before being redirected
-                rooms[room].removeUser(socket.id);
-            }
-        });
+        var socketRooms = Object.keys(socket.rooms)
+        if (socketRooms.length > 1) {
+            // Check that user actually joined a room (index 0 is its socket id)
+            rooms[socketRooms[1]].removeUser(socket.id);
+            socket.to(socketRooms[1]).emit('updateUserCount', -1);
+        }
     });
 
     // Client has already left their rooms
@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
             strokes: rooms[room].getStrokes()
         };
         socket.emit('initUser', init);
-        socket.to(room).emit('newUser');
+        socket.to(room).emit('updateUserCount', 1);
     });
 
     // When a client sends a new title, send it to all other clients in that room

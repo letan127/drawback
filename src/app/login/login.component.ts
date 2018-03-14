@@ -24,12 +24,19 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
-      
+
       this.af.authState.subscribe(authState => {
         if(authState) {
           this.router.navigateByUrl(this.url);
         }
       });
+
+      var texts = document.getElementsByClassName("login-text");
+      for (var i=0; i < texts.length; i++) {
+          texts[i].addEventListener("focus", function() {
+              this.error = " ";
+          })
+      }
   }
 
   loginFb() {
@@ -94,6 +101,11 @@ export class LoginComponent implements OnInit {
         this.error = "Account with that username and password does not exist.";
       })
     }
+  }
+
+  userClicked(){
+      this.error = ''
+      this.signupError = ''
   }
 
 }

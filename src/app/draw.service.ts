@@ -22,11 +22,11 @@ export class DrawService {
         });
     }
 
-    // Notify current clients that a new user entered the room
-    public newUser = () => {
+    // Notify current clients that a user has either entered or left the room
+    public updateUserCount = () => {
         return Observable.create((observer) => {
-            this.socket.on('newUser', () => {
-                observer.next();
+            this.socket.on('updateUserCount', (amount) => {
+                observer.next(amount);
             })
         })
     }
@@ -34,6 +34,24 @@ export class DrawService {
     // Send the server our room ID
     public sendRoom(room){
         this.socket.emit('room', room);
+    }
+
+    // Send the new canvas title to the server
+    public sendTitle(room, title) {
+        var roomTitle = {
+            room: room,
+            title: title
+        };
+        this.socket.emit('title', roomTitle);
+    }
+
+    // Get the new canvas title from the server
+    public getTitle() {
+        return Observable.create((observer) => {
+            this.socket.on('title', (title) => {
+                observer.next(title);
+            });
+        });
     }
 
     // Send a stroke object, its ID, and the client's room ID to the server

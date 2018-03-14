@@ -1,6 +1,7 @@
 html body {
     font-family: sans-serif;
     overflow: hidden;
+    height: 100%;
 }
 #canvas {
     position: relative;
@@ -34,28 +35,23 @@ html body {
 }
 .title-menu {
     border-radius: 8px;
-    cursor: pointer;
 }
 .title-box {
     padding: 5px 10px 5px 10px;
     margin-bottom: 5px;
 }
-.title-menu:hover {
-    background-color: gray;
-}
-.canvas-name {
+#canvas-name {
     background: 0 0;
     border: 1px solid transparent;
     font-weight: bold;
 }
-.title-text {
+#title-text {
     padding: 0 2px;
     font-size: 10px;
     color: #b3b3b3;
-}
-.dropdown-symbol {
-    margin-left: 15px;
-    padding-right: 15px;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 1s, visibility 1s;
 }
 
 /* Share Bar */

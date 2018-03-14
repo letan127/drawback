@@ -19,8 +19,8 @@
         </div>
         <div class="flex-element">
           <form #f='ngForm' (ngSubmit)="loginSubmit(f)" class="flex-element">
-              <input (click) = "userClicked()" class="un" type="text" placeholder="Username" (ngModel)="email" name="email" required>
-              <input (click) = "userClicked()" class="pass" type="password"  placeholder="Password" (ngModel)="password" name="password" required>
+              <input (click) = "userClicked()" class="un" type="text" placeholder="Username" (ngModel)="f.value.email" name="email" required>
+              <input (click) = "userClicked()" class="pass" type="password"  placeholder="Password" (ngModel)="f.value.password" name="password" required>
               <button type="submit" [disabled]="!f.valid" class="submit">Sign in</button>
           </form>
           <span id='error' *ngIf="error" class="error">{{ error }}</span>
@@ -35,8 +35,8 @@
           <div class="flex-element">
             <div class="signup">Welcome!</div>
             <form #formData='ngForm' (ngSubmit)="onSubmit(formData)" class="flex-element">
-              <input (click) = "userClicked()" class="signup-un" type="text" placeholder="Username" (ngModel)="email" name="email" required>
-              <input (click) = "userClicked()" class="signup-pass" type="password"  placeholder="Password" (ngModel)="password" name="password" required>
+              <input (click) = "userClicked()" class="signup-un" type="text" placeholder="Username" (ngModel)="formData.value.email" name="email" required>
+              <input (click) = "userClicked()" class="signup-pass" type="password"  placeholder="Password" (ngModel)="formData.value.password" name="password" required>
               <button type="submit" [disabled]="!formData.valid" class="signup-submit">Create my account</button>
             </form>
             <span class="error" *ngIf="signupError">{{ signupError }}</span>

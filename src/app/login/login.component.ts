@@ -12,8 +12,8 @@ import * as firebase from 'firebase/app';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  email: any;
-  password: any;
+  //email: any;
+  //password: any;
   error: any;
   signupError: any;
   roomID: string;
@@ -24,19 +24,11 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
-
       this.af.authState.subscribe(authState => {
         if(authState) {
           this.router.navigateByUrl(this.url);
         }
       });
-
-      var texts = document.getElementsByClassName("login-text");
-      for (var i=0; i < texts.length; i++) {
-          texts[i].addEventListener("focus", function() {
-              this.error = " ";
-          })
-      }
   }
 
   loginFb() {
@@ -72,11 +64,11 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(formData) {
-    console.log("log out")
-    this.email = formData.value.email;
-    this.password = formData.value.password;
+    //console.log("log out")
+    //this.email = formData.value.email;
+    //this.password = formData.value.password;
     if(formData.valid) {
-      this.af.auth.createUserWithEmailAndPassword(this.email, this.password).then(
+      this.af.auth.createUserWithEmailAndPassword(formData.value.email, formData.value.password).then(
         (success) => {
         console.log(success);
       }).catch(
@@ -88,16 +80,16 @@ export class LoginComponent implements OnInit {
   }
 
   loginSubmit(formData) {
-    console.log("login");
-    this.email = formData.value.email;
-    this.password = formData.value.password;
+    //console.log("login");
+    //this.email = formData.value.email;
+    //this.password = formData.value.password;
     if(formData.valid) {
-      this.af.auth.signInWithEmailAndPassword(this.email, this.password).then(
+      this.af.auth.signInWithEmailAndPassword(formData.value.email, formData.value.password).then(
         (success) => {
         console.log(success);
       }).catch(
         (err) => {
-        console.log("hello",err);
+        console.log(err);
         this.error = "Account with that username and password does not exist.";
       })
     }

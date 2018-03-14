@@ -470,7 +470,7 @@ export class CanvasComponent implements OnInit {
     }
 
     zoom(amount: number) {
-        if(scaleValue * amount > 5 || scaleValue * amount < .1) {
+        if(scaleValue * amount > 11 || scaleValue * amount < .09) {
             return;
         }
         scaleValue *= amount;
@@ -515,8 +515,10 @@ export class CanvasComponent implements OnInit {
     // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
     mouseUp(event: MouseEvent): void {
         drag = false;
-        this.drawService.reqStrokeID(this.id);
-        orphanedStrokes.push(curStroke);
+        if (draw) {
+            this.drawService.reqStrokeID(this.id);
+            orphanedStrokes.push(curStroke);
+        }
     }
 
     // Continue updating and drawing the current stroke
@@ -542,8 +544,14 @@ export class CanvasComponent implements OnInit {
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
         drag = false;
+        // TODO: Need to check if stroke has been drawn before mouseLeave
+        //if (draw) {
+        //    this.drawService.reqStrokeID(this.id);
+        //    orphanedStrokes.push(curStroke);
+        //}
     }
 
+    // Scroll to zoom
     mouseWheel(event): void {
         // https://stackoverflow.com/questions/6775168/zooming-with-canvas
         var mousex = event.clientX - canvas.offsetLeft;

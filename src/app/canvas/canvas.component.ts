@@ -79,7 +79,7 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a clear event, clear the canvas, and reset values
         this.drawService.getClear().subscribe(() => {
-            context.clearRect(0, 0, canvasWidth, canvasHeight);
+            context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
             strokes = [];
             myIDs = [];
             undoIDs = [];
@@ -121,13 +121,14 @@ export class CanvasComponent implements OnInit {
     ngAfterViewInit() {
         // Set callback functions for canvas mouse events
         canvas = <HTMLCanvasElement>document.getElementById("canvas");
-        this.resize();
         window.addEventListener("resize", this.resize.bind(this), false);
         canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
         canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
+        canvas.addEventListener("wheel",  this.mouseWheel.bind(this), false);
         context = canvas.getContext("2d");
+        this.resize();
 
         canvas.addEventListener("touchstart", function (e) {
             e.preventDefault();
@@ -229,9 +230,11 @@ export class CanvasComponent implements OnInit {
         canvas.height = window.innerHeight;
         canvasWidth = canvas.width;
         canvasHeight = canvas.height;
-
-        if (strokes.length > 0)
-            this.drawAll();
+        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
+        context.translate(offset.x, offset.y)
+        drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
+        drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
+        this.drawAll()
     }
 
     showShareModal() {
@@ -293,6 +296,7 @@ export class CanvasComponent implements OnInit {
 
     // Pen tool was clicked; get out of erase mode
     selectPen() {
+        draw = true;
         mode = "source-over";
     }
 
@@ -330,8 +334,8 @@ export class CanvasComponent implements OnInit {
 
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
-        // Clear the canvas
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        // Clear the canvas and also offscreen
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
 
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < strokes.length; i++) {
@@ -348,7 +352,7 @@ export class CanvasComponent implements OnInit {
 
     // Removes everything from the canvas and sends a clear message to the server
     clear() {
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
         strokes = [];
         myIDs = [];
         undoIDs = [];
@@ -460,49 +464,93 @@ export class CanvasComponent implements OnInit {
         document.getElementById("pen-slider-value").innerHTML = ""+size; // num to string
     }
 
+    // Clicked panning button
+    setPan() {
+        draw = false;
+    }
+
+    zoom(amount: number) {
+        if(scaleValue * amount > 5 || scaleValue * amount < .1) {
+            return;
+        }
+        scaleValue *= amount;
+        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
+        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
+        context.translate(offset.x, offset.y)
+        drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
+        drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
+        this.drawAll();
+
+        // Update displayed zoom amount
+        document.getElementById("zoom-amount").innerHTML = ""+Math.round(100 * scaleValue) + "%";
+    }
+
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
-        // Discard stored undos
-        orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
-        if(undoIDs.length) {
-            //TODO: remove the stroke from stroke array?
-            undoIDs = [];
+        if(draw) {
+            // Discard stored undos
+            orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
+            if(undoIDs.length) {
+                //TODO: remove the stroke from stroke array?
+                undoIDs = [];
+            }
+
+            // Get the cursor's current position
+            x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
+            y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
+            // Add the stroke's pixels and tool settings
+            curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize/scaleValue, mode, true);
+            curStroke.pos.push(new Position(x,y));
+            drag = true;
+            this.draw(curStroke);
         }
-
-        // Get the cursor's current position
-        x = event.x - canvas.offsetLeft;
-        y = event.y - canvas.offsetTop;
-
-        // Add the stroke's pixels and tool settings
-        curStroke = new Stroke(new Array<Position>(), currentPaintColor, currentPenSize, mode, true);
-        // Get the first pixel in the new stroke
-        curStroke.pos.push(new Position(x,y));
-        drag = true;
-        this.draw(curStroke);
+        else {
+            // Panning
+            previousPosition.x = event.x - canvas.offsetLeft;
+            previousPosition.y = event.y - canvas.offsetTop;
+            drag = true;
+        }
     }
 
     // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
     mouseUp(event: MouseEvent): void {
         drag = false;
         this.drawService.reqStrokeID(this.id);
-        // Highly unlikely to get an ID immediately, so just send the stroke to a buffer
         orphanedStrokes.push(curStroke);
     }
 
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
-        if (drag == true) {
-            var x = event.x - canvas.offsetLeft;
-            var y = event.y - canvas.offsetTop;
+        if (drag && draw) {
+            var x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
+            var y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
             curStroke.pos.push(new Position(x,y));
             this.draw(curStroke);
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
+        }
+        else if (drag && !draw) {
+            // Translate the context by how much is moved
+            var currentPosition = new Position(event.x - canvas.offsetLeft, event.y - canvas.offsetTop);
+            var changePosition  = new Position(previousPosition.x - currentPosition.x, previousPosition.y - currentPosition.y);
+            previousPosition = currentPosition;
+            offset.add(changePosition);
+            context.translate(changePosition.x, changePosition.y);
+            this.drawAll();
         }
     }
 
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
         drag = false;
+    }
+
+    mouseWheel(event): void {
+        // https://stackoverflow.com/questions/6775168/zooming-with-canvas
+        var mousex = event.clientX - canvas.offsetLeft;
+        var mousey = event.clientY - canvas.offsetTop;
+        var wheel = event.wheelDelta/120;//n or -n
+        var scaleAmount = 1 + wheel/2;
+        this.zoom(scaleAmount);
     }
 }
 
@@ -516,6 +564,11 @@ var currentPenSize = 8;
 var x;
 var y;
 var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
+var draw = true;
+var previousPosition: Position = new Position(0,0);
+var offset: Position = new Position(0,0); // offset relative to current origin
+var scaleValue = 1;
+var drawPosition: Position = new Position(0,0); // Draw positoin relative to original origin
 
 // Global stroke data
 var strokes = new Array<Stroke>();      // Contains every stroke on the canvas

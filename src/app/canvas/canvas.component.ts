@@ -8,11 +8,12 @@ import { Inject } from '@angular/core';
 
 import { AngularFireAuth } from 'angularfire2/auth';
 
+import * as io from 'socket.io-client';
+
 @Component({
     selector: 'app-canvas',
     templateUrl: './canvas.component.html',
-    styleUrls: ['./canvas.component.css'],
-    providers: [DrawService]
+    styleUrls: ['./canvas.component.css']
 })
 
 export class CanvasComponent implements OnInit {
@@ -25,6 +26,7 @@ export class CanvasComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.drawService.setSocket(io('http://localhost:4000'));
         this.af.authState.subscribe(authState => {
             if(!authState) {
                 this.loginButton = "Sign Up or Login"
@@ -479,16 +481,10 @@ export class CanvasComponent implements OnInit {
     }
 
     authentication(){
-        var idIndex = this.url.indexOf("/rooms");
-        var url = this.url.slice(0, idIndex);
-        var moveButton = document.createElement("a");
         if(this.loginState){
-            moveButton.setAttribute("href", url + "/login/" + this.id);
-            moveButton.click();
+            this.router.navigate(['../login/' + this.id]);
         }
         else if (!this.loginState){
-            moveButton.setAttribute("href", url + "/rooms/" + this.id);
-            moveButton.click();
             this.af.auth.signOut();
             console.log('logged out');
         }

@@ -5,10 +5,13 @@ import { DOCUMENT } from '@angular/platform-browser';
 import { Inject } from '@angular/core';
 import * as firebase from 'firebase/app';
 
+import { DrawService } from '../draw.service';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
+  //providers: [DrawService]
 })
 export class LoginComponent implements OnInit {
   error: any;
@@ -17,21 +20,22 @@ export class LoginComponent implements OnInit {
   total_url: string;
   url:any;
   idIndex:any;
-  moveButton:any;
-  
-  constructor(public af: AngularFireAuth,private router: Router, @Inject(DOCUMENT) private document: Document) {
+  //moveButton:any;
+
+  constructor(private drawService: DrawService, public af: AngularFireAuth,private router: Router, @Inject(DOCUMENT) private document: Document) {
     this.total_url = this.document.location.href;
     this.idIndex = this.total_url.indexOf("/login");
     this.roomID = this.total_url.slice(this.idIndex+7, this.total_url.length);
     this.url = this.total_url.slice(0, this.idIndex);
-    this.moveButton = document.createElement("a");
   }
 
   ngOnInit() {
+
+      this.drawService.getSocket().disconnect();
+
       this.af.authState.subscribe(authState => {
         if(authState) {
-          this.moveButton.setAttribute("href", this.url + "/rooms/" + this.roomID);
-          this.moveButton.click();
+          this.router.navigateByUrl('/rooms/' + this.roomID);
         }
       });
   }
@@ -40,8 +44,7 @@ export class LoginComponent implements OnInit {
     this.af.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
     .then(
         (success) => {
-        this.moveButton.setAttribute("href", this.url + "/rooms/" + this.roomID);
-        this.moveButton.click();
+        this.router.navigate(['/rooms/' + this.roomID]);
       }).catch(
         (err) => {
         this.error = err;
@@ -52,8 +55,7 @@ export class LoginComponent implements OnInit {
     this.af.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .then(
         (success) => {
-        this.moveButton.setAttribute("href", this.url + "/rooms/" + this.roomID);
-        this.moveButton.click();
+        this.router.navigate(['/rooms/' + this.roomID]);
       }).catch(
         (err) => {
         this.error = err;

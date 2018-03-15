@@ -13,6 +13,8 @@ import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 
+import { DrawService } from './draw.service';
+
 export const config = {
   apiKey: "AIzaSyBBIYSjhH5moXzFra9BUH-m_0denvu3HmE",
   authDomain: "peppy-coda-192823.firebaseapp.com",
@@ -45,6 +47,7 @@ const appRoutes: Routes = [
         AngularFireDatabaseModule,
         AngularFireAuthModule
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
+    providers: [DrawService]
 })
 export class AppModule { }

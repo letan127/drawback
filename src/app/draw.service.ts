@@ -13,6 +13,10 @@ export class DrawService {
         this.socket = io(this.url);
     }
 
+    public getSocket(){
+        return this.socket;
+    }
+
     // Give the new user the current state of the canvas
     public initUser = () => {
         return Observable.create((observer) => {

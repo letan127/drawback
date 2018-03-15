@@ -13,8 +13,6 @@ import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 
-import { LoginService } from './login.service';
-
 export const config = {
   apiKey: "AIzaSyBBIYSjhH5moXzFra9BUH-m_0denvu3HmE",
   authDomain: "peppy-coda-192823.firebaseapp.com",
@@ -26,7 +24,7 @@ export const config = {
 
 const appRoutes: Routes = [
     {path: 'rooms/:id', component: CanvasComponent},
-    {path: 'login', component: LoginComponent}
+    {path: 'login/:id', component: LoginComponent}
 ];
 
 
@@ -47,7 +45,6 @@ const appRoutes: Routes = [
         AngularFireDatabaseModule,
         AngularFireAuthModule
     ],
-    providers: [LoginService],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

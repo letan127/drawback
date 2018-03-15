@@ -2,7 +2,6 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Stroke } from '../stroke';
 import { Position } from '../position';
 import { DrawService } from '../draw.service';
-import { LoginService } from '../login.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DOCUMENT } from '@angular/platform-browser';
 import { Inject } from '@angular/core';
@@ -22,7 +21,7 @@ export class CanvasComponent implements OnInit {
     numUsers = 1;
     loginState = true;
     loginButton = "Sign Up or Login";
-    constructor(private drawService: DrawService, private loginService: LoginService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router, public af: AngularFireAuth) {
+    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router, public af: AngularFireAuth) {
     }
 
     ngOnInit(): void {
@@ -44,8 +43,6 @@ export class CanvasComponent implements OnInit {
         this.route.params.subscribe(params => {
             this.id = params['id'];
         })
-
-        this.loginService.setRoomID(this.id);
 
         // Send the room ID to the server
         this.drawService.sendRoom(this.id);
@@ -482,14 +479,19 @@ export class CanvasComponent implements OnInit {
     }
 
     authentication(){
-      if(this.loginState){
-        this.loginService.setRoomID(this.id);
-        this.router.navigate(['../login']);
-      }
-      else if (!this.loginState){
-        this.af.auth.signOut();
-        console.log('logged out');
-      }
+        var idIndex = this.url.indexOf("/rooms");
+        var url = this.url.slice(0, idIndex);
+        var moveButton = document.createElement("a");
+        if(this.loginState){
+            moveButton.setAttribute("href", url + "/login/" + this.id);
+            moveButton.click();
+        }
+        else if (!this.loginState){
+            moveButton.setAttribute("href", url + "/rooms/" + this.id);
+            moveButton.click();
+            this.af.auth.signOut();
+            console.log('logged out');
+        }
     }
     // Clicked panning button
     setPan() {

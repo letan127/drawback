@@ -23,7 +23,7 @@ app.get('/rooms/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist/index.html'));
 });
 
-app.get('/login', (req, res) => {
+app.get('/login/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist/index.html'));
 });
 

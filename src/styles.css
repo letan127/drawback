@@ -2,11 +2,34 @@
 
 /* source: https://alligator.io/angular/custom-loading-screen/ */
 
+.flex-container{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+#logo{
+    background: url('./assets/pencil3.svg') no-repeat;
+    background-size: 70px;
+    color: white;
+    letter-spacing: 1px;
+    margin-right: 5px;
+    width: 70px;
+    height: 70px;
+    border: none;
+    border-radius: 70px;
+    outline: none;
+    box-sizing: border-box;
+    margin-top: 300px;
+    border: 2px solid #FFFF;
+}
+
 #loading {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+     height: 30vh;
     color: #4CAF50;
     text-transform: uppercase;
     font-size: 2.5em;

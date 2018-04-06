@@ -5,12 +5,16 @@
   <meta charset="UTF-8">
   <title>Drawback</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Comfortaa" />
 </head>
 
 <body>
     <div class="main flex-container">
         <!-- <span class="error" *ngIf="error">{{ error }}</span> -->
-        <div class="sign">Drawback</div>
+        <div class="flex-element1">
+            <div id="logo"></div>
+            <div class="sign">DrawBack</div>
+        </div>
         <div class="flex-element1">
           <div (click)="loginFb()" id="fb">
             <a id='facebook'></a>
@@ -33,7 +37,10 @@
         <div class="modal-content">
           <span class="close" (click)="closeShareModal()">&times;</span>
           <div class="flex-element">
-            <div class="signup">Welcome!</div>
+              <div class="flex-element1">
+                  <div id="logo2"></div>
+                  <div class="signup">Welcome!</div>
+              </div>
             <form #formData='ngForm' (ngSubmit)="onSubmit(formData)" class="flex-element">
               <input (click) = "userClicked()" class="signup-un" type="text" placeholder="Email" (ngModel)="formData.value.email" name="email" required>
               <input (click) = "userClicked()" class="signup-pass" type="password"  placeholder="Password" (ngModel)="formData.value.password" name="password" required>

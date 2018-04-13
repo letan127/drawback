@@ -179,46 +179,23 @@ export class CanvasComponent implements OnInit {
     ngAfterViewInit() {
         // Set callback functions for canvas mouse events
         this.canvas = <HTMLCanvasElement>document.getElementById("canvas");
+        this.context = this.canvas.getContext("2d");
         window.addEventListener("resize", this.resize.bind(this), false);
+
+        // Canvas mouse events
         this.canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
         this.canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
         this.canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
         this.canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
         this.canvas.addEventListener("wheel",  this.mouseWheel.bind(this), false);
-        this.context = this.canvas.getContext("2d");
+
+        // Mobile events
+        this.canvas.addEventListener("touchstart", this.touchstart.bind(this), false);
+        this.canvas.addEventListener("touchmove", this.touchmove.bind(this), false);
+        this.canvas.addEventListener("touchend", this.touchend.bind(this), false);
+        this.canvas.addEventListener("touchcancel", this.touchcancel.bind(this), false);
+
         this.resize();
-
-        this.canvas.addEventListener("touchstart", function (e) {
-            e.preventDefault();
-              var touch = e.touches[0];
-              var mouseEvent = new MouseEvent("mousedown", {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-              });
-              this.dispatchEvent(mouseEvent);
-        }, false);
-
-        this.canvas.addEventListener("touchend", function (e) {
-            e.preventDefault();
-              var mouseEvent = new MouseEvent("mouseup", {});
-              this.dispatchEvent(mouseEvent);
-        }, false);
-
-        this.canvas.addEventListener("touchcancel",function (e) {
-            e.preventDefault();
-              var mouseEvent = new MouseEvent("mouseleave", {});
-              this.dispatchEvent(mouseEvent);
-        }, false);
-
-        this.canvas.addEventListener("touchmove", function (e) {
-          e.preventDefault();
-              var touch = e.touches[0];
-              var mouseEvent = new MouseEvent("mousemove", {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-              });
-              this.dispatchEvent(mouseEvent);
-        }, false);
 
         // Click canvas name to highlight all the text
         var name = <HTMLInputElement>document.getElementById("canvas-name");
@@ -513,5 +490,37 @@ export class CanvasComponent implements OnInit {
         var wheel = event.wheelDelta/120;//n or -n
         var scaleAmount = 1 + wheel/2;
         this.tool.zoom(scaleAmount);
+    }
+
+    touchstart(event: TouchEvent): void {
+        event.preventDefault();
+        var touch = event.touches[0];
+        var mouseEvent = new MouseEvent("mousedown", {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        this.canvas.dispatchEvent(mouseEvent);
+    }
+
+    touchmove(event: TouchEvent): void {
+        event.preventDefault();
+        var touch = event.touches[0];
+        var mouseEvent = new MouseEvent("mousemove", {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        this.canvas.dispatchEvent(mouseEvent);
+    }
+
+    touchend(event: TouchEvent): void {
+        event.preventDefault();
+        var mouseEvent = new MouseEvent("mouseup", {});
+        this.canvas.dispatchEvent(mouseEvent);
+    }
+
+    touchcancel(event: TouchEvent): void {
+        event.preventDefault();
+        var mouseEvent = new MouseEvent("mouseLeave", {});
+        this.canvas.dispatchEvent(mouseEvent);
     }
 }

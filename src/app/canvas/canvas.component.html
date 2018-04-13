@@ -13,7 +13,9 @@
     <app-tools (setDraw)="setDraw($event)"
                 (callUndo)="undo()"
                 (callRedo)="redo()"
-                (callClear)="clear()">
+                (callClear)="clear()"
+                (callZoom)="zoom($event)"
+                [scaleValue]="scaleValue">
     </app-tools>
     <div class="top-bar header-bar flex-horizontal canvas-component">
         <div class="title-menu flex-horizontal">
@@ -42,26 +44,6 @@
             </div>
         </div>
         <div id="signup-login" class="bar bar-button flex-horizontal" (click)="authentication()">{{loginButton}}</div>
-    </div>
-
-    <!-- Navigation Bar  -->
-    <div class="navigation-bar toolbar flex-vertical canvas-component">
-        <div id="zoom-in" class="tool-button tool-tip" (click) = "zoom(1.5)">
-            <i class="fa fa-search-plus"></i>
-            <span class="tool-tip-text">Zoom In</span>
-        </div>
-        <div id="zoom-amount" class="tools-text">100%</div>
-        <div id="zoom-out" class="tool-button tool-tip" (click) = "zoom(1/1.5)">
-            <i class="fa fa-search-minus"></i>
-            <span class="tool-tip-text">Zoom Out</span>
-        </div>
-        <div class="vertical-separator flex-vertical">
-            <div class="tool-separator"></div>
-        </div>
-        <div id="move" class="tool-button tool-tip" (click) = "setPan()">
-            <i class="fa fa-hand-paper-o"></i>
-            <span class="tool-tip-text">Move</span>
-        </div>
     </div>
     <!-- User Count -->
     <div class="bottom-right-bar bar flex-horizontal canvas-component">

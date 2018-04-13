@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, AfterViewInit, EventEmitter, Output, Input } from '@angular/core';
 
 @Component({
     selector: 'app-tools',
@@ -13,6 +13,8 @@ export class ToolsComponent implements OnInit {
     @Output() callUndo = new EventEmitter();
     @Output() callRedo = new EventEmitter();
     @Output() callClear = new EventEmitter();
+    @Output() callZoom = new EventEmitter<number>();
+    @Input() scaleValue: number; // Get reference to CanvasComponent's scaleValue
 
     constructor() {
         this.mode = "source-over";
@@ -77,6 +79,10 @@ export class ToolsComponent implements OnInit {
     selectEraser() {
         this.setDraw.emit(true);
         this.mode = "destination-out";
+    }
+
+    selectPan() {
+        this.setDraw.emit(false);
     }
 
     // Change the pen color and notify the server
@@ -153,5 +159,14 @@ export class ToolsComponent implements OnInit {
 
     clear() {
         this.callClear.next();
+    }
+
+    zoom(amount: number) {
+        if(this.scaleValue * amount > 11 || this.scaleValue * amount < .09) {
+            return;
+        }
+        this.callZoom.emit(amount);
+        // Update displayed zoom amount
+        document.getElementById("zoom-amount").innerHTML = ""+Math.round(100 * this.scaleValue * amount) + "%";
     }
 }

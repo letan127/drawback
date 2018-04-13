@@ -1,0 +1,30 @@
+<div id="share-button" class="bar-button tool-tip" (click)="showShareModal()">
+    <i class="fa fa-user-plus"></i>
+    <span id="copy-tooltip" class="tool-tip-text">Share Room</span>
+</div>
+
+<div id="share-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="close" (click)="closeShareModal()">&times;</div>
+            <h2>Invite or Join Others</h2>
+        </div>
+        <div class="modal-body">
+            <div class="modal-item">
+                <div class="modal-text">Current Room URL</div>
+                <div class="flex-horizontal">
+                    <input id="room-url" [value]="url + '/rooms/' + roomID" type="text" class="input-bar" readonly>
+                    <span id="copy-button" [innerHTML]="copyMsg" class="bar bar-button" (click)="copyURL()"></span>
+                </div>
+            </div>
+            <div class="modal-item">
+                <div class="modal-text">Enter an existing room ID</div>
+                <div class="flex-horizontal">
+                    <input id="new-room-id" [placeholder]="roomID" type="text" class="input-bar" maxlength="5" autocomplete="off" (input)="resetError()" >
+                    <a class="bar bar-button" (click)="submitRoom()">Change Room</a>
+                </div>
+                <div [innerHTML]="errorMsg" id="error-message" class="error"></div>
+            </div>
+        </div>
+    </div>
+</div>

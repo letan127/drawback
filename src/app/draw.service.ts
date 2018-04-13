@@ -149,8 +149,8 @@ export class DrawService {
 
     public getRoomCheck = () => {
         return Observable.create((observer) => {
-            this.socket.on('check', (checkRoom) => {
-                observer.next(checkRoom);
+            this.socket.on('check', (hasRoom) => {
+                observer.next(hasRoom);
             });
         });
     }

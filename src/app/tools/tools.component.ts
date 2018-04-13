@@ -69,20 +69,12 @@ export class ToolsComponent implements OnInit {
         document.getElementById(tool).classList.toggle("show");
     }
 
-    // Pen tool was clicked; get out of erase mode; get out of pan mode
-    selectPen() {
-        this.setDraw.emit(true);
-        this.mode = "source-over";
-    }
-
-    // Set the pen color to the color of the background; get out of pan mode
-    selectEraser() {
-        this.setDraw.emit(true);
-        this.mode = "destination-out";
-    }
-
-    selectPan() {
-        this.setDraw.emit(false);
+    // Selected pen, eraser, or pan
+    // draw=true if pen or eraser are selected
+    // mode set to pen (instead of eraser) by default
+    selectTool(draw: boolean, mode: string="source-over") {
+        this.setDraw.emit(draw);
+        this.mode = mode;
     }
 
     // Change the pen color and notify the server

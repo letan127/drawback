@@ -24,6 +24,8 @@ export class CanvasComponent implements OnInit {
     loginState: boolean;
     loginButton: string;
 
+    scaleValue: number;
+
     // Get a reference to the nested ToolsComponent in our HTML
     @ViewChild(ToolsComponent)
     private tool: ToolsComponent;
@@ -34,6 +36,8 @@ export class CanvasComponent implements OnInit {
         this.numUsers = 1;
         this.loginState = true;
         this.loginButton = "Sign Up or Login";
+
+        this.scaleValue = 1;
     }
 
     ngOnInit(): void {
@@ -230,10 +234,10 @@ export class CanvasComponent implements OnInit {
         canvas.height = window.innerHeight;
         canvasWidth = canvas.width;
         canvasHeight = canvas.height;
-        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
+        context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * canvas.width/2, -(this.scaleValue - 1) * canvas.height/2);
         context.translate(offset.x, offset.y)
-        drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
-        drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
+        drawPosition.x = -(this.scaleValue - 1) * (canvas.width/2);
+        drawPosition.y = -(this.scaleValue - 1) * (canvas.height/2);
         this.drawAll()
     }
 
@@ -394,25 +398,15 @@ export class CanvasComponent implements OnInit {
             console.log('logged out');
         }
     }
-    // Clicked panning button
-    setPan() {
-        draw = false;
-    }
 
     zoom(amount: number) {
-        if(scaleValue * amount > 11 || scaleValue * amount < .09) {
-            return;
-        }
-        scaleValue *= amount;
+        this.scaleValue *= amount;
         //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
-        context.setTransform(scaleValue, 0, 0, scaleValue, -(scaleValue - 1) * canvas.width/2, -(scaleValue - 1) * canvas.height/2);
+        context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * canvas.width/2, -(this.scaleValue - 1) * canvas.height/2);
         context.translate(offset.x, offset.y)
-        drawPosition.x = -(scaleValue - 1) * (canvas.width/2);
-        drawPosition.y = -(scaleValue - 1) * (canvas.height/2);
+        drawPosition.x = -(this.scaleValue - 1) * (canvas.width/2);
+        drawPosition.y = -(this.scaleValue - 1) * (canvas.height/2);
         this.drawAll();
-
-        // Update displayed zoom amount
-        document.getElementById("zoom-amount").innerHTML = ""+Math.round(100 * scaleValue) + "%";
     }
 
     // Start drawing a stroke
@@ -426,10 +420,10 @@ export class CanvasComponent implements OnInit {
             }
 
             // Get the cursor's current position
-            x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
-            y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
+            x = ((event.x - canvas.offsetLeft - drawPosition.x)/this.scaleValue) - offset.x;
+            y = ((event.y - canvas.offsetTop - drawPosition.y)/this.scaleValue) - offset.y;
             // Add the stroke's pixels and tool settings
-            curStroke = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/scaleValue, this.tool.mode, true);
+            curStroke = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
             curStroke.pos.push(new Position(x,y));
             drag = true;
             this.draw(curStroke);
@@ -454,8 +448,8 @@ export class CanvasComponent implements OnInit {
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (drag && draw) {
-            var x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
-            var y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
+            var x = ((event.x - canvas.offsetLeft - drawPosition.x)/this.scaleValue) - offset.x;
+            var y = ((event.y - canvas.offsetTop - drawPosition.y)/this.scaleValue) - offset.y;
             curStroke.pos.push(new Position(x,y));
             this.draw(curStroke);
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
@@ -488,7 +482,7 @@ export class CanvasComponent implements OnInit {
         var mousey = event.clientY - canvas.offsetTop;
         var wheel = event.wheelDelta/120;//n or -n
         var scaleAmount = 1 + wheel/2;
-        this.zoom(scaleAmount);
+        this.tool.zoom(scaleAmount);
     }
 }
 
@@ -503,7 +497,7 @@ var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
 var draw = true;
 var previousPosition: Position = new Position(0,0);
 var offset: Position = new Position(0,0); // offset relative to current origin
-var scaleValue = 1;
+// var scaleValue = 1;
 var drawPosition: Position = new Position(0,0); // Draw positoin relative to original origin
 
 // Global stroke data

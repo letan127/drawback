@@ -9,6 +9,7 @@ export class ToolsComponent implements OnInit {
     mode: string;   // Determines whether pen or eraser is used
     color: string;  // Pen color
     size: number;   // Pen/Eraser size
+    allColors: string[]; // List of all available colors
     @Output() setDraw = new EventEmitter<boolean>(); // Update CanvasComponent's draw
     @Output() callUndo = new EventEmitter();
     @Output() callRedo = new EventEmitter();
@@ -20,6 +21,7 @@ export class ToolsComponent implements OnInit {
         this.mode = "source-over";
         this.color = "black";
         this.size = 8;
+        this.allColors = ['black', 'red', 'orange', 'yellow', 'green', 'blue', 'darkMagenta'];
     }
 
     ngOnInit() {
@@ -66,38 +68,9 @@ export class ToolsComponent implements OnInit {
         this.mode = mode;
     }
 
-    // Change the pen color and notify the server
-    changeColor(event) {
-        if (event.target.tagName.toLowerCase() === "i")
-            var color = event.currentTarget.id; // Get parent's ID
-        else
-            var color = event.target.id;
-
-        switch(color) {
-            case "black":
-                this.color = "black";
-                break;
-            case "red":
-                this.color = "red";
-                break;
-            case "orange":
-                this.color = "orange";
-                break;
-            case "yellow":
-                this.color = "yellow";
-                break;
-            case "green":
-                this.color = "green";
-                break;
-            case "blue":
-                this.color = "blue";
-                break;
-            case "darkMagenta":
-                this.color = "darkMagenta";
-                break;
-            default:
-                this.color = "black";
-        }
+    // Change the pen color
+    changeColor(color: string) {
+        this.color = color;
     }
 
     // Change the pen size and slider display

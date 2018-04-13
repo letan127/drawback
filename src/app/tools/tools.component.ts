@@ -6,9 +6,9 @@ import { Component, OnInit, AfterViewInit, EventEmitter, Output, Input } from '@
     styleUrls: ['./tools.component.css']
 })
 export class ToolsComponent implements OnInit {
-    mode: string;
-    color: string;
-    size: number;
+    mode: string;   // Determines whether pen or eraser is used
+    color: string;  // Pen color
+    size: number;   // Pen/Eraser size
     @Output() setDraw = new EventEmitter<boolean>(); // Update CanvasComponent's draw
     @Output() callUndo = new EventEmitter();
     @Output() callRedo = new EventEmitter();

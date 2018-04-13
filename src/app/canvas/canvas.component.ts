@@ -18,17 +18,33 @@ import * as io from 'socket.io-client';
 })
 
 export class CanvasComponent implements OnInit {
+    // Canvas/Room metadata
     id: string;
     url: string;
     numUsers: number;
     loginState: boolean;
     loginButton: string;
 
-    scaleValue: number;
+    // Reference to the ToolsComponent used in the HTML
+    @ViewChild(ToolsComponent) private tool: ToolsComponent;
 
-    // Get a reference to the nested ToolsComponent in our HTML
-    @ViewChild(ToolsComponent)
-    private tool: ToolsComponent;
+    // Canvas data
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    canDraw: boolean;       // Changes appear on canvas; only false when panning
+    drag: boolean;          // True if we should be drawing to canvas
+    scaleValue: number;     // Zoom multiplier
+    offset: Position;       // Offset relative to current origin
+    drawPosition: Position; // Draw position relative to original origin
+    previousPosition: Position;
+
+    // Stroke data
+    strokes: Stroke[];          // Every stroke on the canvas
+    orphanedStrokes: Stroke[];  // Strokes waiting for an ID from the server
+    curStroke: Stroke;          // Current stroke being drawn
+    myIDs: number[];            // IDs of strokes drawn by this user
+    undoIDs: number[];          // IDs of strokes that were undone and won't be drawn
+    orphanUndoCount: number;    // Number of strokes that were undone and need an ID
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router, public af: AngularFireAuth) {
         this.id = '';
@@ -37,7 +53,18 @@ export class CanvasComponent implements OnInit {
         this.loginState = true;
         this.loginButton = "Sign Up or Login";
 
+        this.canDraw = true;
+        this.previousPosition = new Position(0,0);
+        this.offset = new Position(0,0);
         this.scaleValue = 1;
+        this.drawPosition = new Position(0,0);
+
+        this.strokes = new Array<Stroke>();
+        this.orphanedStrokes = new Array<Stroke>();
+        this.myIDs= new Array<number>();
+        this.undoIDs = new Array<number>();
+        this.drag = false;
+        this.orphanUndoCount = 0;
     }
 
     ngOnInit(): void {
@@ -68,7 +95,7 @@ export class CanvasComponent implements OnInit {
         this.drawService.initUser().subscribe(init => {
             (<HTMLInputElement>document.getElementById("canvas-name")).value = init.name;
             this.numUsers = init.numUsers;
-            strokes = init.strokes;
+            this.strokes = init.strokes;
             this.updateUserCount();
             this.drawAll();
         })
@@ -89,46 +116,46 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
-            strokes[message.strokeID] = message.stroke;
+            this.strokes[message.strokeID] = message.stroke;
             this.draw(message.stroke);
         })
 
         // When the server sends a strokeID, give it to the earliest orphaned stroke
         // and send the stroke to everyone else
         this.drawService.getStrokeID().subscribe(strokeID => {
-            if(!orphanedStrokes.length)
+            if(!this.orphanedStrokes.length)
                 return;
             // Determine which stack to add the strokeID to
-            if (!orphanedStrokes[0].draw) {
-                undoIDs.unshift(strokeID);
+            if (!this.orphanedStrokes[0].draw) {
+                this.undoIDs.unshift(strokeID);
             }
             else
-                myIDs.push(strokeID);
-            strokes[strokeID] = orphanedStrokes.shift();
-            this.drawService.sendStroke(strokes[strokeID], strokeID, this.id);
+                this.myIDs.push(strokeID);
+            this.strokes[strokeID] = this.orphanedStrokes.shift();
+            this.drawService.sendStroke(this.strokes[strokeID], strokeID, this.id);
         })
 
         // When the server sends a clear event, clear the canvas, and reset values
         this.drawService.getClear().subscribe(() => {
-            context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
-            strokes = [];
-            myIDs = [];
-            undoIDs = [];
-            orphanedStrokes = [];
-            orphanUndoCount = 0;
+            this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
+            this.strokes = [];
+            this.myIDs = [];
+            this.undoIDs = [];
+            this.orphanedStrokes = [];
+            this.orphanUndoCount = 0;
             document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
             this.fade();
         })
 
         // Received another client's undo; don't draw that stroke
         this.drawService.getUndo().subscribe(strokeID => {
-            strokes[strokeID].draw = false;
+            this.strokes[strokeID].draw = false;
             this.drawAll();
         })
 
         // Received another client's redo; draw that stroke
         this.drawService.getRedo().subscribe(strokeID => {
-            strokes[strokeID].draw = true;
+            this.strokes[strokeID].draw = true;
             this.drawAll();
         })
 
@@ -151,43 +178,46 @@ export class CanvasComponent implements OnInit {
 
     ngAfterViewInit() {
         // Set callback functions for canvas mouse events
-        canvas = <HTMLCanvasElement>document.getElementById("canvas");
+        this.canvas = <HTMLCanvasElement>document.getElementById("canvas");
         window.addEventListener("resize", this.resize.bind(this), false);
-        canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
-        canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
-        canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
-        canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
-        canvas.addEventListener("wheel",  this.mouseWheel.bind(this), false);
-        context = canvas.getContext("2d");
+        this.canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
+        this.canvas.addEventListener("mousemove", this.mouseMove.bind(this), false);
+        this.canvas.addEventListener("mouseleave", this.mouseLeave.bind(this), false);
+        this.canvas.addEventListener("mouseup",  this.mouseUp.bind(this), false);
+        this.canvas.addEventListener("wheel",  this.mouseWheel.bind(this), false);
+        this.context = this.canvas.getContext("2d");
         this.resize();
 
-        canvas.addEventListener("touchstart", function (e) {
+        this.canvas.addEventListener("touchstart", function (e) {
             e.preventDefault();
               var touch = e.touches[0];
               var mouseEvent = new MouseEvent("mousedown", {
                 clientX: touch.clientX,
                 clientY: touch.clientY
               });
-              canvas.dispatchEvent(mouseEvent);
+              this.dispatchEvent(mouseEvent);
         }, false);
-        canvas.addEventListener("touchend", function (e) {
+
+        this.canvas.addEventListener("touchend", function (e) {
             e.preventDefault();
               var mouseEvent = new MouseEvent("mouseup", {});
-              canvas.dispatchEvent(mouseEvent);
+              this.dispatchEvent(mouseEvent);
         }, false);
-        canvas.addEventListener("touchcancel",function (e) {
+
+        this.canvas.addEventListener("touchcancel",function (e) {
             e.preventDefault();
               var mouseEvent = new MouseEvent("mouseleave", {});
-              canvas.dispatchEvent(mouseEvent);
+              this.dispatchEvent(mouseEvent);
         }, false);
-        canvas.addEventListener("touchmove", function (e) {
+
+        this.canvas.addEventListener("touchmove", function (e) {
           e.preventDefault();
               var touch = e.touches[0];
               var mouseEvent = new MouseEvent("mousemove", {
                 clientX: touch.clientX,
                 clientY: touch.clientY
               });
-              canvas.dispatchEvent(mouseEvent);
+              this.dispatchEvent(mouseEvent);
         }, false);
 
         // Click canvas name to highlight all the text
@@ -230,14 +260,14 @@ export class CanvasComponent implements OnInit {
     }
     // When the window is resized, reset the canvas size and redraw it
     resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        canvasWidth = canvas.width;
-        canvasHeight = canvas.height;
-        context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * canvas.width/2, -(this.scaleValue - 1) * canvas.height/2);
-        context.translate(offset.x, offset.y)
-        drawPosition.x = -(this.scaleValue - 1) * (canvas.width/2);
-        drawPosition.y = -(this.scaleValue - 1) * (canvas.height/2);
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.canvas.width = this.canvas.width;
+        this.canvas.height = this.canvas.height;
+        this.context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * this.canvas.width/2, -(this.scaleValue - 1) * this.canvas.height/2);
+        this.context.translate(this.offset.x, this.offset.y)
+        this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
+        this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
         this.drawAll()
     }
 
@@ -291,7 +321,7 @@ export class CanvasComponent implements OnInit {
 
     // Sets draw to true or false depending on whether pen or pan was clicked
     setDraw(value: boolean) {
-        draw = value;
+        this.canDraw = value;
     }
 
     // Draws a single stroke that is passed in as an argument
@@ -299,54 +329,54 @@ export class CanvasComponent implements OnInit {
         if(!stroke.draw)
             return;
 
-        context.strokeStyle = stroke.color;
-        context.lineWidth = stroke.size;
-        context.globalCompositeOperation = stroke.mode;
-        context.lineJoin = "round";
+        this.context.strokeStyle = stroke.color;
+        this.context.lineWidth = stroke.size;
+        this.context.globalCompositeOperation = stroke.mode;
+        this.context.lineJoin = "round";
         // Draw the first pixel in the stroke
-        context.beginPath();
-        context.moveTo(stroke.pos[0].x-1, stroke.pos[0].y);
-        context.lineTo(stroke.pos[0].x, stroke.pos[0].y);
-        context.closePath();
-        context.stroke();
+        this.context.beginPath();
+        this.context.moveTo(stroke.pos[0].x-1, stroke.pos[0].y);
+        this.context.lineTo(stroke.pos[0].x, stroke.pos[0].y);
+        this.context.closePath();
+        this.context.stroke();
 
         // Draw the rest of the pixels in the stroke
         for (var j = 1; j < stroke.pos.length; j++) {
             // Create a smooth path from the previous pixel to the current pixel
-            context.beginPath();
-            context.moveTo(stroke.pos[j-1].x, stroke.pos[j-1].y);
-            context.lineTo(stroke.pos[j].x, stroke.pos[j].y);
-            context.closePath();
-            context.stroke();
+            this.context.beginPath();
+            this.context.moveTo(stroke.pos[j-1].x, stroke.pos[j-1].y);
+            this.context.lineTo(stroke.pos[j].x, stroke.pos[j].y);
+            this.context.closePath();
+            this.context.stroke();
         }
     }
 
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
         // Clear the canvas and also offscreen
-        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
+        this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
 
         // Draw each stroke/path from our list of pixel data
-        for (var i = 0; i < strokes.length; i++) {
-            if (strokes[i])
-                this.draw(strokes[i]);
+        for (var i = 0; i < this.strokes.length; i++) {
+            if (this.strokes[i])
+                this.draw(this.strokes[i]);
         }
 
         // Draw local orphan strokes
-        for (var j = 0; j < orphanedStrokes.length; j++) {
-            if (orphanedStrokes[j])
-                this.draw(orphanedStrokes[j]);
+        for (var j = 0; j < this.orphanedStrokes.length; j++) {
+            if (this.orphanedStrokes[j])
+                this.draw(this.orphanedStrokes[j]);
         }
     }
 
     // Removes everything from the canvas and sends a clear message to the server
     clear() {
-        context.clearRect(-canvasWidth*25, -canvasHeight*25, canvasWidth*100, canvasHeight*100);
-        strokes = [];
-        myIDs = [];
-        undoIDs = [];
-        orphanedStrokes = [];
-        orphanUndoCount = 0;
+        this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
+        this.strokes = [];
+        this.myIDs = [];
+        this.undoIDs = [];
+        this.orphanedStrokes = [];
+        this.orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
         document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
         this.fade()
@@ -355,17 +385,17 @@ export class CanvasComponent implements OnInit {
     // Undoes the latest stroke
     undo() {
         // If there are orphaned strokes that can be undone, undo them first
-        if(orphanedStrokes.length && orphanedStrokes.length - orphanUndoCount > 0) {
-            orphanedStrokes[orphanedStrokes.length - orphanUndoCount - 1].draw = false;
-            orphanUndoCount++;
+        if(this.orphanedStrokes.length && this.orphanedStrokes.length - this.orphanUndoCount > 0) {
+            this.orphanedStrokes[this.orphanedStrokes.length - this.orphanUndoCount - 1].draw = false;
+            this.orphanUndoCount++;
         }
         // Undo my strokes
         else {
-            if(!myIDs.length)
+            if(!this.myIDs.length)
                 return;
-            undoIDs.push(myIDs.pop());
-            this.drawService.sendUndo(this.id, undoIDs[undoIDs.length - 1]);
-            strokes[undoIDs[undoIDs.length - 1]].draw = false;
+            this.undoIDs.push(this.myIDs.pop());
+            this.drawService.sendUndo(this.id, this.undoIDs[this.undoIDs.length - 1]);
+            this.strokes[this.undoIDs[this.undoIDs.length - 1]].draw = false;
             this.drawAll();
         }
     }
@@ -373,19 +403,19 @@ export class CanvasComponent implements OnInit {
     // Redoes the latest undone stroke
     redo() {
         // If strokes with IDS can't be redone, check if orphaned strokes can
-        if(!undoIDs.length && orphanUndoCount) {
-            orphanedStrokes[orphanedStrokes.length - orphanUndoCount].draw = true;
-            orphanUndoCount--;
+        if(!this.undoIDs.length && this.orphanUndoCount) {
+            this.orphanedStrokes[this.orphanedStrokes.length - this.orphanUndoCount].draw = true;
+            this.orphanUndoCount--;
         }
         else {
             // Check if strokes with IDs can be undone
-            if(!undoIDs.length)
+            if(!this.undoIDs.length)
                 return;
-            var redoStroke = undoIDs.pop();
-            myIDs.push(redoStroke);
+            var redoStroke = this.undoIDs.pop();
+            this.myIDs.push(redoStroke);
             this.drawService.sendRedo(this.id, redoStroke);
-            strokes[redoStroke].draw = true;
-            this.draw(strokes[redoStroke]);
+            this.strokes[redoStroke].draw = true;
+            this.draw(this.strokes[redoStroke]);
         }
     }
 
@@ -402,109 +432,86 @@ export class CanvasComponent implements OnInit {
     zoom(amount: number) {
         this.scaleValue *= amount;
         //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
-        context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * canvas.width/2, -(this.scaleValue - 1) * canvas.height/2);
-        context.translate(offset.x, offset.y)
-        drawPosition.x = -(this.scaleValue - 1) * (canvas.width/2);
-        drawPosition.y = -(this.scaleValue - 1) * (canvas.height/2);
+        this.context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * this.canvas.width/2, -(this.scaleValue - 1) * this.canvas.height/2);
+        this.context.translate(this.offset.x, this.offset.y)
+        this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
+        this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
         this.drawAll();
     }
 
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
-        if(draw) {
+        if(this.canDraw) {
             // Discard stored undos
-            orphanedStrokes.splice(orphanedStrokes.length - orphanUndoCount, orphanUndoCount);
-            if(undoIDs.length) {
+            this.orphanedStrokes.splice(this.orphanedStrokes.length - this.orphanUndoCount, this.orphanUndoCount);
+            if(this.undoIDs.length) {
                 //TODO: remove the stroke from stroke array?
-                undoIDs = [];
+                this.undoIDs = [];
             }
 
             // Get the cursor's current position
-            x = ((event.x - canvas.offsetLeft - drawPosition.x)/this.scaleValue) - offset.x;
-            y = ((event.y - canvas.offsetTop - drawPosition.y)/this.scaleValue) - offset.y;
+            var x = ((event.x - this.canvas.offsetLeft - this.drawPosition.x)/this.scaleValue) - this.offset.x;
+            var y = ((event.y - this.canvas.offsetTop - this.drawPosition.y)/this.scaleValue) - this.offset.y;
             // Add the stroke's pixels and tool settings
-            curStroke = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
-            curStroke.pos.push(new Position(x,y));
-            drag = true;
-            this.draw(curStroke);
+            this.curStroke = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
+            this.curStroke.pos.push(new Position(x,y));
+            this.drag = true;
+            this.draw(this.curStroke);
         }
         else {
             // Panning
-            previousPosition.x = event.x - canvas.offsetLeft;
-            previousPosition.y = event.y - canvas.offsetTop;
-            drag = true;
+            this.previousPosition.x = event.x - this.canvas.offsetLeft;
+            this.previousPosition.y = event.y - this.canvas.offsetTop;
+            this.drag = true;
         }
     }
 
     // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
     mouseUp(event: MouseEvent): void {
-        drag = false;
-        if (draw) {
+        this.drag = false;
+        if (this.canDraw) {
             this.drawService.reqStrokeID(this.id);
-            orphanedStrokes.push(curStroke);
+            this.orphanedStrokes.push(this.curStroke);
         }
     }
 
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
-        if (drag && draw) {
-            var x = ((event.x - canvas.offsetLeft - drawPosition.x)/this.scaleValue) - offset.x;
-            var y = ((event.y - canvas.offsetTop - drawPosition.y)/this.scaleValue) - offset.y;
-            curStroke.pos.push(new Position(x,y));
-            this.draw(curStroke);
+        if (this.drag && this.canDraw) {
+            var x = ((event.x - this.canvas.offsetLeft - this.drawPosition.x)/this.scaleValue) - this.offset.x;
+            var y = ((event.y - this.canvas.offsetTop - this.drawPosition.y)/this.scaleValue) - this.offset.y;
+            this.curStroke.pos.push(new Position(x,y));
+            this.draw(this.curStroke);
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }
-        else if (drag && !draw) {
-            // Translate the context by how much is moved
-            var currentPosition = new Position(event.x - canvas.offsetLeft, event.y - canvas.offsetTop);
-            var changePosition  = new Position(previousPosition.x - currentPosition.x, previousPosition.y - currentPosition.y);
-            previousPosition = currentPosition;
-            offset.add(changePosition);
-            context.translate(changePosition.x, changePosition.y);
+        else if (this.drag && !this.canDraw) {
+            // Translate the this.context by how much is moved
+            var currentPosition = new Position(event.x - this.canvas.offsetLeft, event.y - this.canvas.offsetTop);
+            var changePosition  = new Position(this.previousPosition.x - currentPosition.x, this.previousPosition.y - currentPosition.y);
+            this.previousPosition = currentPosition;
+            this.offset.add(changePosition);
+            this.context.translate(changePosition.x, changePosition.y);
             this.drawAll();
         }
     }
 
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
-        drag = false;
+        this.drag = false;
         // TODO: Need to check if stroke has been drawn before mouseLeave
-        //if (draw) {
+        //if (this.canDraw) {
         //    this.drawService.reqStrokeID(this.id);
-        //    orphanedStrokes.push(curStroke);
+        //    this.orphanedStrokes.push(this.curStroke);
         //}
     }
 
     // Scroll to zoom
     mouseWheel(event): void {
         // https://stackoverflow.com/questions/6775168/zooming-with-canvas
-        var mousex = event.clientX - canvas.offsetLeft;
-        var mousey = event.clientY - canvas.offsetTop;
+        var mousex = event.clientX - this.canvas.offsetLeft;
+        var mousey = event.clientY - this.canvas.offsetTop;
         var wheel = event.wheelDelta/120;//n or -n
         var scaleAmount = 1 + wheel/2;
         this.tool.zoom(scaleAmount);
     }
 }
-
-// Global canvas data
-var canvas: HTMLCanvasElement;
-var context; // Contains a reference to the canvas element
-var canvasHeight;
-var canvasWidth;
-var x;
-var y;
-var mode = "source-over"; // Default drawing mode set to pen (instead of eraser)
-var draw = true;
-var previousPosition: Position = new Position(0,0);
-var offset: Position = new Position(0,0); // offset relative to current origin
-// var scaleValue = 1;
-var drawPosition: Position = new Position(0,0); // Draw positoin relative to original origin
-
-// Global stroke data
-var strokes = new Array<Stroke>();      // Contains every stroke on the canvas
-var orphanedStrokes = new Array<Stroke>(); // Contains every stroke that needs an ID from the server
-var myIDs= new Array<number>();    // IDs of strokes drawn by user
-var undoIDs = new Array<number>();  // Contains every stroke that was undid and won't be drawn
-var drag = false; // True if we should be drawing to the canvas (after a mouse down)
-var curStroke; // The current stroke being drawn
-var orphanUndoCount = 0; //a count to figure out how many undos in the orphanedStrokes we've done

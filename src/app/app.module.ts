@@ -15,6 +15,7 @@ import { AngularFireAuthModule } from 'angularfire2/auth';
 
 import { DrawService } from './draw.service';
 import { ToolsComponent } from './tools/tools.component';
+import { InviteComponent } from './invite/invite.component';
 
 export const config = {
   apiKey: "AIzaSyBBIYSjhH5moXzFra9BUH-m_0denvu3HmE",
@@ -38,7 +39,8 @@ const appRoutes: Routes = [
         HoverClassDirective,
         CanvasComponent,
         LoginComponent,
-        ToolsComponent
+        ToolsComponent,
+        InviteComponent
     ],
     imports: [
         BrowserModule,

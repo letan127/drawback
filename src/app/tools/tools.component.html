@@ -1,10 +1,10 @@
 <!-- Main toolbar with Drawings Tools -->
 <div class="tool-menu toolbar flex-vertical canvas-component">
-    <div id="pen" class="tool-button tool-tip active" (click)="selectPen()">
+    <div id="pen" class="tool-button tool-tip active" (click)="selectTool(true)">
         <i class="fa fa-pencil"></i>
         <span class="tool-tip-text">Pen</span>
     </div>
-    <div id="eraser" class="tool-button tool-tip" (click)="selectEraser()">
+    <div id="eraser" class="tool-button tool-tip" (click)="selectTool(true, 'destination-out')">
         <i class="fa fa-eraser"></i>
         <span class="tool-tip-text">Eraser</span>
     </div>
@@ -80,7 +80,7 @@
     <div class="vertical-separator flex-vertical">
         <div class="tool-separator"></div>
     </div>
-    <div id="move" class="tool-button tool-tip" (click) = "selectPan()">
+    <div id="move" class="tool-button tool-tip" (click) = "selectTool(false)">
         <i class="fa fa-hand-paper-o"></i>
         <span class="tool-tip-text">Move</span>
     </div>

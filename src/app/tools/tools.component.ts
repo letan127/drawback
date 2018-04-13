@@ -51,17 +51,6 @@ export class ToolsComponent implements OnInit {
         var display = document.getElementById("pen-slider-value");
         display.innerHTML = slider.value;
         this.size = +slider.value * 4;
-        this.fade();
-    }
-
-    fade() {
-        //make it so text shows first
-        document.getElementById('title-text').style.opacity = "1";
-        document.getElementById('title-text').style.visibility = "visible";
-        setTimeout(function() {
-            document.getElementById('title-text').style.opacity = "0";
-            document.getElementById('title-text').style.visibility = "hidden";
-        }, 3000);
     }
 
     /* When the user clicks on the button, toggle between hiding and showing the dropdown content */

@@ -10,6 +10,7 @@ export class ToolsComponent implements OnInit {
     color: string;  // Pen color
     size: number;   // Pen/Eraser size
     allColors: string[]; // List of all available colors
+    curActives: HTMLElement[];
     @Output() setDraw = new EventEmitter<boolean>(); // Update CanvasComponent's draw
     @Output() callUndo = new EventEmitter();
     @Output() callRedo = new EventEmitter();
@@ -28,25 +29,7 @@ export class ToolsComponent implements OnInit {
     }
 
     ngAfterViewInit() {
-        /* When user clicks a tool, that tool's icon will become active */
-        // Get all the tools from the toolbar
-        var tools = document.getElementsByClassName("tool-button");
-
-        // Set callback functions for each tool; tool becomes active when clicked
-        for (var i = 0; i < tools.length; i++) {
-        tools[i].addEventListener("click", function() {
-            var actives = document.getElementsByClassName("active");
-
-            // Always keep either the pen or eraser active but switch other tools' actives
-            if (this.id === "pen" || this.id === "eraser")
-            actives[0].className = actives[0].className.replace(" active", "");
-            else if (actives.length > 1 &&
-                (actives[0].id === "pen" || actives[0].id === "eraser"))
-                actives[1].className = actives[1].className.replace(" active", "");
-
-                this.className += " active";
-            });
-        }
+        this.curActives = new Array<HTMLElement>(document.getElementById("pen"));
 
         // Set slider display and pen size to the default slider value
         var slider = <HTMLInputElement>document.getElementById("pen-size-slider");
@@ -55,17 +38,60 @@ export class ToolsComponent implements OnInit {
         this.size = +slider.value * 4;
     }
 
-    /* When the user clicks on the button, toggle between hiding and showing the dropdown content */
-    showDropdown(tool: string) {
-        document.getElementById(tool).classList.toggle("show");
+    // When the user clicks on a dropdown button, toggle its contents and highlight
+    toggleDropdown(event, tool: string) {
+         // Don't activate the window.click callback which closes the dropdown
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        }
+        else if(window.event) {
+            window.event.cancelBubble=true;
+       }
+
+       // Don't close menu if the background of the menu was clicked
+       if (event.target.classList.contains("dropdown-menu") ||
+           (event.target.classList.contains("slider-value"))) {
+           return;
+       }
+
+       // Show/hide the tool's dropdown and highlight/unhighlight its button
+        var classes = document.getElementById(tool).classList;
+        classes.toggle("show");
+        classes.toggle("active");
+
+        // Close the other dropdown menu if it is open
+        if (tool === "colors")
+            var otherTool = "sizes";
+        else
+            var otherTool = "colors";
+
+        classes = document.getElementById(otherTool).classList;
+        if (classes[classes.length-1] === "show" || classes[classes.length-1] === "active") {
+            classes.toggle("show");
+            classes.toggle("active");
+        }
     }
 
-    // Selected pen, eraser, or pan
-    // draw=true if pen or eraser are selected
-    // mode set to pen (instead of eraser) by default
+    // Select and highlight pen, eraser, or pan
+    // - draw=true if pen or eraser are selected
+    // - mode set to pen (instead of eraser) by default
     selectTool(draw: boolean, mode: string="source-over") {
         this.setDraw.emit(draw);
         this.mode = mode;
+
+        // Switch the highlight on the button from the old tool to the new tool
+        if (draw && mode === "source-over") {
+            var tool = "pen"
+        }
+        else if (draw && mode === "destination-out") {
+            var tool = "eraser"
+        }
+        else if (!draw) {
+            var tool = "pan"
+        }
+        this.curActives[0].classList.toggle("active");
+        this.curActives[0] = document.getElementById(tool);
+        this.curActives[0].classList.toggle("active");
     }
 
     // Change the pen color

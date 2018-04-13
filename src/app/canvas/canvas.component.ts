@@ -163,6 +163,7 @@ export class CanvasComponent implements OnInit {
         this.canvas = <HTMLCanvasElement>document.getElementById("canvas");
         this.context = this.canvas.getContext("2d");
         window.addEventListener("resize", this.resize.bind(this), false);
+        window.addEventListener("click", this.closeMenus.bind(this));
 
         // Canvas mouse events
         this.canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
@@ -194,6 +195,20 @@ export class CanvasComponent implements OnInit {
         this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
         this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
         this.drawAll()
+    }
+
+    // Close and unhighlight any open menus if anything except dropdown tools are clicked
+    closeMenus(event) {
+        // Close dropdown menus
+        var openToolMenu = document.getElementsByClassName("show");
+        if (openToolMenu.length > 0) {
+            openToolMenu[0].classList.toggle("active");
+            openToolMenu[0].classList.toggle("show");
+        }
+
+        // Close share modal
+        if (event.target.classList.contains("modal"))
+            this.invitation.closeShareModal();
     }
 
     // When a new user enters the room, update the displayed user count

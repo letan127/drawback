@@ -107,6 +107,9 @@ html body {
     background-color: gray;
     border-radius: 8px;
 }
+.tool-button:active {
+    background-color: #4CAF50!important;
+}
 .active {
     background-color: #4CAF50!important;
     border-radius: 8px;

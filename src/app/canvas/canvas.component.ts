@@ -183,15 +183,6 @@ export class CanvasComponent implements OnInit {
         this.updateUserCount();
     }
 
-    fade() {
-        //make it so text shows first
-        document.getElementById('title-text').style.opacity = "1";
-        document.getElementById('title-text').style.visibility = "visible";
-        setTimeout(function() {
-            document.getElementById('title-text').style.opacity = "0";
-            document.getElementById('title-text').style.visibility = "hidden";
-        }, 3000);
-    }
     // When the window is resized, reset the canvas size and redraw it
     resize() {
         this.canvas.width = window.innerWidth;

@@ -28,16 +28,8 @@ export class TitleComponent implements OnInit {
 
         this.name.addEventListener("click", this.highlightText.bind(this));
         this.name.addEventListener("keypress", this.submitName.bind(this));
-    }
 
-    fade() {
-        //make it so text shows first
-        this.subtitle.style.opacity = "1";
-        this.subtitle.style.visibility = "visible";
-        setTimeout(function() {
-            this.subtitle.style.opacity = "0";
-            this.subtitle.style.visibility = "hidden";
-        }, 3000);
+        this.fade();
     }
 
     highlightText() {
@@ -66,5 +58,13 @@ export class TitleComponent implements OnInit {
         this.fade();
     }
 
-
+    // Display the subtitle and then hide it after 3 seconds
+    fade() {
+        this.subtitle.style.opacity = "1";
+        this.subtitle.style.visibility = "visible";
+        setTimeout(() => {
+            this.subtitle.style.opacity = "0";
+            this.subtitle.style.visibility = "hidden";
+        }, 3000);
+    }
 }

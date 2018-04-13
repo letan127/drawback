@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { Stroke } from '../stroke';
 import { Position } from '../position';
 import { ToolsComponent } from '../tools/tools.component';
+import { TitleComponent } from '../title/title.component';
 import { InviteComponent } from '../invite/invite.component';
 import { DrawService } from '../draw.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -25,6 +26,7 @@ export class CanvasComponent implements OnInit {
 
     // Reference to the child component nested used in the HTML
     @ViewChild(ToolsComponent) private tool: ToolsComponent;
+    @ViewChild(TitleComponent) private title: TitleComponent;
     @ViewChild(InviteComponent) private invitation: InviteComponent;
 
     // Canvas data
@@ -88,7 +90,7 @@ export class CanvasComponent implements OnInit {
 
         // This client is a new user; give them the current canvas state to draw
         this.drawService.initUser().subscribe(init => {
-            (<HTMLInputElement>document.getElementById("canvas-name")).value = init.name;
+            this.title.rename(init.name);
             this.numUsers = init.numUsers;
             this.strokes = init.strokes;
             this.updateUserCount();
@@ -103,10 +105,7 @@ export class CanvasComponent implements OnInit {
 
         // Update canvas title
         this.drawService.getTitle().subscribe(title => {
-            var name = <HTMLInputElement>document.getElementById("canvas-name");
-            name.value = title;
-            document.getElementById("title-text").innerHTML = "Canvas renamed to " + name.value + ".";
-            this.fade();
+            this.title.rename(title);
         })
 
         // When the server sends a stroke, add it to our list of strokes and draw it
@@ -138,8 +137,7 @@ export class CanvasComponent implements OnInit {
             this.undoIDs = [];
             this.orphanedStrokes = [];
             this.orphanUndoCount = 0;
-            document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
-            this.fade();
+            this.title.updateSubtitle("Canvas has been cleared.");
         })
 
         // Received another client's undo; don't draw that stroke
@@ -180,21 +178,6 @@ export class CanvasComponent implements OnInit {
         this.canvas.addEventListener("touchcancel", this.touchcancel.bind(this), false);
 
         this.resize();
-
-        // Click canvas name to highlight all the text
-        var name = <HTMLInputElement>document.getElementById("canvas-name");
-        name.addEventListener("click", function() {
-            this.select();
-        });
-        // Press enter to change canvas name and update other users
-        name.addEventListener("keypress", (e) => {
-            if (e.keyCode === 13) {
-                this.drawService.sendTitle(this.id, name.value);
-                document.getElementById("title-text").innerHTML = "Canvas renamed to " + name.value + ".";
-                name.blur(); // Unfocus
-                this.fade();
-            }
-        });
 
         // Set the displayed user count
         this.updateUserCount();
@@ -286,8 +269,7 @@ export class CanvasComponent implements OnInit {
         this.orphanedStrokes = [];
         this.orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
-        document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
-        this.fade()
+        this.title.updateSubtitle("Canvas has been cleared.");
     }
 
     // Undoes the latest stroke

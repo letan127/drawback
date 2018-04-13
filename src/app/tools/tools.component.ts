@@ -1,10 +1,12 @@
 import { Component, OnInit, AfterViewInit, EventEmitter, Output, Input } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'app-tools',
     templateUrl: './tools.component.html',
     styleUrls: ['./tools.component.css']
 })
+
 export class ToolsComponent implements OnInit {
     mode: string;   // Determines whether pen or eraser is used
     color: string;  // Pen color
@@ -19,7 +21,7 @@ export class ToolsComponent implements OnInit {
     @Input() scaleValue: number; // Get reference to CanvasComponent's scaleValue
 
     constructor() {
-        this.mode = "source-over";
+        this.mode = environment.PEN_MODE;
         this.color = "black";
         this.size = 8;
         this.allColors = ['black', 'red', 'orange', 'yellow', 'green', 'blue', 'darkMagenta'];
@@ -75,15 +77,15 @@ export class ToolsComponent implements OnInit {
     // Select and highlight pen, eraser, or pan
     // - draw=true if pen or eraser are selected
     // - mode set to pen (instead of eraser) by default
-    selectTool(draw: boolean, mode: string="source-over") {
+    selectTool(draw: boolean, mode: string=this.mode) {
         this.setDraw.emit(draw);
         this.mode = mode;
 
         // Switch the highlight on the button from the old tool to the new tool
-        if (draw && mode === "source-over") {
+        if (draw && mode === environment.PEN_MODE) {
             var tool = "pen"
         }
-        else if (draw && mode === "destination-out") {
+        else if (draw && mode === environment.ERASER_MODE) {
             var tool = "eraser"
         }
         else if (!draw) {
@@ -94,12 +96,13 @@ export class ToolsComponent implements OnInit {
         this.curActives[0].classList.toggle("active");
     }
 
-    // Change the pen color
+    // Change the pen color and automatically select the pen tool
     changeColor(color: string) {
         this.color = color;
+        this.selectTool(true, environment.PEN_MODE);
     }
 
-    // Change the pen size and slider display
+    // Change the pen size and slider display and automatically select current drawing tool
     changeSize($event) {
         // Need to convert HTMLELement into an InputElement to access value
         var size = +(<HTMLInputElement>event.target).value; // +: string to num
@@ -127,6 +130,7 @@ export class ToolsComponent implements OnInit {
         }
         // Change the slider display
         document.getElementById("pen-slider-value").innerHTML = ""+size; // num to string
+        this.selectTool(true, this.mode);
     }
 
     undo() {

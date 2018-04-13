@@ -285,15 +285,10 @@ export class CanvasComponent implements OnInit {
         document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
     }
 
-    // Pen tool was clicked; get out of erase mode
-    selectPen() {
-        draw = true;
-        mode = "source-over";
-    }
-
-    // Set the pen color to the color of the background
-    selectEraser() {
-        mode = "destination-out";
+    // Sets draw to true or false depending on whether pen or pan was clicked
+    setDraw(value: boolean) {
+        draw = value;
+        console.log("pen");
     }
 
     // Draws a single stroke that is passed in as an argument

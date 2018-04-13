@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, EventEmitter, Output } from '@angular/core';
 
 @Component({
     selector: 'app-tools',
@@ -9,6 +9,7 @@ export class ToolsComponent implements OnInit {
     mode: string;
     color: string;
     size: number;
+    @Output() setDraw = new EventEmitter<boolean>(); // Update CanvasComponent's draw
 
     constructor() {
         this.mode = "source-over";
@@ -61,6 +62,18 @@ export class ToolsComponent implements OnInit {
     /* When the user clicks on the button, toggle between hiding and showing the dropdown content */
     showDropdown(tool: string) {
         document.getElementById(tool).classList.toggle("show");
+    }
+
+    // Pen tool was clicked; get out of erase mode; get out of pan mode
+    selectPen() {
+        this.setDraw.emit(true);
+        this.mode = "source-over";
+    }
+
+    // Set the pen color to the color of the background; get out of pan mode
+    selectEraser() {
+        this.setDraw.emit(true);
+        this.mode = "destination-out";
     }
 
     // Change the pen color and notify the server

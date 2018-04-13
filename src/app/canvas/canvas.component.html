@@ -10,7 +10,11 @@
 <div>
     <canvas id='canvas'></canvas>
     <!-- Header -->
-    <app-tools (setDraw)="setDraw($event)"></app-tools>
+    <app-tools (setDraw)="setDraw($event)"
+                (callUndo)="undo()"
+                (callRedo)="redo()"
+                (callClear)="clear()">
+    </app-tools>
     <div class="top-bar header-bar flex-horizontal canvas-component">
         <div class="title-menu flex-horizontal">
             <div class="title-box">

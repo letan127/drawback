@@ -288,7 +288,6 @@ export class CanvasComponent implements OnInit {
     // Sets draw to true or false depending on whether pen or pan was clicked
     setDraw(value: boolean) {
         draw = value;
-        console.log("pen");
     }
 
     // Draws a single stroke that is passed in as an argument

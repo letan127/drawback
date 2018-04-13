@@ -10,6 +10,9 @@ export class ToolsComponent implements OnInit {
     color: string;
     size: number;
     @Output() setDraw = new EventEmitter<boolean>(); // Update CanvasComponent's draw
+    @Output() callUndo = new EventEmitter();
+    @Output() callRedo = new EventEmitter();
+    @Output() callClear = new EventEmitter();
 
     constructor() {
         this.mode = "source-over";
@@ -138,5 +141,17 @@ export class ToolsComponent implements OnInit {
         }
         // Change the slider display
         document.getElementById("pen-slider-value").innerHTML = ""+size; // num to string
+    }
+
+    undo() {
+        this.callUndo.next();
+    }
+
+    redo() {
+        this.callRedo.next();
+    }
+
+    clear() {
+        this.callClear.next();
     }
 }

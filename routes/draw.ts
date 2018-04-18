@@ -79,7 +79,6 @@ io.on('connection', (socket) => {
     // When a client sends a stroke, send it to all other clients in that room
     socket.on('stroke', (strokeMessage) => {
         var strokeMessagewithID = {
-            stroke: strokeMessage.stroke,
             strokeID: strokeMessage.strokeID,
             userID: socket.id
         }

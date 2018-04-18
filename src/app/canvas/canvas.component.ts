@@ -87,6 +87,10 @@ export class CanvasComponent implements OnInit {
             orphanedStrokes = [];
             orphanUndoCount = 0;
             document.getElementById("title-text").innerHTML = "Canvas has been cleared.";
+            for(var key in this.liveStrokes) {
+                this.liveStrokes[key].emptyStroke();
+            }
+            curStroke.emptyStroke();
             this.fade();
         })
 
@@ -120,8 +124,22 @@ export class CanvasComponent implements OnInit {
 
         this.drawService.getNewLiveStroke().subscribe(strokeAndID => {
             this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
+            if(!strokeAndID.stroke.draw)
+                return;
+            //draw the first pixel of the new live stroke
+            context.strokeStyle = strokeAndID.stroke.color;
+            context.lineWidth = strokeAndID.stroke.size;
+            context.globalCompositeOperation = strokeAndID.stroke.mode;
+            context.lineJoin = "round";
+            // Draw the first pixel in the stroke
+            context.beginPath();
+            context.moveTo(strokeAndID.stroke.pos[0].x-1, strokeAndID.stroke.pos[0].y);
+            context.lineTo(strokeAndID.stroke.pos[0].x, strokeAndID.stroke.pos[0].y);
+            context.closePath();
+            context.stroke();
         })
         this.drawService.getNewPixel().subscribe(pixelAndID => {
+            //get the pixel and add it to the liveStroke of the other user
             this.liveStrokes[pixelAndID.id].pos.push(pixelAndID.pixel);
             context.strokeStyle = this.liveStrokes[pixelAndID.id].color;
             context.lineWidth = this.liveStrokes[pixelAndID.id].size;
@@ -360,6 +378,11 @@ export class CanvasComponent implements OnInit {
         for (var i = 0; i < strokes.length; i++) {
             if (strokes[i])
                 this.draw(strokes[i]);
+        }
+
+        //draw all current liveStrokes
+        for (var key in this.liveStrokes) {
+            this.draw(this.liveStrokes[key]);
         }
 
         // Draw local orphan strokes

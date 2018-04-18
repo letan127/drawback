@@ -13,8 +13,6 @@ html body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    flex-grow: 1;
-    justify-content: center;
 }
 .flex-vertical {
     display: flex;
@@ -73,7 +71,6 @@ html body {
 }
 .dropdown-caret {
     position: absolute;
-    z-index: 2;
     bottom: 1px;
     right: 1px;
     font-size: 1;
@@ -168,113 +165,6 @@ html body {
     color: white;
 }
 
-@media only screen and (min-width: 600px) {
-/* Header */
-.top-bar {
-    top: 15px;
-    height: 53px;
-}
-.header-bar {
-    left: 70px;
-    background-color: #555;
-    border:1px solid #ddd;
-    border-radius:8px;
-    color: white;
-}
-.title-menu {
-    border-radius: 8px;
-    cursor: pointer;
-}
-.title-box {
-    padding: 5px 10px 5px 10px;
-    margin-bottom: 5px;
-}
-.title-menu:hover {
-    background-color: gray;
-}
-.canvas-name {
-    background: 0 0;
-    border: 1px solid transparent;
-    font-weight: bold;
-}
-.title-text {
-    padding: 0 2px;
-    font-size: 10px;
-    color: #b3b3b3;
-}
-.dropdown-symbol {
-    margin-left: 15px;
-    padding-right: 15px;
-}
-/* Tool Bar */
-#main-toolbar {
-    visibility: visible!important;
-}
-.tool-menu {
-    top: 85px;
-    left: 10px;
-}
-.tool-button {
-    transition: all 0.3s ease;
-}
-/* Share Bar */
-.top-right-bar {
-    right: 10px;
-}
-.bar {
-    height: inherit;
-    background-color: #555;
-    border:1px solid #ddd;
-    border-radius:8px;
-    color: white;
-}
-.bar-button {
-    padding:5px 10px 5px 10px;
-    margin:5px 5px 5px 5px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-.bar-button:hover {
-    background-color: gray;
-}
-.bar-separator {
-    width: 1px;
-    height: 60%;
-    background-color:#dedede;
-}
-#signup-login {
-    margin-right: 0px!important;
-}
-/* User Count */
-.bar-text {
-    padding:5px 10px 5px 10px;
-    margin:5px 5px 5px 5px;
-}
-.user-bar-separator {
-    width: 1px;
-    background-color: #dedede;
-    height: 20px;
-}
-
-/* Navigation Bar */
-.navigation-bar {
-    top: 85px;
-    right: 10px;
-}
-.tools-text {
-    text-align: center;
-    color: gray;
-    font-size: 12px;
-}
-.vertical-separator {
-    align-items: center;
-}
-.tool-separator {
-    width: 60%;
-    height: 1px;
-    background-color:#dedede;
-}
-
 /* Modals */
 .modal { /* Background of the modal */
     display: none;
@@ -291,7 +181,7 @@ html body {
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 42%;
+    /* width: 42%; */
 }
 .modal-header {
     color: white;
@@ -328,10 +218,120 @@ html body {
     text-decoration: none;
     cursor: pointer;
 }
+@media only screen and (min-width: 600px) {
+    /* Header */
+    .top-bar {
+        top: 15px;
+        height: 53px;
+    }
+    .header-bar {
+        left: 70px;
+        background-color: #555;
+        border:1px solid #ddd;
+        border-radius:8px;
+        color: white;
+    }
+    .title-menu {
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .title-box {
+        padding: 5px 10px 5px 10px;
+        margin-bottom: 5px;
+    }
+    .title-menu:hover {
+        background-color: gray;
+    }
+    .canvas-name {
+        background: 0 0;
+        border: 1px solid transparent;
+        font-weight: bold;
+    }
+    .title-text {
+        padding: 0 2px;
+        font-size: 10px;
+        color: #b3b3b3;
+    }
+    .dropdown-symbol {
+        margin-left: 15px;
+        padding-right: 15px;
+    }
+    /* Tool Bar */
+    #main-toolbar {
+        visibility: visible!important;
+    }
+    .tool-menu {
+        top: 85px;
+        left: 10px;
+    }
+    .tool-button {
+        transition: all 0.3s ease;
+    }
+    /* Share Bar */
+    .top-right-bar {
+        right: 10px;
+    }
+    .bar {
+        height: inherit;
+        background-color: #555;
+        border:1px solid #ddd;
+        border-radius:8px;
+        color: white;
+    }
+    .bar-button {
+        padding:5px 10px 5px 10px;
+        margin:5px 5px 5px 5px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .bar-button:hover {
+        background-color: gray;
+    }
+    .bar-separator {
+        width: 1px;
+        height: 60%;
+        background-color:#dedede;
+    }
+    #signup-login {
+        margin-right: 0px!important;
+    }
+    /* User Count */
+    .bar-text {
+        padding:5px 10px 5px 10px;
+        margin:5px 5px 5px 5px;
+    }
+    .user-bar-separator {
+        width: 1px;
+        background-color: #dedede;
+        height: 20px;
+    }
 
-.mobile-button {
-    display: none;
-}
+    /* Navigation Bar */
+    .navigation-bar {
+        top: 85px;
+        right: 10px;
+    }
+    .tools-text {
+        text-align: center;
+        color: gray;
+        font-size: 12px;
+    }
+    .vertical-separator {
+        align-items: center;
+    }
+    .tool-separator {
+        width: 60%;
+        height: 1px;
+        background-color:#dedede;
+    }
+
+    /* Modals */
+    .modal-content {
+        width: 42%;
+    }
+    .mobile-button {
+        display: none;
+    }
 }
 
 @media only screen and (max-width: 600px) {
@@ -387,7 +387,7 @@ html body {
         border-radius: 8px;
         cursor: pointer;
         color: white;
-        font-size: 15px;
+        font-size: 14px;
         visibility: hidden;
     }
 
@@ -396,7 +396,7 @@ html body {
        border-color: white;
        border-width: 1px;
        border-bottom-style: solid;
-       padding: 5px;
+       padding: 10px;
    }
 
     /* User Count */
@@ -414,5 +414,10 @@ html body {
         margin:2px 2px 2px 2px;
         border-radius: 8px;
         cursor: pointer;
+    }
+
+    /* Modals */
+    .modal-content {
+        width: 100%;
     }
 }

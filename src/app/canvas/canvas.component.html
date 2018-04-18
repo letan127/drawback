@@ -39,10 +39,33 @@
                 <span class="tool-tip-text">Upload</span>
             </div>
         </div>
-        <div id="signup-login" class="bar bar-button flex-horizontal">Sign Up or Login</div>
+        <div id="signup-login" class="bar bar-button flex-horizontal">Sign Up or Log in</div>
+    </div>
+    <!-- Mobile tool button -->
+    <div id="mobile-tool" class="mobile-button canvas-component" (click)="dropToolbar()">
+        <i class="fa fa-pencil"></i>
+    </div>
+    <!-- Mobile share button -->
+    <div id="mobile-share" class="mobile-button canvas-component" (click)="showShareModal()">
+        <i class="fa fa-user-plus"></i>
+    </div>
+    <!-- Mobile hamburger menu-->
+    <div id="hamburger" class="mobile-button canvas-component" (click)="showMenu()">
+        <i class="fa fa-bars"></i>
+    </div>
+    <div id="hamburger-dropdown" class="canvas-component">
+        <div id="hamburger-signup-login" class="hamburger-button">
+            Sign up or Log in
+        </div>
+        <div id="hamburger-upload" class="hamburger-button">
+            Upload
+        </div>
+        <div id="hamburger-download" class="hamburger-button">
+            Download
+        </div>
     </div>
     <!-- Main toolbar with Drawings Tools -->
-    <div class="tool-menu toolbar flex-vertical canvas-component">
+    <div id="main-toolbar" class="tool-menu toolbar flex-vertical canvas-component">
         <div id="pen" class="tool-button tool-tip active" (click)="selectPen()">
             <i class="fa fa-pencil"></i>
             <span class="tool-tip-text">Pen</span>
@@ -131,7 +154,7 @@
     <!-- User Count -->
     <div class="bottom-right-bar bar flex-horizontal canvas-component">
         <div id="num-users-text" class="bar-text"></div>
-        <div class="bar-separator"></div>
+        <div class="user-bar-separator"> </div>
         <div id="num-users" class="bar-button">
             <i class="fa fa-user-circle"></i>
         </div>

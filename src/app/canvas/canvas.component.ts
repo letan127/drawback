@@ -256,6 +256,11 @@ export class CanvasComponent implements OnInit {
         document.getElementById("sizes").classList.toggle("show");
     }
 
+    // Show menu for mobile screens
+    showMenu() {
+        document.getElementById("hamburger-dropdown").classList.toggle("mobile-show");
+    }
+
     // Pen tool was clicked; get out of erase mode
     selectPen() {
         mode = "source-over";
@@ -264,6 +269,11 @@ export class CanvasComponent implements OnInit {
     // Set the pen color to the color of the background
     selectEraser() {
         mode = "destination-out";
+    }
+
+    // Drop toolbar for mobile screens
+    dropToolbar() {
+        var tb = document.getElementById("main-toolbar").classList.toggle("mobile-show");
     }
 
     // Draws a single stroke that is passed in as an argument

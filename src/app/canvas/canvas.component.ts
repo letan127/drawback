@@ -17,6 +17,7 @@ export class CanvasComponent implements OnInit {
     id = '';
     url = '';
     numUsers = 1;
+    liveStrokes = {};
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router) {
     }
@@ -58,8 +59,8 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
-            strokes[message.strokeID] = message.stroke;
-            this.draw(message.stroke);
+            strokes[message.strokeID] = this.liveStrokes[message.userID];
+            //this.draw(message.stroke);
         })
 
         // When the server sends a strokeID, give it to the earliest orphaned stroke
@@ -115,6 +116,24 @@ export class CanvasComponent implements OnInit {
             }
             else
                 document.getElementById("error-message").innerHTML = "This room does not exist. Please try again.";
+        })
+
+        this.drawService.getNewLiveStroke().subscribe(strokeAndID => {
+            this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
+        })
+        this.drawService.getNewPixel().subscribe(pixelAndID => {
+            this.liveStrokes[pixelAndID.id].pos.push(pixelAndID.pixel);
+            context.strokeStyle = this.liveStrokes[pixelAndID.id].color;
+            context.lineWidth = this.liveStrokes[pixelAndID.id].size;
+            context.globalCompositeOperation = this.liveStrokes[pixelAndID.id].mode;
+            context.lineJoin = "round";
+            // Draw the first pixel in the stroke
+            context.beginPath();
+            context.moveTo(this.liveStrokes[pixelAndID.id].pos[this.liveStrokes[pixelAndID.id].pos.length - 2].x, this.liveStrokes[pixelAndID.id].pos[this.liveStrokes[pixelAndID.id].pos.length - 2].y);
+            context.lineTo(this.liveStrokes[pixelAndID.id].pos[this.liveStrokes[pixelAndID.id].pos.length - 1].x, this.liveStrokes[pixelAndID.id].pos[this.liveStrokes[pixelAndID.id].pos.length - 1].y);
+            context.closePath();
+            context.stroke();
+
         })
     }
 
@@ -503,6 +522,7 @@ export class CanvasComponent implements OnInit {
             curStroke.pos.push(new Position(x,y));
             drag = true;
             this.draw(curStroke);
+            this.drawService.sendNewLiveStroke(curStroke, this.id);
         }
         else {
             // Panning
@@ -527,6 +547,7 @@ export class CanvasComponent implements OnInit {
             var x = ((event.x - canvas.offsetLeft - drawPosition.x)/scaleValue) - offset.x;
             var y = ((event.y - canvas.offsetTop - drawPosition.y)/scaleValue) - offset.y;
             curStroke.pos.push(new Position(x,y));
+            this.drawService.sendPixel(new Position(x,y), this.id);
             this.draw(curStroke);
             //TODO: if sendStroke here, will it cause others to see drawing in real time?
         }

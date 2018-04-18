@@ -78,7 +78,12 @@ io.on('connection', (socket) => {
 
     // When a client sends a stroke, send it to all other clients in that room
     socket.on('stroke', (strokeMessage) => {
-        socket.to(strokeMessage.room).emit('stroke', strokeMessage);
+        var strokeMessagewithID = {
+            stroke: strokeMessage.stroke,
+            strokeID: strokeMessage.strokeID,
+            userID: socket.id
+        }
+        socket.to(strokeMessage.room).emit('stroke', strokeMessagewithID);
         rooms[strokeMessage.room].add(strokeMessage.stroke);
     });
 
@@ -121,6 +126,23 @@ io.on('connection', (socket) => {
         };
         socket.emit('check', checkRoom);
     });
+
+    socket.on('newLiveStroke', (liveStroke) => {
+        var strokeAndID = {
+            stroke: liveStroke.stroke,
+            id: socket.id
+        }
+       socket.to(liveStroke.room).emit('startLiveStroke', strokeAndID);
+    });
+
+    socket.on('newPixel', (pixel) => {
+        var pixelAndID = {
+            pixel: pixel.pixel,
+            id: socket.id
+        }
+       socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
+    });
+
 });
 
 module.exports = router;

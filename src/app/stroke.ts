@@ -13,9 +13,5 @@ export class Stroke {
         this.mode = mode;
         this.draw = draw;
     }
-    emptyStroke() {
-        var lastPosition = this.pos[this.pos.length - 1];
-        this.pos = [];
-        this.pos.push(lastPosition);
-    }
+
 }

@@ -94,6 +94,7 @@ export class CanvasComponent implements OnInit {
             this.title.rename(init.name);
             this.numUsers = init.numUsers;
             this.strokes = init.strokes;
+            this.liveStrokes = init.liveStrokes;
             this.updateUserCount();
             this.drawAll();
         })
@@ -127,7 +128,7 @@ export class CanvasComponent implements OnInit {
             else
                 this.myIDs.push(strokeID);
             this.strokes[strokeID] = this.orphanedStrokes.shift();
-            this.drawService.sendStroke(this.strokes[strokeID], strokeID, this.id);
+            this.drawService.sendStroke(strokeID, this.id);
         })
 
         // When the server sends a clear event, clear the canvas, and reset values
@@ -139,9 +140,9 @@ export class CanvasComponent implements OnInit {
             this.orphanedStrokes = [];
             this.orphanUndoCount = 0;
             for(var key in this.liveStrokes) {
-                this.liveStrokes[key].emptyStroke();
+                this.liveStrokes[key].pos = [];
             }
-            this.curStroke.emptyStroke();
+            this.curStroke.pos = [];
             this.title.updateSubtitle("Canvas has been cleared.");
         })
 
@@ -185,7 +186,15 @@ export class CanvasComponent implements OnInit {
             this.context.lineWidth = this.liveStrokes[pixelAndID.id].size;
             this.context.globalCompositeOperation = this.liveStrokes[pixelAndID.id].mode;
             this.context.lineJoin = "round";
-            // Draw the first pixel in the stroke
+            // If the drawing was cleared by someone else, there's nothing left
+            if (this.liveStrokes[pixelAndID.id].pos.length < 2) {
+                this.context.beginPath();
+                this.context.moveTo(pixelAndID.pixel.x-1, pixelAndID.pixel.y);
+                this.context.lineTo(pixelAndID.pixel.x, pixelAndID.pixel.y);
+                this.context.closePath();
+                this.context.stroke();
+                return;
+            }
             this.context.beginPath();
             this.context.moveTo(this.liveStrokes[pixelAndID.id].pos[this.liveStrokes[pixelAndID.id].pos.length - 2].x, this.liveStrokes[pixelAndID.id].pos[this.liveStrokes[pixelAndID.id].pos.length - 2].y);
             this.context.lineTo(this.liveStrokes[pixelAndID.id].pos[this.liveStrokes[pixelAndID.id].pos.length - 1].x, this.liveStrokes[pixelAndID.id].pos[this.liveStrokes[pixelAndID.id].pos.length - 1].y);
@@ -317,6 +326,9 @@ export class CanvasComponent implements OnInit {
         this.orphanedStrokes = [];
         this.orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
+        for (var key in this.liveStrokes) {
+            this.liveStrokes[key].pos = [];
+        }
         this.title.updateSubtitle("Canvas has been cleared.");
     }
 
@@ -409,8 +421,8 @@ export class CanvasComponent implements OnInit {
     mouseUp(event: MouseEvent): void {
         this.drag = false;
         if (this.canDraw) {
-            this.drawService.reqStrokeID(this.id);
             this.orphanedStrokes.push(this.curStroke);
+            this.drawService.reqStrokeID(this.id);
         }
     }
 

@@ -9,6 +9,7 @@ let server = http.Server(app);
 let socketIO = require('socket.io');
 let io = socketIO(server);
 var rooms = {}; // Access each room's stroke data with its ID
+var liveStrokes = {};
 var alphabet = '0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 // Generates a unique and random room ID
@@ -66,7 +67,8 @@ io.on('connection', (socket) => {
         var init = {
             name: rooms[room].getName(),
             numUsers: rooms[room].getUsers(),
-            strokes: rooms[room].getStrokes()
+            strokes: rooms[room].getStrokes(),
+            liveStrokes: rooms[room].getLiveStrokes()
         };
         socket.emit('initUser', init);
         socket.to(room).emit('updateUserCount', 1);
@@ -85,7 +87,7 @@ io.on('connection', (socket) => {
             userID: socket.id
         }
         socket.to(strokeMessage.room).emit('stroke', strokeMessagewithID);
-        rooms[strokeMessage.room].add(strokeMessage.stroke);
+        rooms[strokeMessage.room].add(socket.id);
     });
 
     // When a client requests a strokeID, send an available ID for that room
@@ -130,6 +132,7 @@ io.on('connection', (socket) => {
             id: socket.id
         }
        socket.to(liveStroke.room).emit('startLiveStroke', strokeAndID);
+       rooms[liveStroke.room].addLiveStroke(socket.id, liveStroke.stroke);
     });
 
     socket.on('newPixel', (pixel) => {
@@ -138,6 +141,7 @@ io.on('connection', (socket) => {
             id: socket.id
         }
        socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
+       rooms[pixel.room].addPixel(socket.id, pixel.pixel);
     });
 
 });

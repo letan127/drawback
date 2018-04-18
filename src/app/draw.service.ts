@@ -60,9 +60,8 @@ export class DrawService {
     }
 
     // Send a stroke object, its ID, and the client's room ID to the server
-    public sendStroke(stroke, strokeID, roomID) {
+    public sendStroke(strokeID, roomID) {
         var strokeWithRoom = {
-            stroke: stroke,
             strokeID: strokeID,
             room: roomID
         };

@@ -24,7 +24,7 @@ export class LoginComponent implements OnInit {
 
   constructor(private drawService: DrawService, public af: AngularFireAuth,private router: Router, @Inject(DOCUMENT) private document: Document) {
     this.total_url = this.document.location.href;
-    this.idIndex = this.total_url.indexOf("/login");
+    this.idIndex = this.total_url.indexOf("/login"); //Might need to change if stlye of URL changes
     this.roomID = this.total_url.slice(this.idIndex+7, this.total_url.length);
     this.url = this.total_url.slice(0, this.idIndex);
   }

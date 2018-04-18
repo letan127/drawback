@@ -1,16 +1,21 @@
 import { Injectable } from '@angular/core';
-import * as io from 'socket.io-client';
 import { Observable } from 'rxjs/Observable';
 import { Stroke } from './stroke';
 
 
 @Injectable()
 export class DrawService {
-    private url = 'http://localhost:4000';
     private socket;
 
     constructor() {
-        this.socket = io(this.url);
+    }
+
+    public setSocket(io){
+        this.socket = io;
+    }
+
+    public getSocket(){
+        return this.socket;
     }
 
     // Give the new user the current state of the canvas

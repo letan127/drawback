@@ -36,7 +36,7 @@
                 <span class="tool-tip-text">Upload</span>
             </div>
         </div>
-        <div id="signup-login" class="bar bar-button flex-horizontal">Sign Up or Login</div>
+        <div id="signup-login" class="bar bar-button flex-horizontal" (click)="authentication()">{{loginButton}}</div>
     </div>
     <!-- Main toolbar with Drawings Tools -->
     <div class="tool-menu toolbar flex-vertical canvas-component">
@@ -161,4 +161,5 @@
     </div>
 </div>
 </body>
+
 </html>

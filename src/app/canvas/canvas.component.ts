@@ -6,22 +6,38 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DOCUMENT } from '@angular/platform-browser';
 import { Inject } from '@angular/core';
 
+import { AngularFireAuth } from 'angularfire2/auth';
+
+import * as io from 'socket.io-client';
+
 @Component({
     selector: 'app-canvas',
     templateUrl: './canvas.component.html',
-    styleUrls: ['./canvas.component.css'],
-    providers: [DrawService]
+    styleUrls: ['./canvas.component.css']
 })
 
 export class CanvasComponent implements OnInit {
     id = '';
     url = '';
     numUsers = 1;
-
-    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router) {
+    loginState = true;
+    loginButton = "Sign Up or Login";
+    constructor(private drawService: DrawService, private route: ActivatedRoute, @Inject(DOCUMENT) private document: Document, private router: Router, public af: AngularFireAuth) {
     }
 
     ngOnInit(): void {
+        this.drawService.setSocket(io('http://localhost:4000'));
+        this.af.authState.subscribe(authState => {
+            if(!authState) {
+                this.loginButton = "Sign Up or Login"
+                this.loginState = true;
+            }
+            else{
+                this.loginButton = "Logout";
+                this.loginState = false;
+            }
+        });
+
         // Get the full URL of this room
         this.url = this.document.location.href;
 
@@ -464,6 +480,15 @@ export class CanvasComponent implements OnInit {
         document.getElementById("pen-slider-value").innerHTML = ""+size; // num to string
     }
 
+    authentication(){
+        if(this.loginState){
+            this.router.navigate(['../login/' + this.id]);
+        }
+        else if (!this.loginState){
+            this.af.auth.signOut();
+            console.log('logged out');
+        }
+    }
     // Clicked panning button
     setPan() {
         draw = false;

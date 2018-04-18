@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Drawback</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Comfortaa" />
+</head>
+
+<body>
+    <div class="main flex-container">
+        <!-- <span class="error" *ngIf="error">{{ error }}</span> -->
+        <div class="flex-element1">
+            <div id="logo"></div>
+            <div class="sign">DrawBack</div>
+        </div>
+        <div class="flex-element1">
+          <div (click)="loginFb()" id="fb">
+            <a id='facebook'></a>
+          </div><br>
+          <div (click)="loginGoogle()" id="google"></div>
+        </div>
+        <div class="flex-element">
+          <form #f='ngForm' (ngSubmit)="loginSubmit(f)" class="flex-element">
+              <input (click) = "userClicked()" class="un" type="text" placeholder="Email" (ngModel)="f.value.email" name="email" required>
+              <input (click) = "userClicked()" class="pass" type="password"  placeholder="Password" (ngModel)="f.value.password" name="password" required>
+              <button type="submit" [disabled]="!f.valid" class="submit">Sign in</button>
+          </form>
+          <span id='error' *ngIf="error" class="error">{{ error }}</span>
+          <a id='back' style="color: darkblue; cursor: pointer; margin-top: 15px" (click)="showShareModal()">No account? <strong>Create one here</strong></a>
+
+        </div>
+    </div>
+
+      <div id="share-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" (click)="closeShareModal()">&times;</span>
+          <div class="flex-element">
+              <div class="flex-element1">
+                  <div id="logo2"></div>
+                  <div class="signup">Welcome!</div>
+              </div>
+            <form #formData='ngForm' (ngSubmit)="onSubmit(formData)" class="flex-element">
+              <input (click) = "userClicked()" class="signup-un" type="text" placeholder="Email" (ngModel)="formData.value.email" name="email" required>
+              <input (click) = "userClicked()" class="signup-pass" type="password"  placeholder="Password" (ngModel)="formData.value.password" name="password" required>
+              <button type="submit" [disabled]="!formData.valid" class="signup-submit">Create my account</button>
+            </form>
+            <span class="error" *ngIf="signupError">{{ signupError }}</span>
+          </div>
+        </div>
+      </div>
+
+</body>
+
+</html>

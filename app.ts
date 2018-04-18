@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var engines = require('consolidate');
 
 var draw = require('./routes/draw.ts');
+var login = require('./routes/login.ts');
 var app = express();
 
 
@@ -14,9 +15,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({'extended':'false'}));
 
 
-app.use('', draw);
+app.use('/', draw);
 app.use(express.static(path.join(__dirname, 'dist')));
+app.use('/login', login);
+
 app.get('/rooms/:id', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/index.html'));
+});
+
+app.get('/login/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist/index.html'));
 });
 

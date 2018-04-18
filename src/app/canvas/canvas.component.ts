@@ -46,7 +46,7 @@ export class CanvasComponent implements OnInit {
     myIDs: number[];            // IDs of strokes drawn by this user
     undoIDs: number[];          // IDs of strokes that were undone and won't be drawn
     orphanUndoCount: number;    // Number of strokes that were undone and need an ID
-    liveStrokes = {}
+    liveStrokes = {};
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
@@ -113,7 +113,7 @@ export class CanvasComponent implements OnInit {
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
             this.strokes[message.strokeID] = this.liveStrokes[message.userID];
-            //this.draw(message.stroke);
+            delete this.liveStrokes[message.userID];
         })
 
         // When the server sends a strokeID, give it to the earliest orphaned stroke
@@ -269,7 +269,7 @@ export class CanvasComponent implements OnInit {
 
     // Draws a single stroke that is passed in as an argument
     draw(stroke) {
-        if(!stroke.draw)
+        if(!stroke.draw || stroke.pos.length == 0)
             return;
 
         this.context.strokeStyle = stroke.color;

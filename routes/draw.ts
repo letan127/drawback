@@ -121,11 +121,7 @@ io.on('connection', (socket) => {
         else
             var hasRoom = false;
 
-        var checkRoom = {
-            newRoom: newRoom,
-            hasRoom: hasRoom
-        };
-        socket.emit('check', checkRoom);
+        socket.emit('check', hasRoom);
     });
 
     socket.on('newLiveStroke', (liveStroke) => {

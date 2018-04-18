@@ -5,5 +5,7 @@
 
 export const environment = {
   production: false,
-  DRAW_URL: 'ws://echo.websocket.org/'
+  DRAW_URL: 'ws://echo.websocket.org/',
+  PEN_MODE: 'source-over',
+  ERASER_MODE: 'destination-out'
 };

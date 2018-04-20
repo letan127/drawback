@@ -99,6 +99,7 @@ io.on('connection', (socket) => {
     // When a client clicks clear, tell all other clients to clear
     socket.on('clear', (room) => {
         socket.to(room).emit('clear');
+        socket.emit('clear');
         rooms[room].clear();
     });
 

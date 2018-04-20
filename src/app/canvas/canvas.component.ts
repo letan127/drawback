@@ -113,7 +113,7 @@ export class CanvasComponent implements OnInit {
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
             this.strokes[message.strokeID] = this.liveStrokes[message.userID];
-            delete this.liveStrokes[message.userID];
+            //delete this.liveStrokes[message.userID];
         })
 
         // When the server sends a strokeID, give it to the earliest orphaned stroke
@@ -294,6 +294,29 @@ export class CanvasComponent implements OnInit {
         }
     }
 
+    //draws a Pixel
+    drawCurPixel(pixel) {
+        this.curStroke.pos.push(pixel);
+        this.context.strokeStyle = this.curStroke.color;
+        this.context.lineWidth = this.curStroke.size;
+        this.context.globalCompositeOperation = this.curStroke.mode;
+        this.context.lineJoin = "round";
+        // If the drawing was cleared by someone else, there's nothing left
+        if (this.curStroke.pos.length < 2) {
+            this.context.beginPath();
+            this.context.moveTo(this.curStroke.pos[0].x-1, this.curStroke.pos[0].y);
+            this.context.lineTo(this.curStroke.pos[0].x, this.curStroke.pos[0].y);
+            this.context.closePath();
+            this.context.stroke();
+            return;
+        }
+        this.context.beginPath();
+        this.context.moveTo(this.curStroke.pos[this.curStroke.pos.length-2].x, this.curStroke.pos[this.curStroke.pos.length-2].y);
+        this.context.lineTo(this.curStroke.pos[this.curStroke.pos.length-1].x, this.curStroke.pos[this.curStroke.pos.length-1].y);
+        this.context.closePath();
+        this.context.stroke();
+    }
+
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
         // Clear the canvas and also offscreen
@@ -319,16 +342,7 @@ export class CanvasComponent implements OnInit {
 
     // Removes everything from the canvas and sends a clear message to the server
     clear() {
-        this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
-        this.strokes = [];
-        this.myIDs = [];
-        this.undoIDs = [];
-        this.orphanedStrokes = [];
-        this.orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
-        for (var key in this.liveStrokes) {
-            this.liveStrokes[key].pos = [];
-        }
         this.title.updateSubtitle("Canvas has been cleared.");
     }
 
@@ -431,8 +445,7 @@ export class CanvasComponent implements OnInit {
         if (this.drag && this.canDraw) {
             var x = ((event.x - this.canvas.offsetLeft - this.drawPosition.x)/this.scaleValue) - this.offset.x;
             var y = ((event.y - this.canvas.offsetTop - this.drawPosition.y)/this.scaleValue) - this.offset.y;
-            this.curStroke.pos.push(new Position(x,y));
-            this.draw(this.curStroke);
+            this.drawCurPixel(new Position(x,y));
             this.drawService.sendPixel(new Position(x,y), this.id);
         }
         else if (this.drag && !this.canDraw) {

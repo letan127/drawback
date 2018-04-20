@@ -68,7 +68,8 @@ io.on('connection', (socket) => {
             name: rooms[room].getName(),
             numUsers: rooms[room].getUsers(),
             strokes: rooms[room].getStrokes(),
-            liveStrokes: rooms[room].getLiveStrokes()
+            liveStrokes: rooms[room].getLiveStrokes(),
+            socketID: socket.id
         };
         socket.emit('initUser', init);
         socket.to(room).emit('updateUserCount', 1);
@@ -98,8 +99,7 @@ io.on('connection', (socket) => {
 
     // When a client clicks clear, tell all other clients to clear
     socket.on('clear', (room) => {
-        socket.to(room).emit('clear');
-        socket.emit('clear');
+        io.in(room).emit('clear');
         rooms[room].clear();
     });
 

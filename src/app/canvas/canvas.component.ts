@@ -115,7 +115,7 @@ export class CanvasComponent implements OnInit {
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
             this.strokes[message.strokeID] = this.liveStrokes[message.userID];
-            //delete this.liveStrokes[message.userID];
+            delete this.liveStrokes[message.userID];
         })
 
         // When the server sends a strokeID, give it to the earliest orphaned stroke
@@ -304,7 +304,6 @@ export class CanvasComponent implements OnInit {
     drawAll() {
         // Clear the canvas and also offscreen
         this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
-
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < this.strokes.length; i++) {
             if (this.strokes[i])
@@ -362,7 +361,7 @@ export class CanvasComponent implements OnInit {
             this.myIDs.push(redoStroke);
             this.drawService.sendRedo(this.id, redoStroke);
             this.strokes[redoStroke].draw = true;
-            this.draw(this.strokes[redoStroke]);
+            this.drawAll();
         }
     }
 

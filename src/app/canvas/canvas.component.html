@@ -10,22 +10,15 @@
 <div>
     <canvas id='canvas'></canvas>
     <!-- Header -->
-    <div class="top-bar header-bar flex-horizontal canvas-component">
-        <div class="title-menu flex-horizontal">
-            <div class="title-box">
-                <input id="canvas-name" type="text" autocomplete="off"/>
-                <div id="title-text">Welcome to your canvas!</div>
-            </div>
-        </div>
-    </div>
-    <!-- Sharing and User Bar -->
+    <app-title [roomID]=id
+                (sendTitle)="drawService.sendTitle($event.roomID, $event.name)">
+    </app-title>
+    <!-- Invite, Download, and Upload Bar -->
     <div class="top-bar top-right-bar flex-horizontal canvas-component">
-        <!-- Copy URL, Upload, and Download Bar -->
         <div class="bar flex-horizontal">
-            <div id="share-button" class="bar-button tool-tip" (click)="showShareModal()">
-                <i class="fa fa-user-plus"></i>
-                <span id="copy-tooltip" class="tool-tip-text">Share Room</span>
-            </div>
+            <app-invite [roomID]="id"
+                        (checkRoom)="drawService.requestRoomCheck($event)">
+            </app-invite>
             <div class="bar-separator"></div>
             <div class="bar-button tool-tip">
                 <i id="download" class="fa fa-download"></i>
@@ -38,125 +31,20 @@
         </div>
         <div id="signup-login" class="bar bar-button flex-horizontal" (click)="authentication()">{{loginButton}}</div>
     </div>
-    <!-- Main toolbar with Drawings Tools -->
-    <div class="tool-menu toolbar flex-vertical canvas-component">
-        <div id="pen" class="tool-button tool-tip active" (click)="selectPen()">
-            <i class="fa fa-pencil"></i>
-            <span class="tool-tip-text">Pen</span>
-        </div>
-        <div id="eraser" class="tool-button tool-tip" (click)="selectEraser()">
-            <i class="fa fa-eraser"></i>
-            <span class="tool-tip-text">Eraser</span>
-        </div>
-        <div id="colors" class="tool-button tool-tip" (click)="showColors()">
-            <i class="fa fa-paint-brush">
-                <div class="dropdown-caret">
-                    <i class="fa fa-caret-right"></i>
-                </div>
-            </i>
-            <span class="tool-tip-text">Colors</span>
-            <div class="dropdown-menu drop-right flex-horizontal">
-                <div id="black" class="dropdown-item" style="color:black" (click)="changeColor($event)">
-                    <i class="fa fa-circle"></i>
-                </div>
-                <div id="red" class="dropdown-item" style="color:red" (click)="changeColor($event)">
-                    <i class="fa fa-circle"></i>
-                </div>
-                <div id="orange" class="dropdown-item" style="color:orange" (click)="changeColor($event)">
-                    <i class="fa fa-circle"></i>
-                </div>
-                <div id="yellow" class="dropdown-item" style="color:yellow" (click)="changeColor($event)">
-                    <i class="fa fa-circle"></i>
-                </div>
-                <div id="green" class="dropdown-item" style="color:green" (click)="changeColor($event)">
-                    <i class="fa fa-circle"></i>
-                </div>
-                <div id="blue" class="dropdown-item" style="color:blue" (click)="changeColor($event)">
-                    <i class="fa fa-circle"></i>
-                </div>
-                <div id="darkMagenta" class="dropdown-item" style="color:darkMagenta" (click)="changeColor($event)">
-                    <i class="fa fa-circle"></i>
-                </div>
-            </div>
-        </div>
-        <div id="sizes" class="tool-button tool-tip" (click)="showSizes()">
-            <i class="fa fa-window-minimize">
-                <div class="dropdown-caret">
-                    <i class="fa fa-caret-right"></i>
-                </div>
-            </i>
-            <span class="tool-tip-text">Sizes</span>
-            <div class="slider-menu dropdown-menu drop-right flex-horizontal">
-                <div id="pen-slider-value" class="slider-value"></div>
-                <div class="slider-box">
-                    <input id="pen-size-slider" type="range" class="slider" min="1" max="6" value="2" (input)="changeSize($event)">
-                </div>
-            </div>
-        </div>
-        <div id="undo" class="tool-button tool-tip" (click)="undo()">
-            <i class="fa fa-undo"></i>
-            <span class="tool-tip-text">Undo</span>
-        </div>
-        <div id="redo" class="tool-button tool-tip" (click)="redo()">
-            <i class="fa fa-repeat"></i>
-            <span class="tool-tip-text">Redo</span>
-        </div>
-        <div id="clear" class="tool-button tool-tip" (click)="clear()">
-            <i class="fa fa-trash"></i>
-            <span class="tool-tip-text">Clear</span>
-        </div>
-    </div>
-    <!-- Navigation Bar  -->
-    <div class="navigation-bar toolbar flex-vertical canvas-component">
-        <div id="zoom-in" class="tool-button tool-tip" (click) = "zoom(1.5)">
-            <i class="fa fa-search-plus"></i>
-            <span class="tool-tip-text">Zoom In</span>
-        </div>
-        <div id="zoom-amount" class="tools-text">100%</div>
-        <div id="zoom-out" class="tool-button tool-tip" (click) = "zoom(1/1.5)">
-            <i class="fa fa-search-minus"></i>
-            <span class="tool-tip-text">Zoom Out</span>
-        </div>
-        <div class="vertical-separator flex-vertical">
-            <div class="tool-separator"></div>
-        </div>
-        <div id="move" class="tool-button tool-tip" (click) = "setPan()">
-            <i class="fa fa-hand-paper-o"></i>
-            <span class="tool-tip-text">Move</span>
-        </div>
-    </div>
+    <!-- Toolbar -->
+    <app-tools (setDraw)="setDraw($event)"
+                (callUndo)="undo()"
+                (callRedo)="redo()"
+                (callClear)="clear()"
+                (callZoom)="zoom($event)"
+                [scaleValue]="scaleValue">
+    </app-tools>
     <!-- User Count -->
     <div class="bottom-right-bar bar flex-horizontal canvas-component">
         <div id="num-users-text" class="bar-text"></div>
         <div class="bar-separator"></div>
         <div id="num-users" class="bar-button">
             <i class="fa fa-user-circle"></i>
-        </div>
-    </div>
-</div>
-<!-- Share Modal -->
-<div id="share-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="close" (click)="closeShareModal()">&times;</div>
-            <h2>Invite or Join Others</h2>
-        </div>
-        <div class="modal-body">
-            <div class="modal-item">
-                <div class="modal-text">Current Room URL</div>
-                <div class="flex-horizontal">
-                    <input id="room-url" type="text" class="input-bar" readonly>
-                    <span id="copy-button" class="bar bar-button" (click)="copyURL()">Copy</span>
-                </div>
-            </div>
-            <div class="modal-item">
-                <div class="modal-text">Enter an existing room ID</div>
-                <div class="flex-horizontal">
-                    <input id="new-room-id" type="text" class="input-bar" maxlength="5" autocomplete="off" (input)="resetError()" >
-                    <a id="change-room-button" class="bar bar-button" (click)="changeRoom()">Change Room</a>
-                </div>
-                <div id="error-message" class="error"></div>
-            </div>
         </div>
     </div>
 </div>

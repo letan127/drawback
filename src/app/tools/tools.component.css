@@ -1,0 +1,305 @@
+html body {
+    font-family: sans-serif;
+    overflow: hidden;
+    height: 100%;
+}
+#canvas {
+    position: relative;
+    cursor: crosshair;
+}
+.canvas-component {
+    position: absolute;
+}
+.flex-horizontal {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.flex-vertical {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Header */
+.top-bar {
+    top: 15px;
+    height: 53px;
+}
+.header-bar {
+    left: 70px;
+    background-color: #555;
+    border:1px solid #ddd;
+    border-radius:8px;
+    color: white;
+}
+.title-menu {
+    border-radius: 8px;
+}
+.title-box {
+    padding: 5px 10px 5px 10px;
+    margin-bottom: 5px;
+}
+#canvas-name {
+    background: 0 0;
+    border: 1px solid transparent;
+    font-weight: bold;
+}
+#title-text {
+    padding: 0 2px;
+    font-size: 10px;
+    color: #b3b3b3;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 1s, visibility 1s;
+}
+
+/* Share Bar */
+.top-right-bar {
+    right: 10px;
+}
+.bar {
+    height: inherit;
+    background-color: #555;
+    border:1px solid #ddd;
+    border-radius:8px;
+    color: white;
+}
+.bar-button {
+    padding:5px 10px 5px 10px;
+    margin:5px 5px 5px 5px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.bar-button:hover {
+    background-color: gray;
+}
+#signup-login {
+    margin-right: 0px!important;
+}
+.bar-separator {
+    width: 1px;
+    height: 60%;
+    background-color:#dedede;
+}
+
+/* Toolbar */
+.toolbar {
+    width: 50px;
+    height: auto;
+    background-color: #555;
+    border-radius: 8px;
+}
+.tool-menu {
+    top: 85px;
+    left: 10px;
+}
+.tool-button {
+    cursor: pointer;
+    text-align: center;
+    padding: 5px;
+    margin: 10px;
+    color: white;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+.tool-button:hover {
+    background-color: gray;
+    border-radius: 8px;
+}
+.tool-button:active {
+    background-color: #4CAF50!important;
+}
+.active {
+    background-color: #4CAF50!important;
+    border-radius: 8px;
+}
+.tool-tip {
+    position: relative;
+}
+.tool-tip-text {
+    visibility: hidden;
+    text-align: center;
+    font-size: 12px;
+    font-style: normal;
+    color: #fff;
+    background-color: black;
+    padding: 5px;
+    border-radius: 6px;
+    white-space: nowrap; /* Keep the text in one line */
+
+    /* Position the tooltip on top of and centered on the tool icon */
+    position: absolute;
+    z-index: 2;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.tool-tip:hover .tool-tip-text {
+    visibility: visible;
+}
+.dropdown-caret {
+    position: absolute;
+    z-index: 2;
+    bottom: 1px;
+    right: 1px;
+    font-size: 1;
+}
+.dropdown-menu {
+    visibility: hidden;
+    position: absolute;
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+.drop-right {
+    top: 5px;
+    left: 45px;
+}
+.show .dropdown-menu {
+    visibility: visible;
+}
+.dropdown-item {
+    text-align: center;
+    padding: 5px 10px;
+    margin: 0px 5px;
+    font-size: 20px;
+}
+.dropdown-item:hover {
+    background-color: gray;
+    border-radius: 8px;
+}
+.slider-menu {
+    width: 100%;
+}
+.slider-value {
+    color: black;
+    width: 33px;
+    height: 21px;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 5px;
+    margin-left: 10px;
+}
+.slider-box {
+    padding: 5px;
+    margin: 5px;
+}
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 7px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    margin: 0 10 0 5px;
+}
+.slider:hover {
+    opacity: 1;
+}
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+.slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+/* Navigation Bar */
+.navigation-bar {
+    top: 85px;
+    right: 10px;
+}
+.tools-text {
+    text-align: center;
+    color: gray;
+    font-size: 12px;
+}
+.vertical-separator {
+    align-items: center;
+}
+.tool-separator {
+    width: 60%;
+    height: 1px;
+    background-color:#dedede;
+}
+
+/* User Count */
+.bottom-right-bar {
+    bottom: 10px;
+    right: 10px;
+    height: 42px;
+}
+.bar-text {
+    padding:5px 10px 5px 10px;
+    margin:5px 5px 5px 5px;
+}
+
+/* Modals */
+.modal { /* Background of the modal */
+    display: none;
+    position: fixed; /* Stay in place */
+    z-index: 1;
+    left: 0;
+    top: 0;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 42%;
+}
+.modal-header {
+    color: white;
+    background-color: #5cb85c;
+    border-radius: 8px;
+}
+.modal-body {
+    padding: 2px;
+    margin: 2px;
+}
+.modal-item {
+    padding: 2px;
+    margin: 2px;
+}
+.modal-text {
+    padding: 10px 0px 0px 0px;
+    color: gray;
+}
+.error {
+    color: red;
+    font-size: 12px;
+}
+.input-bar {
+    width: 70%;
+}
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

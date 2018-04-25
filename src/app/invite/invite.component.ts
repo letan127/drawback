@@ -12,7 +12,8 @@ export class InviteComponent implements OnInit {
     room: HTMLInputElement;     // Displays the current room's URL
     newRoom: HTMLInputElement;  // Allows users to enter a 5-character room ID
     moveButton: HTMLElement;    // Click to move to a new room
-    errorMsg: string;   // Appears if inputted new room ID is invalid
+    copyButton: HTMLElement;    // Click to copy the room's URL
+    errorMsg: string    // Tells user why the inputted roomID is invalid
     copyMsg: string;    // Tells user whether they've copied the room URL
     url: string;        // Generic URL of the page without the room ID
 
@@ -36,9 +37,10 @@ export class InviteComponent implements OnInit {
         this.room = <HTMLInputElement>document.getElementById("room-url");
         this.newRoom = <HTMLInputElement>document.getElementById("new-room-id");
         this.moveButton = document.createElement("a");
+        this.copyButton = document.getElementById("copy-button");
 
         this.newRoom.addEventListener("keypress", (event) => {
-            if (event.keyCode == 13)
+            if (event.key == "Enter")
                 this.submitRoom();
         });
     }
@@ -67,6 +69,10 @@ export class InviteComponent implements OnInit {
         this.room.select();
         document.execCommand("Copy");
         this.copyMsg = "Copied!";
+
+        setTimeout(() => {
+            this.copyMsg = "Copy URL";
+        }, 3000);
     }
 
     // Check for incorrect room IDs

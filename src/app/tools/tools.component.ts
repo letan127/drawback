@@ -146,9 +146,9 @@ export class ToolsComponent implements OnInit {
     }
 
     zoom(amount: number) {
-        if(this.scaleValue * amount > 11 || this.scaleValue * amount < .09) {
+        if(this.scaleValue * amount > 11 || this.scaleValue * amount < .09)
             return;
-        }
+
         this.callZoom.emit(amount);
         // Update displayed zoom amount
         document.getElementById("zoom-amount").innerHTML = ""+Math.round(100 * this.scaleValue * amount) + "%";

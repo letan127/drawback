@@ -13,7 +13,11 @@
             <div class="modal-item">
                 <div class="modal-text">Current Room URL</div>
                 <div class="flex-horizontal">
+<<<<<<< HEAD
                     <input id="room-url" [value]="url" type="text" class="input-bar" readonly>
+=======
+                    <input id="room-url" [value]="url + '/rooms/' + roomID" type="text" class="input-bar" readonly>
+>>>>>>> aea278b4e5a24dfbf6af55aae7baeb5a826aa239
                     <span id="copy-button" [innerHTML]="copyMsg" class="bar bar-button" (click)="copyURL()"></span>
                 </div>
             </div>

@@ -65,6 +65,6 @@ export class TitleComponent implements OnInit {
         setTimeout(() => {
             this.subtitle.style.opacity = "0";
             this.subtitle.style.visibility = "hidden";
-        }, 3000);
+        }, 6000);
     }
 }

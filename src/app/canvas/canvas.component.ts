@@ -419,6 +419,7 @@ export class CanvasComponent implements OnInit {
         if (this.canDraw) {
             this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
             this.drawService.reqStrokeID(this.id);
+            delete this.liveStrokes[this.socketID]
         }
     }
 

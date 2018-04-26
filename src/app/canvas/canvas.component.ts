@@ -169,12 +169,9 @@ export class CanvasComponent implements OnInit {
             this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
             if(!strokeAndID.stroke.draw)
                 return;
-            //draw the first pixel of the new live stroke
-            this.context.strokeStyle = strokeAndID.stroke.color;
-            this.context.lineWidth = strokeAndID.stroke.size;
-            this.context.globalCompositeOperation = strokeAndID.stroke.mode;
-            this.context.lineJoin = "round";
+
             // Draw the first pixel in the stroke
+            this.prepareCanvas(strokeAndID.stroke);
             this.context.beginPath();
             this.context.moveTo(strokeAndID.stroke.pos[0].x-1, strokeAndID.stroke.pos[0].y);
             this.context.lineTo(strokeAndID.stroke.pos[0].x, strokeAndID.stroke.pos[0].y);
@@ -252,16 +249,21 @@ export class CanvasComponent implements OnInit {
         this.canDraw = value;
     }
 
+    // Copy the stroke's settings to the canvas before drawing
+    prepareCanvas(stroke: Stroke) {
+        this.context.strokeStyle = stroke.color;
+        this.context.lineWidth = stroke.size;
+        this.context.globalCompositeOperation = stroke.mode;
+        this.context.lineJoin = "round";
+    }
+
     // Draws a single stroke that is passed in as an argument
     draw(stroke) {
         if(!stroke.draw || stroke.pos.length == 0)
             return;
 
-        this.context.strokeStyle = stroke.color;
-        this.context.lineWidth = stroke.size;
-        this.context.globalCompositeOperation = stroke.mode;
-        this.context.lineJoin = "round";
         // Draw the first pixel in the stroke
+        this.prepareCanvas(stroke);
         this.context.beginPath();
         this.context.moveTo(stroke.pos[0].x-1, stroke.pos[0].y);
         this.context.lineTo(stroke.pos[0].x, stroke.pos[0].y);
@@ -282,10 +284,8 @@ export class CanvasComponent implements OnInit {
     //draws a Pixel
     drawPixel(pixel, socketID) {
         this.liveStrokes[socketID].pos.push(pixel);
-        this.context.strokeStyle = this.liveStrokes[socketID].color;
-        this.context.lineWidth = this.liveStrokes[socketID].size;
-        this.context.globalCompositeOperation = this.liveStrokes[socketID].mode;
-        this.context.lineJoin = "round";
+        this.prepareCanvas(this.liveStrokes[socketID]);
+
         // If the drawing was cleared by someone else, there's nothing left
         if (this.liveStrokes[socketID].pos.length < 2) {
             this.context.beginPath();

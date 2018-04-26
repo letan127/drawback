@@ -97,7 +97,7 @@ io.on('connection', (socket) => {
         rooms[room].incrementID();
     });
 
-    // When a client clicks clear, tell all other clients to clear
+    // When a client clicks clear, tell all clients to clear, including the sender
     socket.on('clear', (room) => {
         io.in(room).emit('clear');
         rooms[room].clear();

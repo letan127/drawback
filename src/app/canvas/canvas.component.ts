@@ -262,6 +262,15 @@ export class CanvasComponent implements OnInit {
         this.context.stroke();
     }
 
+    // Draw a line connect the previous point and current point
+    drawNextPoint(points: Position[], prev) {
+        this.context.beginPath();
+        this.context.moveTo(points[prev].x, points[prev].y);
+        this.context.lineTo(points[prev+1].x, points[prev+1].y);
+        this.context.closePath();
+        this.context.stroke();
+    }
+
     // Draws a single stroke that is passed in as an argument
     draw(stroke) {
         if(!stroke.draw || stroke.pos.length == 0)
@@ -272,31 +281,23 @@ export class CanvasComponent implements OnInit {
         this.drawFirstPoint(stroke.pos[0]);
 
         // Draw the rest of the pixels in the stroke
-        for (var j = 1; j < stroke.pos.length; j++) {
-            // Create a smooth path from the previous pixel to the current pixel
-            this.context.beginPath();
-            this.context.moveTo(stroke.pos[j-1].x, stroke.pos[j-1].y);
-            this.context.lineTo(stroke.pos[j].x, stroke.pos[j].y);
-            this.context.closePath();
-            this.context.stroke();
+        for (var j = 0; j < stroke.pos.length - 1; j++) {
+            this.drawNextPoint(stroke.pos, j);
         }
     }
 
-    //draws a Pixel
+    // Draw a pixel and add it to the current stroke
     drawPixel(pixel, socketID) {
         this.liveStrokes[socketID].pos.push(pixel);
         this.prepareCanvas(this.liveStrokes[socketID]);
 
-        // If the drawing was cleared by someone else, there's nothing left
         if (this.liveStrokes[socketID].pos.length < 2) {
+            // Canvas was cleared while drawing; start drawing a new stroke
             this.drawFirstPoint(this.liveStrokes[socketID].pos[0]);
         }
         else {
-            this.context.beginPath();
-            this.context.moveTo(this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-2].x, this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-2].y);
-            this.context.lineTo(this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-1].x, this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-1].y);
-            this.context.closePath();
-            this.context.stroke();
+            // Continue drawing the current stroke
+            this.drawNextPoint(this.liveStrokes[socketID].pos, this.liveStrokes[socketID].pos.length-2);
         }
     }
 

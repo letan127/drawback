@@ -172,11 +172,7 @@ export class CanvasComponent implements OnInit {
 
             // Draw the first pixel in the stroke
             this.prepareCanvas(strokeAndID.stroke);
-            this.context.beginPath();
-            this.context.moveTo(strokeAndID.stroke.pos[0].x-1, strokeAndID.stroke.pos[0].y);
-            this.context.lineTo(strokeAndID.stroke.pos[0].x, strokeAndID.stroke.pos[0].y);
-            this.context.closePath();
-            this.context.stroke();
+            this.drawFirstPoint(strokeAndID.stroke.pos[0]);
         })
         this.drawService.getNewPixel().subscribe(pixelAndID => {
             //get the pixel and add it to the liveStroke of the other user
@@ -257,6 +253,15 @@ export class CanvasComponent implements OnInit {
         this.context.lineJoin = "round";
     }
 
+    // Draw the first point of a stroke
+    drawFirstPoint(point: Position) {
+        this.context.beginPath();
+        this.context.moveTo(point.x-1, point.y);
+        this.context.lineTo(point.x, point.y);
+        this.context.closePath();
+        this.context.stroke();
+    }
+
     // Draws a single stroke that is passed in as an argument
     draw(stroke) {
         if(!stroke.draw || stroke.pos.length == 0)
@@ -264,11 +269,7 @@ export class CanvasComponent implements OnInit {
 
         // Draw the first pixel in the stroke
         this.prepareCanvas(stroke);
-        this.context.beginPath();
-        this.context.moveTo(stroke.pos[0].x-1, stroke.pos[0].y);
-        this.context.lineTo(stroke.pos[0].x, stroke.pos[0].y);
-        this.context.closePath();
-        this.context.stroke();
+        this.drawFirstPoint(stroke.pos[0]);
 
         // Draw the rest of the pixels in the stroke
         for (var j = 1; j < stroke.pos.length; j++) {
@@ -288,18 +289,15 @@ export class CanvasComponent implements OnInit {
 
         // If the drawing was cleared by someone else, there's nothing left
         if (this.liveStrokes[socketID].pos.length < 2) {
+            this.drawFirstPoint(this.liveStrokes[socketID].pos[0]);
+        }
+        else {
             this.context.beginPath();
-            this.context.moveTo(this.liveStrokes[socketID].pos[0].x-1, this.liveStrokes[socketID].pos[0].y);
-            this.context.lineTo(this.liveStrokes[socketID].pos[0].x, this.liveStrokes[socketID].pos[0].y);
+            this.context.moveTo(this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-2].x, this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-2].y);
+            this.context.lineTo(this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-1].x, this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-1].y);
             this.context.closePath();
             this.context.stroke();
-            return;
         }
-        this.context.beginPath();
-        this.context.moveTo(this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-2].x, this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-2].y);
-        this.context.lineTo(this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-1].x, this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-1].y);
-        this.context.closePath();
-        this.context.stroke();
     }
 
     // Clears the canvas and redraws every stroke in our list of strokes

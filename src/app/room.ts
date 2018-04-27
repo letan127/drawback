@@ -1,4 +1,5 @@
 import { Stroke } from './stroke';
+import { Position } from './position';
 
 // Server-side copy of a room's properties
 export class Room {
@@ -7,6 +8,7 @@ export class Room {
     private strokes: Stroke[];
     private numUsers: number;
     private liveStrokes = {};
+    private recentPixel = new Position(0,0);
     constructor() {
         this.name = "Untitled Canvas";
         this.latestStrokeID = 0;
@@ -38,6 +40,9 @@ export class Room {
         return this.liveStrokes;
     }
 
+    getRecentPixel() {
+        return this.recentPixel;
+    }
     // Change the canvas name
     rename(name: string): void {
         this.name = name;
@@ -80,10 +85,12 @@ export class Room {
     //adds a new live stroke to the room based on socket.id
     addLiveStroke(id: string, stroke: Stroke): void {
         this.liveStrokes[id] = stroke;
+        this.recentPixel = stroke.pos[0];
     }
 
     //adds a pixel to the live stroke of the user
     addPixel(id: string, pixel): void {
         this.liveStrokes[id].pos.push(pixel);
+        this.recentPixel = pixel;
     }
 }

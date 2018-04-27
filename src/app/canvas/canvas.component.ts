@@ -96,6 +96,10 @@ export class CanvasComponent implements OnInit {
             this.strokes = init.strokes;
             this.liveStrokes = init.liveStrokes;
             this.socketID = init.socketID;
+            init.recentPosition.x = -init.recentPosition.x/2;
+            init.recentPosition.y = -init.recentPosition.y/2;
+            this.offset.add(init.recentPosition);
+            this.context.translate(-this.offset.x, -this.offset.y);
             this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
             this.updateUserCount();
             this.drawAll();
@@ -289,6 +293,8 @@ export class CanvasComponent implements OnInit {
     // Draw a pixel and add it to the current stroke
     drawPixel(pixel, socketID) {
         this.liveStrokes[socketID].pos.push(pixel);
+        console.log(pixel.x);
+        console.log(pixel.y)
         this.prepareCanvas(this.liveStrokes[socketID]);
 
         if (this.liveStrokes[socketID].pos.length < 2) {

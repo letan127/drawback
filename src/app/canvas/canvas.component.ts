@@ -130,6 +130,7 @@ export class CanvasComponent implements OnInit {
             else
                 this.myIDs.push(strokeID);
             this.strokes[strokeID] = this.orphanedStrokes.shift();
+            delete this.liveStrokes[this.socketID]
             this.drawService.sendStroke(strokeID, this.id);
         })
 
@@ -419,7 +420,6 @@ export class CanvasComponent implements OnInit {
         if (this.canDraw) {
             this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
             this.drawService.reqStrokeID(this.id);
-            delete this.liveStrokes[this.socketID]
         }
     }
 

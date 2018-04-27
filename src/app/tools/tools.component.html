@@ -1,0 +1,74 @@
+<!-- Mobile tool button -->
+<div id="mobile-tool" class="mobile-button canvas-component" (click)="dropToolbar()">
+    <i class="fa fa-pencil"></i>
+</div>
+<!-- Main toolbar with Drawings Tools -->
+<div id="main-toolbar" class="tool-menu toolbar flex-vertical canvas-component">
+    <div id="pen" class="tool-button tool-tip active" (click)="selectTool(true, 'source-over')">
+        <i class="fa fa-pencil"></i>
+        <span class="tool-tip-text">Pen</span>
+    </div>
+    <div id="eraser" class="tool-button tool-tip" (click)="selectTool(true, 'destination-out')">
+        <i class="fa fa-eraser"></i>
+        <span class="tool-tip-text">Eraser</span>
+    </div>
+    <div id="colors" class="tool-button tool-tip" (click)="toggleDropdown($event, 'colors')">
+        <i class="fa fa-paint-brush">
+            <div class="dropdown-caret">
+                <i class="fa fa-caret-right"></i>
+            </div>
+        </i>
+        <span class="tool-tip-text">Colors</span>
+        <div class="dropdown-menu drop-right flex-horizontal">
+            <div *ngFor="let color of allColors"
+                class="dropdown-item" [style.color]="color" (click)=changeColor(color)>
+                <i class="fa fa-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div id="sizes" class="tool-button tool-tip" (click)="toggleDropdown($event, 'sizes')">
+        <i class="fa fa-window-minimize">
+            <div class="dropdown-caret">
+                <i class="fa fa-caret-right"></i>
+            </div>
+        </i>
+        <span class="tool-tip-text">Sizes</span>
+        <div class="slider-menu dropdown-menu drop-right flex-horizontal">
+            <div id="pen-slider-value" class="slider-value"></div>
+            <div class="slider-box">
+                <input id="pen-size-slider" type="range" class="slider" min="1" max="6" value="2" (input)="changeSize($event)">
+            </div>
+        </div>
+    </div>
+    <div id="undo" class="tool-button tool-tip" (click)="undo()">
+        <i class="fa fa-undo"></i>
+        <span class="tool-tip-text">Undo</span>
+    </div>
+    <div id="redo" class="tool-button tool-tip" (click)="redo()">
+        <i class="fa fa-repeat"></i>
+        <span class="tool-tip-text">Redo</span>
+    </div>
+    <div id="clear" class="tool-button tool-tip" (click)="clear()">
+        <i class="fa fa-trash"></i>
+        <span class="tool-tip-text">Clear</span>
+    </div>
+</div>
+<!-- Navigation Bar  -->
+<div class="navigation-bar toolbar flex-vertical canvas-component">
+    <div id="zoom-in" class="tool-button tool-tip" (click) = "zoom(1.5)">
+        <i class="fa fa-search-plus"></i>
+        <span class="tool-tip-text">Zoom In</span>
+    </div>
+    <div id="zoom-amount" class="tools-text">100%</div>
+    <div id="zoom-out" class="tool-button tool-tip" (click) = "zoom(1/1.5)">
+        <i class="fa fa-search-minus"></i>
+        <span class="tool-tip-text">Zoom Out</span>
+    </div>
+    <div class="vertical-separator flex-vertical">
+        <div class="tool-separator"></div>
+    </div>
+    <div id="pan" class="tool-button tool-tip" (click) = "selectTool(false)">
+        <i class="fa fa-hand-paper-o"></i>
+        <span class="tool-tip-text">Move</span>
+    </div>
+</div>

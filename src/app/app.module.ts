@@ -7,11 +7,29 @@ import { AppComponent } from './app.component';
 import { DropDownDirective } from './shared/dropdown.directive';
 import { HoverClassDirective } from './shared/hover-class.directive';
 import { CanvasComponent } from './canvas/canvas.component';
+import { LoginComponent } from './login/login.component';
 import { Routes, RouterModule } from '@angular/router';
+import { AngularFireModule } from 'angularfire2';
+import { AngularFireDatabaseModule } from 'angularfire2/database';
+import { AngularFireAuthModule } from 'angularfire2/auth';
 
+import { DrawService } from './draw.service';
+import { ToolsComponent } from './tools/tools.component';
+import { InviteComponent } from './invite/invite.component';
+import { TitleComponent } from './title/title.component';
+
+export const config = {
+  apiKey: "AIzaSyBBIYSjhH5moXzFra9BUH-m_0denvu3HmE",
+  authDomain: "peppy-coda-192823.firebaseapp.com",
+  databaseURL: "https://peppy-coda-192823.firebaseio.com",
+  projectId: "peppy-coda-192823",
+  storageBucket: "peppy-coda-192823.appspot.com",
+  messagingSenderId: "608993808317"
+};
 
 const appRoutes: Routes = [
     {path: 'rooms/:id', component: CanvasComponent},
+    {path: 'login/:id', component: LoginComponent}
 ];
 
 
@@ -20,15 +38,22 @@ const appRoutes: Routes = [
         AppComponent,
         DropDownDirective,
         HoverClassDirective,
-        CanvasComponent
+        CanvasComponent,
+        LoginComponent,
+        ToolsComponent,
+        InviteComponent,
+        TitleComponent
     ],
     imports: [
         BrowserModule,
         HttpModule,
         FormsModule,
-        RouterModule.forRoot(appRoutes)
+        RouterModule.forRoot(appRoutes),
+        AngularFireModule.initializeApp(config),
+        AngularFireDatabaseModule,
+        AngularFireAuthModule
     ],
-    providers: [],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
+    providers: [DrawService]
 })
 export class AppModule { }

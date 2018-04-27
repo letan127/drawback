@@ -272,7 +272,7 @@ html body {
         transition: all 0.3s ease;
     }
     /* Share Bar */
-    #top-right-bar {
+    .top-right-bar {
         right: 10px;
     }
     .bar {
@@ -344,7 +344,6 @@ html body {
     }
 }
 
-/* Mobile screens */
 @media only screen and (max-width: 600px) {
     #main-toolbar {
         visibility: hidden;
@@ -356,11 +355,9 @@ html body {
     .navigation-bar {
         display: none;
     }
-
-    .bar-button {
+    .top-bar {
         display: none;
     }
-
     .mobile-button {
         width: 50px;
         background-color: #555;
@@ -414,10 +411,6 @@ html body {
    }
 
     /* User Count */
-    #num-users {
-        display: inline!important;
-    }
-    
     .bar-text {
         padding:2px 0px 2px 5px;
         margin:2px 2px 2px 2px;
@@ -432,11 +425,6 @@ html body {
         margin:2px 2px 2px 2px;
         border-radius: 8px;
         cursor: pointer;
-    }
-
-    #top-right-bar {
-        top: 20px;
-        right: 72px;
     }
 
     /* Modals */

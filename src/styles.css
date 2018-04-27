@@ -1,1 +1,54 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* source: https://alligator.io/angular/custom-loading-screen/ */
+
+.flex-container{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+#logo{
+    background: url('./assets/pencil3.svg') no-repeat;
+    background-size: 70px;
+    color: white;
+    letter-spacing: 1px;
+    margin-right: 5px;
+    width: 70px;
+    height: 70px;
+    border: none;
+    border-radius: 70px;
+    outline: none;
+    box-sizing: border-box;
+    margin-top: 300px;
+    border: 2px solid #FFFF;
+}
+
+#loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+     height: 30vh;
+    color: #4CAF50;
+    text-transform: uppercase;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+}
+@keyframes dots {
+    50% {
+        transform: translateY(-.4rem);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+.d {
+    animation: dots 1.5s ease-out infinite;
+}
+.d-2 {
+    animation-delay: .5s;
+}
+.d-3 {
+    animation-delay: 1s;
+}

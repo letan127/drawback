@@ -1,16 +1,21 @@
 import { Injectable } from '@angular/core';
-import * as io from 'socket.io-client';
 import { Observable } from 'rxjs/Observable';
 import { Stroke } from './stroke';
 
 
 @Injectable()
 export class DrawService {
-    private url = 'http://localhost:4000';
     private socket;
 
     constructor() {
-        this.socket = io(this.url);
+    }
+
+    public setSocket(io){
+        this.socket = io;
+    }
+
+    public getSocket(){
+        return this.socket;
     }
 
     // Give the new user the current state of the canvas
@@ -22,11 +27,11 @@ export class DrawService {
         });
     }
 
-    // Notify current clients that a new user entered the room
-    public newUser = () => {
+    // Notify current clients that a user has either entered or left the room
+    public updateUserCount = () => {
         return Observable.create((observer) => {
-            this.socket.on('newUser', () => {
-                observer.next();
+            this.socket.on('updateUserCount', (amount) => {
+                observer.next(amount);
             })
         })
     }
@@ -34,6 +39,24 @@ export class DrawService {
     // Send the server our room ID
     public sendRoom(room){
         this.socket.emit('room', room);
+    }
+
+    // Send the new canvas title to the server
+    public sendTitle(room, title) {
+        var roomTitle = {
+            room: room,
+            title: title
+        };
+        this.socket.emit('title', roomTitle);
+    }
+
+    // Get the new canvas title from the server
+    public getTitle() {
+        return Observable.create((observer) => {
+            this.socket.on('title', (title) => {
+                observer.next(title);
+            });
+        });
     }
 
     // Send a stroke object, its ID, and the client's room ID to the server
@@ -126,8 +149,8 @@ export class DrawService {
 
     public getRoomCheck = () => {
         return Observable.create((observer) => {
-            this.socket.on('check', (checkRoom) => {
-                observer.next(checkRoom);
+            this.socket.on('check', (hasRoom) => {
+                observer.next(hasRoom);
             });
         });
     }

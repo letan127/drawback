@@ -534,8 +534,15 @@ export class CanvasComponent implements OnInit {
           clientY: touch.clientY
         });
 
-        // Check for pinch or pan gesture
-        if (event.touches.length == 2) {
+        // Actions change depending on the number of fingers:
+        // - 1: Draw
+        // - 2: Pinch to zoom or pan
+        // - 3+: Pan
+        if (event.touches.length == 1) {
+            // Draw with one finger
+            this.canvas.dispatchEvent(mouseEvent);
+        }
+        else if (event.touches.length == 2) {
             // Get the distances between the current fingers
             this.curFingerDistance = this.findDistance(event.touches);
             var fingerDelta = this.curFingerDistance - this.prevFingerDistance;
@@ -557,7 +564,10 @@ export class CanvasComponent implements OnInit {
                 this.canvas.dispatchEvent(mouseEvent);
             }
         }
-        this.canvas.dispatchEvent(mouseEvent); // Draw with one finger
+        else {
+            // Pan with 3+ fingers
+            this.canvas.dispatchEvent(mouseEvent);
+        }
     }
 
     touchend(event: TouchEvent): void {

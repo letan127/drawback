@@ -50,9 +50,9 @@ export class CanvasComponent implements OnInit {
     socketID: string;
 
     // Touch data
-    startFingerDistance: number; // Distance between two fingers on touchdown
-    prevFingerDistance: number; // Distance between two fingers during previous movement
-    curFingerDistance: number; // Current distance between two fingers
+    prevFingerPosition: TouchList;  // Positions of the fingers during the previous movement
+    prevFingerDistance: number;     // Distance between two fingers during previous movement
+    curFingerDistance: number;      // Current distance between two fingers
 
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
@@ -74,7 +74,6 @@ export class CanvasComponent implements OnInit {
         this.drag = false;
         this.orphanUndoCount = 0;
 
-        this.startFingerDistance = 0;
         this.prevFingerDistance = 0;
         this.curFingerDistance = 0;
     }
@@ -521,8 +520,8 @@ export class CanvasComponent implements OnInit {
         // Use two fingers to pan or zoom
         if (event.touches.length == 2) {
             this.canDraw = false;
-            this.startFingerDistance = this.findDistance(event.touches);
-            this.prevFingerDistance = this.startFingerDistance;
+            this.prevFingerPosition = event.touches;
+            this.prevFingerDistance = this.findDistance(event.touches);
         }
         this.canvas.dispatchEvent(mouseEvent);
     }
@@ -535,17 +534,30 @@ export class CanvasComponent implements OnInit {
           clientY: touch.clientY
         });
 
-        // Pinch to zoom
+        // Check for pinch or pan gesture
         if (event.touches.length == 2) {
+            // Get the distances between the current fingers
             this.curFingerDistance = this.findDistance(event.touches);
             var fingerDelta = this.curFingerDistance - this.prevFingerDistance;
             this.prevFingerDistance = this.curFingerDistance;
 
-            this.tool.zoom(1 + fingerDelta/50);
+            // Get the direction that each finger moved
+            var deltaX1 = event.touches[0].clientX - this.prevFingerPosition[0].clientX;
+            var deltaY1 = event.touches[0].clientY - this.prevFingerPosition[0].clientY;
+            var deltaX2 = event.touches[1].clientX - this.prevFingerPosition[1].clientX;
+            var deltaY2 = event.touches[1].clientY - this.prevFingerPosition[1].clientY;
+            this.prevFingerPosition = event.touches;
+
+            if (deltaX1 * deltaX2 <= 0 || deltaY1 * deltaY2 <= 0) {
+                // Detect pinch to zoom when fingers move in opposite directions
+                this.tool.zoom(1 + fingerDelta/100);
+            }
+            else {
+                // Pan with two fingers
+                this.canvas.dispatchEvent(mouseEvent);
+            }
         }
-        else {
-            this.canvas.dispatchEvent(mouseEvent);
-        }
+        this.canvas.dispatchEvent(mouseEvent); // Draw with one finger
     }
 
     touchend(event: TouchEvent): void {

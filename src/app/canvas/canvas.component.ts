@@ -223,6 +223,11 @@ export class CanvasComponent implements OnInit {
     }
 
     focus(position) {
+        //no need to translate if nothing has been drawn
+        if (position.x == 0 && position.y == 0) {
+            return
+        }
+        
         this.offset.add(-position.x + this.canvas.width/2, -position.y + this.canvas.height/2);
         this.context.translate(-position.x + this.canvas.width/2, -position.y + this.canvas.height/2);
     }

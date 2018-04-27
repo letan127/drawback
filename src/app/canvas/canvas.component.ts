@@ -169,17 +169,10 @@ export class CanvasComponent implements OnInit {
             this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
             if(!strokeAndID.stroke.draw)
                 return;
-            //draw the first pixel of the new live stroke
-            this.context.strokeStyle = strokeAndID.stroke.color;
-            this.context.lineWidth = strokeAndID.stroke.size;
-            this.context.globalCompositeOperation = strokeAndID.stroke.mode;
-            this.context.lineJoin = "round";
+
             // Draw the first pixel in the stroke
-            this.context.beginPath();
-            this.context.moveTo(strokeAndID.stroke.pos[0].x-1, strokeAndID.stroke.pos[0].y);
-            this.context.lineTo(strokeAndID.stroke.pos[0].x, strokeAndID.stroke.pos[0].y);
-            this.context.closePath();
-            this.context.stroke();
+            this.prepareCanvas(strokeAndID.stroke);
+            this.drawFirstPoint(strokeAndID.stroke.pos[0]);
         })
         this.drawService.getNewPixel().subscribe(pixelAndID => {
             //get the pixel and add it to the liveStroke of the other user
@@ -252,54 +245,60 @@ export class CanvasComponent implements OnInit {
         this.canDraw = value;
     }
 
+    // Copy the stroke's settings to the canvas before drawing
+    prepareCanvas(stroke: Stroke) {
+        this.context.strokeStyle = stroke.color;
+        this.context.lineWidth = stroke.size;
+        this.context.globalCompositeOperation = stroke.mode;
+        this.context.lineJoin = "round";
+    }
+
+    // Draw the first point of a stroke
+    drawFirstPoint(point: Position) {
+        this.context.beginPath();
+        this.context.moveTo(point.x-1, point.y);
+        this.context.lineTo(point.x, point.y);
+        this.context.closePath();
+        this.context.stroke();
+    }
+
+    // Draw a line connect the previous point and current point
+    drawNextPoint(points: Position[], prev) {
+        this.context.beginPath();
+        this.context.moveTo(points[prev].x, points[prev].y);
+        this.context.lineTo(points[prev+1].x, points[prev+1].y);
+        this.context.closePath();
+        this.context.stroke();
+    }
+
     // Draws a single stroke that is passed in as an argument
     draw(stroke) {
         if(!stroke.draw || stroke.pos.length == 0)
             return;
 
-        this.context.strokeStyle = stroke.color;
-        this.context.lineWidth = stroke.size;
-        this.context.globalCompositeOperation = stroke.mode;
-        this.context.lineJoin = "round";
         // Draw the first pixel in the stroke
-        this.context.beginPath();
-        this.context.moveTo(stroke.pos[0].x-1, stroke.pos[0].y);
-        this.context.lineTo(stroke.pos[0].x, stroke.pos[0].y);
-        this.context.closePath();
-        this.context.stroke();
+        this.prepareCanvas(stroke);
+        this.drawFirstPoint(stroke.pos[0]);
 
         // Draw the rest of the pixels in the stroke
-        for (var j = 1; j < stroke.pos.length; j++) {
-            // Create a smooth path from the previous pixel to the current pixel
-            this.context.beginPath();
-            this.context.moveTo(stroke.pos[j-1].x, stroke.pos[j-1].y);
-            this.context.lineTo(stroke.pos[j].x, stroke.pos[j].y);
-            this.context.closePath();
-            this.context.stroke();
+        for (var j = 0; j < stroke.pos.length - 1; j++) {
+            this.drawNextPoint(stroke.pos, j);
         }
     }
 
-    //draws a Pixel
+    // Draw a pixel and add it to the current stroke
     drawPixel(pixel, socketID) {
         this.liveStrokes[socketID].pos.push(pixel);
-        this.context.strokeStyle = this.liveStrokes[socketID].color;
-        this.context.lineWidth = this.liveStrokes[socketID].size;
-        this.context.globalCompositeOperation = this.liveStrokes[socketID].mode;
-        this.context.lineJoin = "round";
-        // If the drawing was cleared by someone else, there's nothing left
+        this.prepareCanvas(this.liveStrokes[socketID]);
+
         if (this.liveStrokes[socketID].pos.length < 2) {
-            this.context.beginPath();
-            this.context.moveTo(this.liveStrokes[socketID].pos[0].x-1, this.liveStrokes[socketID].pos[0].y);
-            this.context.lineTo(this.liveStrokes[socketID].pos[0].x, this.liveStrokes[socketID].pos[0].y);
-            this.context.closePath();
-            this.context.stroke();
-            return;
+            // Canvas was cleared while drawing; start drawing a new stroke
+            this.drawFirstPoint(this.liveStrokes[socketID].pos[0]);
         }
-        this.context.beginPath();
-        this.context.moveTo(this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-2].x, this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-2].y);
-        this.context.lineTo(this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-1].x, this.liveStrokes[socketID].pos[this.liveStrokes[socketID].pos.length-1].y);
-        this.context.closePath();
-        this.context.stroke();
+        else {
+            // Continue drawing the current stroke
+            this.drawNextPoint(this.liveStrokes[socketID].pos, this.liveStrokes[socketID].pos.length-2);
+        }
     }
 
     // Clears the canvas and redraws every stroke in our list of strokes

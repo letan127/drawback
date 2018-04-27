@@ -96,10 +96,7 @@ export class CanvasComponent implements OnInit {
             this.strokes = init.strokes;
             this.liveStrokes = init.liveStrokes;
             this.socketID = init.socketID;
-            init.recentPosition.x = -init.recentPosition.x/2;
-            init.recentPosition.y = -init.recentPosition.y/2;
-            this.offset.add(init.recentPosition);
-            this.context.translate(-this.offset.x, -this.offset.y);
+            this.focus(init.recentPosition);
             this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
             this.updateUserCount();
             this.drawAll();
@@ -223,6 +220,11 @@ export class CanvasComponent implements OnInit {
         this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
         this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
         this.drawAll()
+    }
+
+    focus(position) {
+        this.offset.add(-position.x + this.canvas.width/2, -position.y + this.canvas.height/2);
+        this.context.translate(-position.x + this.canvas.width/2, -position.y + this.canvas.height/2);
     }
 
     // Close and unhighlight any open menus when clicking outside of it or pressing escape

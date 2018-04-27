@@ -49,6 +49,12 @@ export class CanvasComponent implements OnInit {
     doneStrokes = {}
     socketID: string;
 
+    // Touch data
+    startFingerDistance: number; // Distance between two fingers on touchdown
+    prevFingerDistance: number; // Distance between two fingers during previous movement
+    curFingerDistance: number; // Current distance between two fingers
+
+
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
         this.numUsers = 1;
@@ -67,6 +73,10 @@ export class CanvasComponent implements OnInit {
         this.undoIDs = new Array<number>();
         this.drag = false;
         this.orphanUndoCount = 0;
+
+        this.startFingerDistance = 0;
+        this.prevFingerDistance = 0;
+        this.curFingerDistance = 0;
     }
 
     ngOnInit(): void {
@@ -490,6 +500,13 @@ export class CanvasComponent implements OnInit {
         this.tool.zoom(scaleAmount);
     }
 
+    // Gets the diagonal distance between two fingers
+    findDistance(fingers): number {
+        var fingerDiffX = fingers[0].clientX - fingers[1].clientX;
+        var fingerDiffY = fingers[0].clientY - fingers[1].clientY;
+        return Math.hypot(fingerDiffX, fingerDiffY);
+    }
+
     touchstart(event: TouchEvent): void {
         event.preventDefault();
         var touch = event.touches[0];
@@ -497,6 +514,16 @@ export class CanvasComponent implements OnInit {
           clientX: touch.clientX,
           clientY: touch.clientY
         });
+
+        // Give user time to place down their fingers
+        setTimeout(100);
+
+        // Use two fingers to pan or zoom
+        if (event.touches.length == 2) {
+            this.canDraw = false;
+            this.startFingerDistance = this.findDistance(event.touches);
+            this.prevFingerDistance = this.startFingerDistance;
+        }
         this.canvas.dispatchEvent(mouseEvent);
     }
 
@@ -507,12 +534,24 @@ export class CanvasComponent implements OnInit {
           clientX: touch.clientX,
           clientY: touch.clientY
         });
-        this.canvas.dispatchEvent(mouseEvent);
+
+        // Pinch to zoom
+        if (event.touches.length == 2) {
+            this.curFingerDistance = this.findDistance(event.touches);
+            var fingerDelta = this.curFingerDistance - this.prevFingerDistance;
+            this.prevFingerDistance = this.curFingerDistance;
+
+            this.tool.zoom(1 + fingerDelta/50);
+        }
+        else {
+            this.canvas.dispatchEvent(mouseEvent);
+        }
     }
 
     touchend(event: TouchEvent): void {
         event.preventDefault();
         var mouseEvent = new MouseEvent("mouseup", {});
+        this.canDraw = true;
         this.canvas.dispatchEvent(mouseEvent);
     }
 

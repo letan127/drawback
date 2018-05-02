@@ -114,7 +114,7 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
-            this.strokes[message.strokeID] = this.liveStrokes[message.userID];
+            this.strokes[message.strokeID] = this.liveStrokes[message.userID].deepCopy();
             delete this.liveStrokes[message.userID];
         })
 
@@ -124,12 +124,14 @@ export class CanvasComponent implements OnInit {
             if(!this.orphanedStrokes.length)
                 return;
             // Determine which stack to add the strokeID to
+            console.log(this.orphanedStrokes);
             if (!this.orphanedStrokes[0].draw) {
                 this.undoIDs.unshift(strokeID);
             }
             else
                 this.myIDs.push(strokeID);
-            this.strokes[strokeID] = this.orphanedStrokes.shift();
+            this.strokes[strokeID] = this.orphanedStrokes.shift().deepCopy();
+            console.log(this.orphanedStrokes);
             delete this.liveStrokes[this.socketID]
             this.drawService.sendStroke(strokeID, this.id);
         })
@@ -301,6 +303,10 @@ export class CanvasComponent implements OnInit {
         }
     }
 
+    deepCopy(stroke) {
+
+    }
+
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
         // Clear the canvas and also offscreen
@@ -417,7 +423,7 @@ export class CanvasComponent implements OnInit {
     mouseUp(event: MouseEvent): void {
         this.drag = false;
         if (this.canDraw) {
-            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+            this.orphanedStrokes.push(this.liveStrokes[this.socketID].deepCopy());
             this.drawService.reqStrokeID(this.id);
         }
     }

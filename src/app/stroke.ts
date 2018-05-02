@@ -14,4 +14,12 @@ export class Stroke {
         this.draw = draw;
     }
 
+    deepCopy() {
+        var newStroke = new Stroke(new Array<Position>(), this.color, this.size, this.mode, this.draw);
+        for(var i = 0; i < this.pos.length; i++) {
+            newStroke.pos.push(new Position(this.pos[i].x, this.pos[i].y));
+        }
+        return newStroke;
+    }
+
 }

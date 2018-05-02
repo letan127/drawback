@@ -413,11 +413,15 @@ html body {
        padding: 10px;
    }
 
+   #hamburger-download {
+       border-bottom-style: none!important;
+   }
+
     /* User Count */
     #num-users {
         display: inline!important;
     }
-    
+
     .bar-text {
         padding:2px 0px 2px 5px;
         margin:2px 2px 2px 2px;

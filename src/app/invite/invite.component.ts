@@ -46,7 +46,7 @@ export class InviteComponent implements OnInit {
     }
 
     // Show the share modal and reset the copy button
-    showShareModal() {
+    showShareModal(event) {
         // Don't activate the window.click callback which closes the modal
        if (event.stopPropagation) {
            event.stopPropagation();

@@ -13,7 +13,7 @@ html body {
 .modal { /* Background of the modal */
     display: none;
     position: fixed; /* Stay in place */
-    z-index: 1;
+    z-index: 2;
     left: 0;
     top: 0;
     overflow: auto; /* Enable scroll if needed */

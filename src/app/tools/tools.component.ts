@@ -113,7 +113,7 @@ export class ToolsComponent implements OnInit {
     }
 
     // Change the pen size and slider display and automatically select current drawing tool
-    changeSize($event) {
+    changeSize(event) {
         // Need to convert HTMLELement into an InputElement to access value
         var size = +(<HTMLInputElement>event.target).value; // +: string to num
         switch(size) {

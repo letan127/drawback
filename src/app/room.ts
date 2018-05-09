@@ -6,7 +6,7 @@ export class Room {
     private latestStrokeID: number;
     private strokes: Stroke[];
     private numUsers: number;
-
+    private liveStrokes = {};
     constructor() {
         this.name = "Untitled Canvas";
         this.latestStrokeID = 0;
@@ -34,6 +34,10 @@ export class Room {
         return this.numUsers;
     }
 
+    getLiveStrokes() {
+        return this.liveStrokes;
+    }
+
     // Change the canvas name
     rename(name: string): void {
         this.name = name;
@@ -44,15 +48,18 @@ export class Room {
         this.latestStrokeID++;
     }
 
-    // Add a new stroke
-    add(stroke: Stroke): void {
-        this.strokes.push(stroke);
+    // move the live stroke of the user to the new array
+    add(id: string): void {
+        this.strokes.push(this.liveStrokes[id]);
     }
 
     // Remove all strokes
     clear(): void {
         this.latestStrokeID = 0;
         this.strokes = [];
+        for (var key in this.liveStrokes) {
+            this.liveStrokes[key].pos = [];
+        }
     }
 
     // Set draw=true if the stroke should be drawn; otherwise false (for undo/redo)
@@ -68,5 +75,15 @@ export class Room {
     // Remove the user from the room
     removeUser(id: string): void {
         this.numUsers--;
+    }
+
+    //adds a new live stroke to the room based on socket.id
+    addLiveStroke(id: string, stroke: Stroke): void {
+        this.liveStrokes[id] = stroke;
+    }
+
+    //adds a pixel to the live stroke of the user
+    addPixel(id: string, pixel): void {
+        this.liveStrokes[id].pos.push(pixel);
     }
 }

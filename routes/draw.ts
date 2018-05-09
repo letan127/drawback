@@ -9,6 +9,7 @@ let server = http.Server(app);
 let socketIO = require('socket.io');
 let io = socketIO(server);
 var rooms = {}; // Access each room's stroke data with its ID
+var liveStrokes = {};
 var alphabet = '0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 // Generates a unique and random room ID
@@ -66,7 +67,9 @@ io.on('connection', (socket) => {
         var init = {
             name: rooms[room].getName(),
             numUsers: rooms[room].getUsers(),
-            strokes: rooms[room].getStrokes()
+            strokes: rooms[room].getStrokes(),
+            liveStrokes: rooms[room].getLiveStrokes(),
+            socketID: socket.id
         };
         socket.emit('initUser', init);
         socket.to(room).emit('updateUserCount', 1);
@@ -80,8 +83,12 @@ io.on('connection', (socket) => {
 
     // When a client sends a stroke, send it to all other clients in that room
     socket.on('stroke', (strokeMessage) => {
-        socket.to(strokeMessage.room).emit('stroke', strokeMessage);
-        rooms[strokeMessage.room].add(strokeMessage.stroke);
+        var strokeMessagewithID = {
+            strokeID: strokeMessage.strokeID,
+            userID: socket.id
+        }
+        socket.to(strokeMessage.room).emit('stroke', strokeMessagewithID);
+        rooms[strokeMessage.room].add(socket.id);
     });
 
     // When a client requests a strokeID, send an available ID for that room
@@ -90,9 +97,9 @@ io.on('connection', (socket) => {
         rooms[room].incrementID();
     });
 
-    // When a client clicks clear, tell all other clients to clear
+    // When a client clicks clear, tell all clients to clear, including the sender
     socket.on('clear', (room) => {
-        socket.to(room).emit('clear');
+        io.in(room).emit('clear');
         rooms[room].clear();
     });
 
@@ -119,6 +126,25 @@ io.on('connection', (socket) => {
 
         socket.emit('check', hasRoom);
     });
+
+    socket.on('newLiveStroke', (liveStroke) => {
+        var strokeAndID = {
+            stroke: liveStroke.stroke,
+            id: socket.id
+        }
+       socket.to(liveStroke.room).emit('startLiveStroke', strokeAndID);
+       rooms[liveStroke.room].addLiveStroke(socket.id, liveStroke.stroke);
+    });
+
+    socket.on('newPixel', (pixel) => {
+        var pixelAndID = {
+            pixel: pixel.pixel,
+            id: socket.id
+        }
+       socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
+       rooms[pixel.room].addPixel(socket.id, pixel.pixel);
+    });
+
 });
 
 module.exports = router;

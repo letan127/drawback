@@ -41,11 +41,13 @@ export class CanvasComponent implements OnInit {
 
     // Stroke data
     strokes: Stroke[];          // Every stroke on the canvas
-    orphanedStrokes: Stroke[];  // Strokes waiting for an ID from the server
-    curStroke: Stroke;          // Current stroke being drawn
+    orphanedStrokes: Stroke[];  // Strokes waiting for an ID from the server      // Current stroke being drawn
     myIDs: number[];            // IDs of strokes drawn by this user
     undoIDs: number[];          // IDs of strokes that were undone and won't be drawn
     orphanUndoCount: number;    // Number of strokes that were undone and need an ID
+    liveStrokes = {};
+    doneStrokes = {}
+    socketID: string;
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
@@ -93,6 +95,9 @@ export class CanvasComponent implements OnInit {
             this.title.rename(init.name);
             this.numUsers = init.numUsers;
             this.strokes = init.strokes;
+            this.liveStrokes = init.liveStrokes;
+            this.socketID = init.socketID;
+            this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
             this.updateUserCount();
             this.drawAll();
         })
@@ -110,8 +115,8 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
-            this.strokes[message.strokeID] = message.stroke;
-            this.draw(message.stroke);
+            this.strokes[message.strokeID] = this.liveStrokes[message.userID];
+            this.liveStrokes[message.userID].liveStroke = false;
         })
 
         // When the server sends a strokeID, give it to the earliest orphaned stroke
@@ -126,7 +131,7 @@ export class CanvasComponent implements OnInit {
             else
                 this.myIDs.push(strokeID);
             this.strokes[strokeID] = this.orphanedStrokes.shift();
-            this.drawService.sendStroke(this.strokes[strokeID], strokeID, this.id);
+            this.drawService.sendStroke(strokeID, this.id);
         })
 
         // When the server sends a clear event, clear the canvas, and reset values
@@ -137,6 +142,9 @@ export class CanvasComponent implements OnInit {
             this.undoIDs = [];
             this.orphanedStrokes = [];
             this.orphanUndoCount = 0;
+            for(var key in this.liveStrokes) {
+                this.liveStrokes[key].pos = [];
+            }
             this.title.updateSubtitle("Canvas has been cleared.");
         })
 
@@ -155,6 +163,22 @@ export class CanvasComponent implements OnInit {
         // Move to the requested room if it exists; otherwise show an error message
         this.drawService.getRoomCheck().subscribe(hasRoom => {
             this.invitation.changeRoom(hasRoom);
+        })
+
+        this.drawService.getNewLiveStroke().subscribe(strokeAndID => {
+            strokeAndID.stroke
+            this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
+            if(!strokeAndID.stroke.draw)
+                return;
+
+            // Draw the first pixel in the stroke
+            this.prepareCanvas(strokeAndID.stroke);
+            this.drawFirstPoint(strokeAndID.stroke.pos[0]);
+        })
+        this.drawService.getNewPixel().subscribe(pixelAndID => {
+            //get the pixel and add it to the liveStroke of the other user
+            this.drawPixel(pixelAndID.pixel,pixelAndID.id)
+
         })
     }
 
@@ -222,42 +246,77 @@ export class CanvasComponent implements OnInit {
         this.canDraw = value;
     }
 
-    // Draws a single stroke that is passed in as an argument
-    draw(stroke) {
-        if(!stroke.draw)
-            return;
-
+    // Copy the stroke's settings to the canvas before drawing
+    prepareCanvas(stroke: Stroke) {
         this.context.strokeStyle = stroke.color;
         this.context.lineWidth = stroke.size;
         this.context.globalCompositeOperation = stroke.mode;
         this.context.lineJoin = "round";
-        // Draw the first pixel in the stroke
+    }
+
+    // Draw the first point of a stroke
+    drawFirstPoint(point: Position) {
         this.context.beginPath();
-        this.context.moveTo(stroke.pos[0].x-1, stroke.pos[0].y);
-        this.context.lineTo(stroke.pos[0].x, stroke.pos[0].y);
+        this.context.moveTo(point.x-1, point.y);
+        this.context.lineTo(point.x, point.y);
         this.context.closePath();
         this.context.stroke();
+    }
+
+    // Draw a line connect the previous point and current point
+    drawNextPoint(points: Position[], prev) {
+        this.context.beginPath();
+        this.context.moveTo(points[prev].x, points[prev].y);
+        this.context.lineTo(points[prev+1].x, points[prev+1].y);
+        this.context.closePath();
+        this.context.stroke();
+    }
+
+    // Draws a single stroke that is passed in as an argument
+    draw(stroke) {
+        if(!stroke.draw || stroke.pos.length == 0)
+            return;
+
+        // Draw the first pixel in the stroke
+        this.prepareCanvas(stroke);
+        this.drawFirstPoint(stroke.pos[0]);
 
         // Draw the rest of the pixels in the stroke
-        for (var j = 1; j < stroke.pos.length; j++) {
-            // Create a smooth path from the previous pixel to the current pixel
-            this.context.beginPath();
-            this.context.moveTo(stroke.pos[j-1].x, stroke.pos[j-1].y);
-            this.context.lineTo(stroke.pos[j].x, stroke.pos[j].y);
-            this.context.closePath();
-            this.context.stroke();
+        for (var j = 0; j < stroke.pos.length - 1; j++) {
+            this.drawNextPoint(stroke.pos, j);
         }
     }
+
+    // Draw a pixel and add it to the current stroke
+    drawPixel(pixel, socketID) {
+        this.liveStrokes[socketID].pos.push(pixel);
+        this.prepareCanvas(this.liveStrokes[socketID]);
+
+        if (this.liveStrokes[socketID].pos.length < 2) {
+            // Canvas was cleared while drawing; start drawing a new stroke
+            this.drawFirstPoint(this.liveStrokes[socketID].pos[0]);
+        }
+        else {
+            // Continue drawing the current stroke
+            this.drawNextPoint(this.liveStrokes[socketID].pos, this.liveStrokes[socketID].pos.length-2);
+        }
+    }
+
 
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
         // Clear the canvas and also offscreen
         this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
-
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < this.strokes.length; i++) {
             if (this.strokes[i])
                 this.draw(this.strokes[i]);
+        }
+
+        //draw all current liveStrokes
+        for (var key in this.liveStrokes) {
+            if (this.liveStrokes[key].liveStroke)
+                this.draw(this.liveStrokes[key]);
         }
 
         // Draw local orphan strokes
@@ -267,14 +326,9 @@ export class CanvasComponent implements OnInit {
         }
     }
 
+
     // Removes everything from the canvas and sends a clear message to the server
     clear() {
-        this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
-        this.strokes = [];
-        this.myIDs = [];
-        this.undoIDs = [];
-        this.orphanedStrokes = [];
-        this.orphanUndoCount = 0;
         this.drawService.sendClear(this.id);
         this.title.updateSubtitle("Canvas has been cleared.");
     }
@@ -312,7 +366,7 @@ export class CanvasComponent implements OnInit {
             this.myIDs.push(redoStroke);
             this.drawService.sendRedo(this.id, redoStroke);
             this.strokes[redoStroke].draw = true;
-            this.draw(this.strokes[redoStroke]);
+            this.drawAll();
         }
     }
 
@@ -350,10 +404,10 @@ export class CanvasComponent implements OnInit {
             var x = ((event.x - this.canvas.offsetLeft - this.drawPosition.x)/this.scaleValue) - this.offset.x;
             var y = ((event.y - this.canvas.offsetTop - this.drawPosition.y)/this.scaleValue) - this.offset.y;
             // Add the stroke's pixels and tool settings
-            this.curStroke = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
-            this.curStroke.pos.push(new Position(x,y));
+            this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
+            this.drawPixel(new Position(x,y), this.socketID);
             this.drag = true;
-            this.draw(this.curStroke);
+            this.drawService.sendNewLiveStroke(this.liveStrokes[this.socketID], this.id);
         }
         else {
             // Panning
@@ -367,8 +421,9 @@ export class CanvasComponent implements OnInit {
     mouseUp(event: MouseEvent): void {
         this.drag = false;
         if (this.canDraw) {
+            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+            this.liveStrokes[this.socketID].liveStroke = false;
             this.drawService.reqStrokeID(this.id);
-            this.orphanedStrokes.push(this.curStroke);
         }
     }
 
@@ -377,9 +432,8 @@ export class CanvasComponent implements OnInit {
         if (this.drag && this.canDraw) {
             var x = ((event.x - this.canvas.offsetLeft - this.drawPosition.x)/this.scaleValue) - this.offset.x;
             var y = ((event.y - this.canvas.offsetTop - this.drawPosition.y)/this.scaleValue) - this.offset.y;
-            this.curStroke.pos.push(new Position(x,y));
-            this.draw(this.curStroke);
-            //TODO: if sendStroke here, will it cause others to see drawing in real time?
+            this.drawPixel(new Position(x,y), this.socketID);
+            this.drawService.sendPixel(new Position(x,y), this.id);
         }
         else if (this.drag && !this.canDraw) {
             // Translate the this.context by how much is moved

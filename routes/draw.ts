@@ -42,11 +42,8 @@ io.on('connection', (socket) => {
     // Remove user's data from all of their rooms before they disconnect
     socket.on('disconnecting', () => {
         var socketRooms = Object.keys(socket.rooms)
-        if (socketRooms.length > 1) {
-            // Check that user actually joined a room (index 0 is its socket id)
-            rooms[socketRooms[1]].removeUser(socket.id);
-            socket.to(socketRooms[1]).emit('updateUserCount', -1);
-        }
+        rooms[socketRooms[0]].removeUser(socket.id);
+        socket.to(socketRooms[0]).emit('updateUserCount', -1);
     });
 
     // Client has already left their rooms
@@ -57,6 +54,7 @@ io.on('connection', (socket) => {
     // When the server receives a room ID, it will add the client to that room,
     // give them the current state of the canvas, and notify all other clients
     socket.on('room', (room) => {
+        socket.leave(socket.id); // Socket should leave its auto-generated room before joining our user-made one
         socket.join(room);
         if (!(room in rooms)) {
             // TODO: Remove this to ensure users can't create new rooms by changing URL

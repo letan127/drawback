@@ -46,6 +46,7 @@ export class CanvasComponent implements OnInit {
     undoIDs: number[];          // IDs of strokes that were undone and won't be drawn
     orphanUndoCount: number;    // Number of strokes that were undone and need an ID
     liveStrokes = {};
+    doneStrokes = {}
     socketID: string;
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
@@ -116,7 +117,7 @@ export class CanvasComponent implements OnInit {
         // When the server sends a stroke, add it to our list of strokes and draw it
         this.drawService.getStroke().subscribe(message => {
             this.strokes[message.strokeID] = this.liveStrokes[message.userID];
-            delete this.liveStrokes[message.userID];
+            this.liveStrokes[message.userID].liveStroke = false;
         })
 
         // When the server sends a strokeID, give it to the earliest orphaned stroke
@@ -131,7 +132,6 @@ export class CanvasComponent implements OnInit {
             else
                 this.myIDs.push(strokeID);
             this.strokes[strokeID] = this.orphanedStrokes.shift();
-            delete this.liveStrokes[this.socketID]
             this.drawService.sendStroke(strokeID, this.id);
         })
 
@@ -167,6 +167,7 @@ export class CanvasComponent implements OnInit {
         })
 
         this.drawService.getNewLiveStroke().subscribe(strokeAndID => {
+            strokeAndID.stroke
             this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
             if(!strokeAndID.stroke.draw)
                 return;
@@ -314,6 +315,7 @@ export class CanvasComponent implements OnInit {
         }
     }
 
+
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
         // Clear the canvas and also offscreen
@@ -326,7 +328,8 @@ export class CanvasComponent implements OnInit {
 
         //draw all current liveStrokes
         for (var key in this.liveStrokes) {
-            this.draw(this.liveStrokes[key]);
+            if (this.liveStrokes[key].liveStroke)
+                this.draw(this.liveStrokes[key]);
         }
 
         // Draw local orphan strokes
@@ -335,6 +338,7 @@ export class CanvasComponent implements OnInit {
                 this.draw(this.orphanedStrokes[j]);
         }
     }
+
 
     // Removes everything from the canvas and sends a clear message to the server
     clear() {
@@ -431,6 +435,7 @@ export class CanvasComponent implements OnInit {
         this.drag = false;
         if (this.canDraw) {
             this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+            this.liveStrokes[this.socketID].liveStroke = false;
             this.drawService.reqStrokeID(this.id);
         }
     }

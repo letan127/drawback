@@ -39,6 +39,7 @@ html body {
 .modal-item {
     padding: 2px;
     margin: 2px;
+    color: black;
 }
 .modal-text {
     padding: 10px 0px 0px 0px;

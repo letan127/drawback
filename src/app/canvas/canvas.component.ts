@@ -70,7 +70,7 @@ export class CanvasComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.drawService.setSocket(io('https://cf6a77f3.ngrok.io'));
+        this.drawService.setSocket(io('http://localhost:4000'));
         this.af.authState.subscribe(authState => {
             if(!authState) {
                 this.loginButton = "Sign Up or Login"

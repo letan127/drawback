@@ -219,7 +219,7 @@ html body {
     text-decoration: none;
     cursor: pointer;
 }
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 601px) {
     /* Header */
     .top-bar {
         top: 15px;

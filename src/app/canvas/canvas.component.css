@@ -369,19 +369,15 @@ html body {
         cursor: pointer;
         text-align: center;
         padding: 5px;
-        margin: 10px;
         color: white;
         font-size: 15px;
         /* transition: all 0.3s ease; */
     }
-    #mobile-tool {
-        top: 10px;
-    }
 
     /*  Hamburger dropdown menu*/
     #hamburger {
-        top: 10px;
-        right: 5px;
+        top: 20px;
+        right: 15px;
     }
 
     #mobile-share {

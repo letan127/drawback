@@ -366,13 +366,13 @@ html body {
         cursor: pointer;
         text-align: center;
         padding: 5px;
-        margin: 10px;
         color: white;
         font-size: 15px;
         /* transition: all 0.3s ease; */
     }
     #mobile-tool {
-        top: 10px;
+        top: 20px;
+        left: 10px;
     }
 
     /*  Hamburger dropdown menu*/

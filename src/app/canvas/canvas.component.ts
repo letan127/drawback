@@ -97,7 +97,7 @@ export class CanvasComponent implements OnInit {
             this.strokes = init.strokes;
             this.liveStrokes = init.liveStrokes;
             this.socketID = init.socketID;
-            this.focus(init.recentPosition);
+            this.focus(init.pictureSize);
             this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
             this.updateUserCount();
             this.drawAll();
@@ -167,7 +167,6 @@ export class CanvasComponent implements OnInit {
         })
 
         this.drawService.getNewLiveStroke().subscribe(strokeAndID => {
-            strokeAndID.stroke
             this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
             if(!strokeAndID.stroke.draw)
                 return;
@@ -223,14 +222,32 @@ export class CanvasComponent implements OnInit {
         this.drawAll()
     }
 
-    focus(position) {
+    focus(pictureSize) {
+        var scaling = 1;
         //no need to translate if nothing has been drawn
-        if (position.x == 0 && position.y == 0) {
+        if (pictureSize.focusX == 0 && pictureSize.focusY == 0) {
             return
         }
-        
-        this.offset.add(-position.x + this.canvas.width/2, -position.y + this.canvas.height/2);
-        this.context.translate(-position.x + this.canvas.width/2, -position.y + this.canvas.height/2);
+        this.offset.add(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
+        this.context.translate(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
+        if (pictureSize.pictureWidth < this.canvas.width && pictureSize.pictureHeight < this.canvas.height) {
+            while((scaling * this.canvas.height > pictureSize.pictureHeight && scaling * this.canvas.width > pictureSize.pictureWidth) && scaling < 11) {
+                scaling = scaling * 1.5;
+            }
+            if (scaling > 11) {
+                scaling = 11;
+            }
+            this.tool.zoom(scaling)
+        }
+        else {
+            while((pictureSize.pictureHeight * scaling > this.canvas.height && pictureSize.pictureWidth * scaling > this.canvas.width) && scaling < .09 ) {
+                scaling = scaling * .66;
+            }
+            if (scaling > .09) {
+                scaling = .09;
+            }
+            this.tool.zoom(scaling)
+        }
     }
 
     // Close and unhighlight any open menus when clicking outside of it or pressing escape
@@ -301,8 +318,6 @@ export class CanvasComponent implements OnInit {
     // Draw a pixel and add it to the current stroke
     drawPixel(pixel, socketID) {
         this.liveStrokes[socketID].pos.push(pixel);
-        console.log(pixel.x);
-        console.log(pixel.y)
         this.prepareCanvas(this.liveStrokes[socketID]);
 
         if (this.liveStrokes[socketID].pos.length < 2) {

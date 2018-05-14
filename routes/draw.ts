@@ -71,7 +71,7 @@ io.on('connection', (socket) => {
             strokes: rooms[room].getStrokes(),
             liveStrokes: rooms[room].getLiveStrokes(),
             socketID: socket.id,
-            recentPosition: rooms[room].getRecentPixel()
+            pictureSize: rooms[room].getRecentPixel()
         };
         socket.emit('initUser', init);
         socket.to(room).emit('updateUserCount', 1);

@@ -70,7 +70,7 @@ export class CanvasComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.drawService.setSocket(io('http://localhost:4000'));
+        this.drawService.setSocket(io('https://46abaee0.ngrok.io'));
         this.af.authState.subscribe(authState => {
             if(!authState) {
                 this.loginButton = "Sign Up or Login"
@@ -223,28 +223,28 @@ export class CanvasComponent implements OnInit {
     }
 
     focus(pictureSize) {
-        var scaling = 1;
         //no need to translate if nothing has been drawn
+        var scaling = 1
         if (pictureSize.focusX == 0 && pictureSize.focusY == 0) {
             return
         }
         this.offset.add(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
         this.context.translate(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
         if (pictureSize.pictureWidth < this.canvas.width && pictureSize.pictureHeight < this.canvas.height) {
-            while((scaling * this.canvas.height > pictureSize.pictureHeight && scaling * this.canvas.width > pictureSize.pictureWidth) && scaling < 11) {
+            while((1.5 * scaling * pictureSize.pictureHeight < this.canvas.height && 1.5 * scaling * pictureSize.pictureWidth < this.canvas.width) && scaling < 14) {
                 scaling = scaling * 1.5;
             }
-            if (scaling > 11) {
-                scaling = 11;
+            if (scaling > 14) {
+                scaling = 14;
             }
             this.tool.zoom(scaling)
         }
         else {
-            while((pictureSize.pictureHeight * scaling > this.canvas.height && pictureSize.pictureWidth * scaling > this.canvas.width) && scaling < .09 ) {
+            while((pictureSize.pictureHeight * scaling  > this.canvas.height || pictureSize.pictureWidth * scaling  > this.canvas.width) && scaling > .03 ) {
                 scaling = scaling * .66;
             }
-            if (scaling > .09) {
-                scaling = .09;
+            if (scaling < .03) {
+                scaling = .03;
             }
             this.tool.zoom(scaling)
         }

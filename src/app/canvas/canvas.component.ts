@@ -70,7 +70,7 @@ export class CanvasComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.drawService.setSocket(io('https://46abaee0.ngrok.io'));
+        this.drawService.setSocket(io('http://localhost:4000'));
         this.af.authState.subscribe(authState => {
             if(!authState) {
                 this.loginButton = "Sign Up or Login"
@@ -230,16 +230,7 @@ export class CanvasComponent implements OnInit {
         }
         this.offset.add(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
         this.context.translate(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
-        if (pictureSize.pictureWidth < this.canvas.width && pictureSize.pictureHeight < this.canvas.height) {
-            while((1.5 * scaling * pictureSize.pictureHeight < this.canvas.height && 1.5 * scaling * pictureSize.pictureWidth < this.canvas.width) && scaling < 14) {
-                scaling = scaling * 1.5;
-            }
-            if (scaling > 14) {
-                scaling = 14;
-            }
-            this.tool.zoom(scaling)
-        }
-        else {
+        if (pictureSize.pictureWidth > this.canvas.width && pictureSize.pictureHeight > this.canvas.height) {
             while((pictureSize.pictureHeight * scaling  > this.canvas.height || pictureSize.pictureWidth * scaling  > this.canvas.width) && scaling > .03 ) {
                 scaling = scaling * .66;
             }

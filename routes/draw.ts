@@ -157,12 +157,19 @@ io.on('connection', (socket) => {
     });
 
     socket.on('newPixel', (pixel) => {
-        var pixelAndID = {
-            pixel: pixel.pixel,
-            id: socket.id
+        // TODO: Remove this if errors are never thrown
+        //       Not sure if this case will ever occur (due to dropped packets)
+        if (socket.id in rooms[pixel.room].getLiveStrokes) {
+            var pixelAndID = {
+                pixel: pixel.pixel,
+                id: socket.id
+            }
+            socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
+            rooms[pixel.room].addPixel(socket.id, pixel.pixel);
         }
-        socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
-        rooms[pixel.room].addPixel(socket.id, pixel.pixel);
+        else {
+            throw new Error("Trying to add pixels to a non-existent live stroke\n");
+        }
     });
 
 });

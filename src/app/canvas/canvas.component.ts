@@ -241,6 +241,11 @@ export class CanvasComponent implements OnInit {
         document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
     }
 
+    // Show menu for mobile screens
+    showMenu() {
+        document.getElementById("hamburger-dropdown").classList.toggle("mobile-show");
+    }
+
     // Sets draw to true or false depending on whether pen or pan was clicked
     setDraw(value: boolean) {
         this.canDraw = value;

@@ -35,9 +35,38 @@ router.get('', (req, res) => {
     res.redirect(fullurl);
 })
 
+// Adds unknown user rooms to the server and reinitializes the user's room
+// TODO: Check if room is in database and replace init with database room data
+function rejoin(room, socket) {
+    // Remove socket from its auto-generated room and add it to the 5-char canvas room
+    socket.leave(socket.id);
+    socket.join(room);
+
+    rooms[room] = new Room(); // TODO: Remove this if we want to restrict users from creating their own rooms
+    rooms[room].addUser(socket.id);
+    var init = {
+        name: rooms[room].getName(),
+        numUsers: rooms[room].getUsers(),
+        strokes: rooms[room].getStrokes(),
+        liveStrokes: rooms[room].getLiveStrokes(),
+        socketID: socket.id
+    };
+    socket.emit('initUser', init);
+    socket.to(room).emit('updateUserCount', 1);
+}
+
 // Begin listening for requests when a client connects
 io.on('connection', (socket) => {
-    console.log('user ' + socket.id + ' connected\n');
+    console.debug('user ' + socket.id + ' connected\n');
+
+    // Check every packet to see if the user's room exists; add room to server if it doesn't
+    socket.use((packet) => {
+        var room = (typeof packet[1] === 'object') ? packet[1].room : packet[1];
+        if (room in rooms == false) {
+            rejoin(room, socket);
+            console.warn("Unknown room " + room + " detected");
+        }
+    });
 
     // Remove user's data from all of their rooms before they disconnect
     socket.on('disconnecting', () => {
@@ -48,29 +77,13 @@ io.on('connection', (socket) => {
 
     // Client has already left their rooms
     socket.on('disconnect', () => {
-        console.log('user ' + socket.id + ' disconnected\n');
+        console.debug('user ' + socket.id + ' disconnected\n');
     });
 
     // When the server receives a room ID, it will add the client to that room,
     // give them the current state of the canvas, and notify all other clients
     socket.on('room', (room) => {
-        socket.leave(socket.id); // Socket should leave its auto-generated room before joining our user-made one
-        socket.join(room);
-        if (!(room in rooms)) {
-            // TODO: Remove this to ensure users can't create new rooms by changing URL
-            // Only happens when user manually types a room URL
-            rooms[room] = new Room();
-        }
-        rooms[room].addUser(socket.id);
-        var init = {
-            name: rooms[room].getName(),
-            numUsers: rooms[room].getUsers(),
-            strokes: rooms[room].getStrokes(),
-            liveStrokes: rooms[room].getLiveStrokes(),
-            socketID: socket.id
-        };
-        socket.emit('initUser', init);
-        socket.to(room).emit('updateUserCount', 1);
+        // Now executed in socket.use => rejoin()
     });
 
     // When a client sends a new title, send it to all other clients in that room

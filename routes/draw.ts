@@ -58,6 +58,8 @@ function rejoin(room, socket) {
 // Begin listening for requests when a client connects
 io.on('connection', (socket) => {
     console.debug('user ' + socket.id + ' connected\n');
+    // TODO: Socket should join the 5-char room as soon as they connect
+    //       To be implemented when server decides the room ID, not the client
 
     // Check every packet to see if the user's room exists; add room to server if it doesn't
     socket.use((packet) => {
@@ -71,8 +73,15 @@ io.on('connection', (socket) => {
     // Remove user's data from all of their rooms before they disconnect
     socket.on('disconnecting', () => {
         var socketRooms = Object.keys(socket.rooms)
-        rooms[socketRooms[0]].removeUser(socket.id);
-        socket.to(socketRooms[0]).emit('updateUserCount', -1);
+        // TODO: Remove this check if server will decide client rooms
+        if (socket.id !== socketRooms[0]) {
+            rooms[socketRooms[0]].removeUser(socket.id);
+            socket.to(socketRooms[0]).emit('updateUserCount', -1);
+        }
+        else {
+            // User left the room before their socket could request to join their canvas room
+            console.error("Socket " + socket.id + "is in an unspecified, unknown room");
+        }
     });
 
     // Client has already left their rooms
@@ -117,15 +126,15 @@ io.on('connection', (socket) => {
     // When a client clicks undo, tell all other clients in the room to undo
     // that stroke
     socket.on('undo', (undoStroke) => {
-       socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
-       rooms[undoStroke.room].setDraw(undoStroke.strokeID, false);
+        socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
+        rooms[undoStroke.room].setDraw(undoStroke.strokeID, false);
    });
 
     // When a client clicks redo, tell all other clients in the room to redo
     // that stroke
     socket.on('redo', (redoStroke) => {
-       socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
-       rooms[redoStroke.room].setDraw(redoStroke.strokeID, true);
+        socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
+        rooms[redoStroke.room].setDraw(redoStroke.strokeID, true);
     });
 
     // Let client know if the room they want to move to exists
@@ -143,8 +152,8 @@ io.on('connection', (socket) => {
             stroke: liveStroke.stroke,
             id: socket.id
         }
-       socket.to(liveStroke.room).emit('startLiveStroke', strokeAndID);
-       rooms[liveStroke.room].addLiveStroke(socket.id, liveStroke.stroke);
+        socket.to(liveStroke.room).emit('startLiveStroke', strokeAndID);
+        rooms[liveStroke.room].addLiveStroke(socket.id, liveStroke.stroke);
     });
 
     socket.on('newPixel', (pixel) => {
@@ -152,8 +161,8 @@ io.on('connection', (socket) => {
             pixel: pixel.pixel,
             id: socket.id
         }
-       socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
-       rooms[pixel.room].addPixel(socket.id, pixel.pixel);
+        socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
+        rooms[pixel.room].addPixel(socket.id, pixel.pixel);
     });
 
 });

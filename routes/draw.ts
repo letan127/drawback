@@ -25,7 +25,6 @@ function generateID() {
 }
 
 server.listen(4000);
-
 //app.get('')
 
 router.get('', (req, res) => {
@@ -35,12 +34,11 @@ router.get('', (req, res) => {
     res.redirect(fullurl);
 })
 
-// Adds unknown user rooms to the server and reinitializes the user's room
+// Adds unknown user rooms to the server, reinitialize their canvas, and updates user count
 // TODO: Check if room is in database and replace init with database room data
 function join(room, socket) {
-    // Remove socket from its auto-generated room and add it to the 5-char canvas room
-    socket.leave(socket.id);
-    socket.join(room);
+    socket.leave(socket.id); // Remove socket from the room it automatically joined
+    socket.join(room);       // Join the canvas room
 
     rooms[room].addUser(socket.id);
     var init = {
@@ -60,7 +58,8 @@ io.on('connection', (socket) => {
     // TODO: Socket should join the 5-char room as soon as they connect
     //       To be implemented when server decides the room ID, not the client
 
-    // Check every packet to see if the user's room exists; add room to server if it doesn't
+    // Add unknown rooms to the server and reinitialize the client's canvas
+    // This gets called before every socket.on()
     socket.use((packet, next) => {
         var room = (typeof packet[1] === 'object') ? packet[1].room : packet[1];
         if (room in rooms == false) {
@@ -68,7 +67,7 @@ io.on('connection', (socket) => {
             join(room, socket);
             console.warn("Unknown room " + room + " detected");
         }
-        return next(); // Send packet to its socket.on
+        return next(); // Continue to the correct socket.on()
     });
 
     // Remove user's data from all of their rooms before they disconnect
@@ -90,8 +89,7 @@ io.on('connection', (socket) => {
         console.info('user ' + socket.id + ' disconnected\n');
     });
 
-    // When the server receives a room ID, it will add the client to that room,
-    // give them the current state of the canvas, and notify all other clients
+    // Give new clients the room's data and tell other clients' to update their user counts
     socket.on('room', (room) => {
         join(room, socket);
     });
@@ -102,7 +100,7 @@ io.on('connection', (socket) => {
         socket.to(roomTitle.room).emit('title', roomTitle.title);
     })
 
-    // When a client sends a stroke, send it to all other clients in that room
+    // Send completed strokes (with stroke ID) to all other clients in the room
     socket.on('stroke', (strokeMessage) => {
         var strokeMessagewithID = {
             strokeID: strokeMessage.strokeID,
@@ -112,7 +110,7 @@ io.on('connection', (socket) => {
         rooms[strokeMessage.room].add(socket.id);
     });
 
-    // When a client requests a strokeID, send an available ID for that room
+    // Send the next available strokeID to the requesting client (requested on mouse up)
     socket.on('strokeID', (room) => {
         socket.emit('strokeID', rooms[room].getID());
         rooms[room].incrementID();
@@ -138,12 +136,13 @@ io.on('connection', (socket) => {
         rooms[redoStroke.room].setDraw(redoStroke.strokeID, true);
     });
 
-    // Let client know if the room they want to move to exists
+    // Let client know if the room they want to move to exists (from share modal)
     socket.on('check', (newRoom) => {
         var hasRoom = (newRoom in rooms) ? true : false;
         socket.emit('check', hasRoom);
     });
 
+    // Send everyone the new live stroke (created from mousedown)
     socket.on('newLiveStroke', (liveStroke) => {
         var strokeAndID = {
             stroke: liveStroke.stroke,
@@ -153,6 +152,7 @@ io.on('connection', (socket) => {
         rooms[liveStroke.room].addLiveStroke(socket.id, liveStroke.stroke);
     });
 
+    // Tell everyone else to add pixels to this client's live strokes (created from mousemove)
     socket.on('newPixel', (pixel) => {
         var pixelAndID = {
             pixel: pixel.pixel,

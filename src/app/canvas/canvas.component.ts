@@ -4,6 +4,7 @@ import { Position } from '../position';
 import { ToolsComponent } from '../tools/tools.component';
 import { TitleComponent } from '../title/title.component';
 import { InviteComponent } from '../invite/invite.component';
+import { UsersComponent } from '../users/users.component';
 import { DrawService } from '../draw.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -20,7 +21,6 @@ import * as io from 'socket.io-client';
 export class CanvasComponent implements OnInit {
     // Canvas/Room metadata
     id: string;
-    numUsers: number;
     loginState: boolean;
     loginButton: string;
 
@@ -28,6 +28,8 @@ export class CanvasComponent implements OnInit {
     @ViewChild(ToolsComponent) private tool: ToolsComponent;
     @ViewChild(TitleComponent) private title: TitleComponent;
     @ViewChild(InviteComponent) private invitation: InviteComponent;
+    @ViewChild(UsersComponent) private users: UsersComponent;
+
 
     // Canvas data
     canvas: HTMLCanvasElement;
@@ -51,7 +53,6 @@ export class CanvasComponent implements OnInit {
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
-        this.numUsers = 1;
         this.loginState = true;
         this.loginButton = "Sign Up or Login";
 
@@ -93,20 +94,15 @@ export class CanvasComponent implements OnInit {
         // This client is a new user; give them the current canvas state to draw
         this.drawService.initUser().subscribe(init => {
             this.title.rename(init.name);
-            this.numUsers = init.numUsers;
             this.strokes = init.strokes;
             this.liveStrokes = init.liveStrokes;
             this.socketID = init.socketID;
             this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
-            this.updateUserCount();
+            this.users.updateUserCount(init.numUsers);
             this.drawAll();
         })
 
         // New user entered a room, so increment our user count
-        this.drawService.updateUserCount().subscribe(amount => {
-            this.numUsers += amount;
-            this.updateUserCount();
-        })
 
         // Update canvas title
         this.drawService.getTitle().subscribe(title => {
@@ -206,7 +202,6 @@ export class CanvasComponent implements OnInit {
         this.resize();
 
         // Set the displayed user count
-        this.updateUserCount();
     }
 
     // When the window is resized, reset the canvas size and redraw it
@@ -234,11 +229,6 @@ export class CanvasComponent implements OnInit {
         // Close share modal
         if (event.target.classList.contains("modal") || event.key == "Escape")
             this.invitation.closeShareModal();
-    }
-
-    // When a new user enters the room, update the displayed user count
-    updateUserCount() {
-        document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
     }
 
     // Sets draw to true or false depending on whether pen or pan was clicked

@@ -37,12 +37,11 @@ router.get('', (req, res) => {
 
 // Adds unknown user rooms to the server and reinitializes the user's room
 // TODO: Check if room is in database and replace init with database room data
-function rejoin(room, socket) {
+function join(room, socket) {
     // Remove socket from its auto-generated room and add it to the 5-char canvas room
     socket.leave(socket.id);
     socket.join(room);
 
-    rooms[room] = new Room(); // TODO: Remove this if we want to restrict users from creating their own rooms
     rooms[room].addUser(socket.id);
     var init = {
         name: rooms[room].getName(),
@@ -57,17 +56,19 @@ function rejoin(room, socket) {
 
 // Begin listening for requests when a client connects
 io.on('connection', (socket) => {
-    console.debug('user ' + socket.id + ' connected\n');
+    console.info('user ' + socket.id + ' connected\n');
     // TODO: Socket should join the 5-char room as soon as they connect
     //       To be implemented when server decides the room ID, not the client
 
     // Check every packet to see if the user's room exists; add room to server if it doesn't
-    socket.use((packet) => {
+    socket.use((packet, next) => {
         var room = (typeof packet[1] === 'object') ? packet[1].room : packet[1];
         if (room in rooms == false) {
-            rejoin(room, socket);
+            rooms[room] = new Room(); // TODO: Remove this if we want to restrict users from creating their own rooms
+            join(room, socket);
             console.warn("Unknown room " + room + " detected");
         }
+        return next(); // Send packet to its socket.on
     });
 
     // Remove user's data from all of their rooms before they disconnect
@@ -86,13 +87,13 @@ io.on('connection', (socket) => {
 
     // Client has already left their rooms
     socket.on('disconnect', () => {
-        console.debug('user ' + socket.id + ' disconnected\n');
+        console.info('user ' + socket.id + ' disconnected\n');
     });
 
     // When the server receives a room ID, it will add the client to that room,
     // give them the current state of the canvas, and notify all other clients
     socket.on('room', (room) => {
-        // Now executed in socket.use => rejoin()
+        join(room, socket);
     });
 
     // When a client sends a new title, send it to all other clients in that room
@@ -139,11 +140,7 @@ io.on('connection', (socket) => {
 
     // Let client know if the room they want to move to exists
     socket.on('check', (newRoom) => {
-        if (newRoom in rooms)
-            var hasRoom = true;
-        else
-            var hasRoom = false;
-
+        var hasRoom = (newRoom in rooms) ? true : false;
         socket.emit('check', hasRoom);
     });
 
@@ -157,21 +154,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('newPixel', (pixel) => {
-        // TODO: Remove this if errors are never thrown
-        //       Not sure if this case will ever occur (due to dropped packets)
-        if (socket.id in rooms[pixel.room].getLiveStrokes) {
-            var pixelAndID = {
-                pixel: pixel.pixel,
-                id: socket.id
-            }
-            socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
-            rooms[pixel.room].addPixel(socket.id, pixel.pixel);
+        var pixelAndID = {
+            pixel: pixel.pixel,
+            id: socket.id
         }
-        else {
-            throw new Error("Trying to add pixels to a non-existent live stroke\n");
-        }
+        socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
+        rooms[pixel.room].addPixel(socket.id, pixel.pixel);
     });
-
 });
-
 module.exports = router;

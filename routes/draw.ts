@@ -73,6 +73,8 @@ io.on('connection', (socket) => {
         };
         socket.emit('initUser', init);
         socket.to(room).emit('updateUserCount', 1);
+        socket.to(room).emit('userInfo', rooms[room].getUserInfo());
+        console.log("here")
     });
 
     // When a client sends a new title, send it to all other clients in that room
@@ -145,6 +147,15 @@ io.on('connection', (socket) => {
        rooms[pixel.room].addPixel(socket.id, pixel.pixel);
     });
 
+    socket.on('color', (roomColor) => {
+        rooms[roomColor.room].changeColor(socket.id, roomColor.color);
+        var userDetails = {
+            userColor: roomColor.color,
+            socketID: socket.id
+        }
+        console.log("here")
+        socket.to(roomColor.room).emit('changeUserColor', userDetails);
+    })
 });
 
 module.exports = router;

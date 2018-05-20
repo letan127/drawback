@@ -185,4 +185,36 @@ export class DrawService {
             });
         });
     }
+
+    public userInformation = () => {
+        return Observable.create((observer) => {
+            this.socket.on('userInfo', (userInfo) => {
+                observer.next(userInfo);
+            });
+        });
+    }
+
+    public changeColor(room, color) {
+        var roomColor = {
+            room: room,
+            color: color
+        }
+        this.socket.emit('color', roomColor);
+    }
+
+    public updateUserColor = () => {
+        return Observable.create((observer) => {
+            this.socket.on('changeUserColor', (userDetails) => {
+                observer.next(userDetails);
+            });
+        });
+    }
+
+    public updateUserName = () => {
+        return Observable.create((observer) => {
+            this.socket.on('changeUserName', (userDetails) => {
+                observer.next(userDetails);
+            });
+        });
+    }
 }

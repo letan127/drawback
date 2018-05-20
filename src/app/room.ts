@@ -7,6 +7,7 @@ export class Room {
     private strokes: Stroke[];
     private numUsers: number;
     private liveStrokes = {};
+    private userInfo = {};
     constructor() {
         this.name = "Untitled Canvas";
         this.latestStrokeID = 0;
@@ -36,6 +37,10 @@ export class Room {
 
     getLiveStrokes() {
         return this.liveStrokes;
+    }
+
+    getUserInfo() {
+        return this.userInfo;
     }
 
     // Change the canvas name
@@ -70,6 +75,11 @@ export class Room {
     // Add user to the room
     addUser(id: string): void {
         this.numUsers++;
+        var userInfo = {
+            userName: "AnonymousUser" + this.numUsers.toString(),
+            userColor: "black"
+        }
+        this.userInfo[id] = userInfo;
     }
 
     // Remove the user from the room
@@ -85,5 +95,9 @@ export class Room {
     //adds a pixel to the live stroke of the user
     addPixel(id: string, pixel): void {
         this.liveStrokes[id].pos.push(pixel);
+    }
+
+    changeColor(id: string, color: string): void {
+        this.userInfo[id].userColor = color;
     }
 }

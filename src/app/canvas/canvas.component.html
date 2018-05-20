@@ -32,7 +32,8 @@
         <div id="signup-login" class="bar bar-button flex-horizontal" (click)="authentication()">{{loginButton}}</div>
     </div>
     <!-- Toolbar -->
-    <app-tools (setDraw)="setDraw($event)"
+    <app-tools  [roomID]=id
+                (setDraw)="setDraw($event)"
                 (callUndo)="undo()"
                 (callRedo)="redo()"
                 (callClear)="clear()"
@@ -40,7 +41,7 @@
                 [scaleValue]="scaleValue">
     </app-tools>
     <!-- User Count -->
-    <app-users></app-users>
+    <app-users [roomID]=id></app-users>
 </div>
 </body>
 

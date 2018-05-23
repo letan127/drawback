@@ -172,11 +172,17 @@ export class CanvasComponent implements OnInit {
             this.prepareCanvas(strokeAndID.stroke);
             this.drawFirstPoint(strokeAndID.stroke.pos[0]);
         })
+
         this.drawService.getNewPixel().subscribe(pixelAndID => {
             //get the pixel and add it to the liveStroke of the other user
             this.drawPixel(pixelAndID.pixel,pixelAndID.id)
-
         })
+
+        // Stop drawing if the server did not receive this pixel's livestroke
+        this.drawService.getPixelError().subscribe(errorPixel => {
+            this.liveStrokes[this.socketID].canDraw = false;
+            this.drawAll();
+        });
     }
 
     ngAfterViewInit() {
@@ -414,16 +420,6 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
-    mouseUp(event: MouseEvent): void {
-        this.drag = false;
-        if (this.canDraw) {
-            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
-            this.liveStrokes[this.socketID].liveStroke = false;
-            this.drawService.reqStrokeID(this.id);
-        }
-    }
-
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (this.drag && this.canDraw) {
@@ -440,6 +436,16 @@ export class CanvasComponent implements OnInit {
             this.offset.add(changePosition);
             this.context.translate(changePosition.x, changePosition.y);
             this.drawAll();
+        }
+    }
+
+    // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
+    mouseUp(event: MouseEvent): void {
+        this.drag = false;
+        if (this.canDraw) {
+            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+            this.liveStrokes[this.socketID].liveStroke = false;
+            this.drawService.reqStrokeID(this.id);
         }
     }
 

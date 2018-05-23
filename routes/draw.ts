@@ -63,7 +63,7 @@ io.on('connection', (socket) => {
 
     if (room in rooms === false) {
         rooms[room] = new Room();
-        console.warn("Did not receive this room's GET request");
+        console.warn('Did not receive ' + room + '\'s GET request');
     }
     join(room, socket);
 
@@ -146,12 +146,17 @@ io.on('connection', (socket) => {
 
     // Tell everyone else to add pixels to this client's live strokes (created from mousemove)
     socket.on('newPixel', (pixel) => {
-        var pixelAndID = {
-            pixel: pixel.pixel,
-            id: socket.id
+        if (rooms[pixel.room].containsLiveStroke(socket.id)) {
+            var pixelAndID = {
+                pixel: pixel.pixel,
+                id: socket.id
+            }
+            socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
+            rooms[pixel.room].addPixel(socket.id, pixel.pixel);
         }
-        socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
-        rooms[pixel.room].addPixel(socket.id, pixel.pixel);
+        else {
+            socket.emit('pixelError'); // Tell user to stop drawing
+        }
     });
 });
 module.exports = router;

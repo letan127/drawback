@@ -185,4 +185,12 @@ export class DrawService {
             });
         });
     }
+
+    public getPixelError = () => {
+        return Observable.create((observer) => {
+            this.socket.on('pixelError', () => {
+                observer.next();
+            });
+        });
+    }
 }

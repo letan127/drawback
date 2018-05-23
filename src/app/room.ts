@@ -77,6 +77,14 @@ export class Room {
         this.numUsers--;
     }
 
+    // Return true if room contains id's livestroke
+    containsLiveStroke(id: string): boolean {
+        if (id in this.liveStrokes) {
+            return true;
+        }
+        return false;
+    }
+
     //adds a new live stroke to the room based on socket.id
     addLiveStroke(id: string, stroke: Stroke): void {
         this.liveStrokes[id] = stroke;

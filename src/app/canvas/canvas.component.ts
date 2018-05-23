@@ -87,9 +87,6 @@ export class CanvasComponent implements OnInit {
             this.id = params['id'];
         })
 
-        // Send the room ID to the server
-        this.drawService.sendRoom(this.id);
-
         // This client is a new user; give them the current canvas state to draw
         this.drawService.initUser().subscribe(init => {
             this.title.rename(init.name);

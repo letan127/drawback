@@ -36,12 +36,12 @@ router.get('', (req, res) => {
 
 // Adds unknown user rooms to the server, reinitialize their canvas, and updates user count
 // TODO: Check if room is in database and replace init with database room data
-function join(room, socket) {
+function join(room, socket): void {
     socket.leave(socket.id); // Remove socket from the room it automatically joined
     socket.join(room);       // Join the canvas room
 
     rooms[room].addUser(socket.id);
-    var init = {
+    let init = {
         name: rooms[room].getName(),
         numUsers: rooms[room].getUsers(),
         strokes: rooms[room].getStrokes(),
@@ -55,20 +55,17 @@ function join(room, socket) {
 // Begin listening for requests when a client connects
 io.on('connection', (socket) => {
     console.info('user ' + socket.id + ' connected\n');
-    // TODO: Socket should join the 5-char room as soon as they connect
-    //       To be implemented when server decides the room ID, not the client
 
-    // Add unknown rooms to the server and reinitialize the client's canvas
-    // This gets called before every socket.on()
-    socket.use((packet, next) => {
-        var room = (typeof packet[1] === 'object') ? packet[1].room : packet[1];
-        if (room in rooms == false) {
-            rooms[room] = new Room(); // TODO: Remove this if we want to restrict users from creating their own rooms
-            join(room, socket);
-            console.warn("Unknown room " + room + " detected");
-        }
-        return next(); // Continue to the correct socket.on()
-    });
+    // Get the user's room ID and add them to the server
+    const url = socket.request.headers.referer;
+    const idIndex = url.indexOf("/rooms");
+    const room = url.slice(idIndex + 7, url.length);
+
+    if (room in rooms === false) {
+        rooms[room] = new Room();
+        console.warn("Did not receive this room's GET request");
+    }
+    join(room, socket);
 
     // Remove user's data from all of their rooms before they disconnect
     socket.on('disconnecting', () => {
@@ -87,11 +84,6 @@ io.on('connection', (socket) => {
     // Client has already left their rooms
     socket.on('disconnect', () => {
         console.info('user ' + socket.id + ' disconnected\n');
-    });
-
-    // Give new clients the room's data and tell other clients' to update their user counts
-    socket.on('room', (room) => {
-        join(room, socket);
     });
 
     // When a client sends a new title, send it to all other clients in that room

@@ -35,6 +35,10 @@ export class Room {
         return this.numUsers;
     }
 
+    getSpecificUser(id) {
+        return this.userInfo[id];
+    }
+
     getLiveStrokes() {
         return this.liveStrokes;
     }

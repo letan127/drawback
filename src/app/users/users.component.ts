@@ -15,15 +15,21 @@ export class UsersComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.drawService.updateUserCount().subscribe(amount => {
-        this.numUsers += amount;
-        this.updateUserCount();
+    this.drawService.updateUsers().subscribe(userInfo => {
+        if (userInfo.amount == -1) {
+          this.numUsers -= 1;
+          this.updateUserCount();
+        }
+        else {
+          this.numUsers += 1;
+          this.userInfo[userInfo.socketID] = userInfo.userInfo;
+          this.updateUserCount();
+        }
     })
-    this.drawService.userInformation().subscribe(userInfo => {
+    this.drawService.users().subscribe(userInfo => {
         this.userInfo = userInfo;
     })
     this.drawService.updateUserColor().subscribe(userDetails => {
-      console.log(this.userInfo)
       this.userInfo[userDetails.socketID].userColor = userDetails.userColor;
     })
     this.drawService.updateUserName().subscribe(userDetails => {

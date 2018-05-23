@@ -28,10 +28,10 @@ export class DrawService {
     }
 
     // Notify current clients that a user has either entered or left the room
-    public updateUserCount = () => {
+    public updateUsers = () => {
         return Observable.create((observer) => {
-            this.socket.on('updateUserCount', (amount) => {
-                observer.next(amount);
+            this.socket.on('updateUsers', (userInfo) => {
+                observer.next(userInfo);
             })
         })
     }
@@ -186,7 +186,7 @@ export class DrawService {
         });
     }
 
-    public userInformation = () => {
+    public users = () => {
         return Observable.create((observer) => {
             this.socket.on('userInfo', (userInfo) => {
                 observer.next(userInfo);
@@ -217,4 +217,5 @@ export class DrawService {
             });
         });
     }
+
 }

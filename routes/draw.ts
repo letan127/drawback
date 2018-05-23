@@ -45,7 +45,12 @@ io.on('connection', (socket) => {
         if (socketRooms.length > 1) {
             // Check that user actually joined a room (index 0 is its socket id)
             rooms[socketRooms[1]].removeUser(socket.id);
-            socket.to(socketRooms[1]).emit('updateUserCount', -1);
+            var users = {
+                amount: -1,
+                socketID: socket.id,
+                userInfo: rooms[socketRooms[1]].getSpecificUser()
+            }
+            socket.to(socketRooms[1]).emit('updateUserCount', users);
         }
     });
 
@@ -72,9 +77,13 @@ io.on('connection', (socket) => {
             socketID: socket.id
         };
         socket.emit('initUser', init);
-        socket.to(room).emit('updateUserCount', 1);
-        socket.to(room).emit('userInfo', rooms[room].getUserInfo());
-        console.log("here")
+        socket.emit('userInfo', rooms[room].getUserInfo());
+        var users = {
+            amount: 1,
+            socketID: socket.id,
+            userInfo: rooms[room].getSpecificUser(socket.id)
+        }
+        socket.to(room).emit('updateUsers', users);
     });
 
     // When a client sends a new title, send it to all other clients in that room

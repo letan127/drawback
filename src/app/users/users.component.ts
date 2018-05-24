@@ -9,7 +9,7 @@ import { DrawService } from '../draw.service';
 export class UsersComponent implements OnInit {
   numUsers: number;
   @Input() roomID: string;
-  userInfo = {}
+  userInfo = []
   constructor(private drawService: DrawService) {
     this.numUsers = 0
   }
@@ -22,18 +22,30 @@ export class UsersComponent implements OnInit {
         }
         else {
           this.numUsers += 1;
-          this.userInfo[userInfo.socketID] = userInfo.userInfo;
+          this.userInfo.push(userInfo.userInfo);
           this.updateUserCount();
+          console.log(this.userInfo)
         }
     })
     this.drawService.users().subscribe(userInfo => {
         this.userInfo = userInfo;
     })
     this.drawService.updateUserColor().subscribe(userDetails => {
-      this.userInfo[userDetails.socketID].userColor = userDetails.userColor;
+        for(var i = 0; i < this.userInfo.length; i++) {
+            if (this.userInfo[i].socketID == userDetails.socketID) {
+              this.userInfo[i].userColor = userDetails.userColor;
+              console.log(this.userInfo)
+              return
+            }
+        }
     })
     this.drawService.updateUserName().subscribe(userDetails => {
-      this.userInfo[userDetails.socketID].userName = userDetails.userName;
+      for(var i = 0; i < this.userInfo.length; i++) {
+          if (this.userInfo[i].socketID == userDetails.id) {
+              this.userInfo[i].userName = userDetails.userName;
+              return
+          }
+      }
     })
   }
   updateUserCount(value = 0) {

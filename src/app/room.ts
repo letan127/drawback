@@ -7,7 +7,7 @@ export class Room {
     private strokes: Stroke[];
     private numUsers: number;
     private liveStrokes = {};
-    private userInfo = {};
+    private userInfo = [];
     constructor() {
         this.name = "Untitled Canvas";
         this.latestStrokeID = 0;
@@ -36,7 +36,11 @@ export class Room {
     }
 
     getSpecificUser(id) {
-        return this.userInfo[id];
+        for(var i = 0; i < this.userInfo.length; i++) {
+            if (this.userInfo[i].socketID == id) {
+                return this.userInfo[i];
+            }
+        }
     }
 
     getLiveStrokes() {
@@ -80,10 +84,11 @@ export class Room {
     addUser(id: string): void {
         this.numUsers++;
         var userInfo = {
+            socketID: id,
             userName: "AnonymousUser" + this.numUsers.toString(),
             userColor: "black"
         }
-        this.userInfo[id] = userInfo;
+        this.userInfo.push(userInfo);
     }
 
     // Remove the user from the room
@@ -102,6 +107,11 @@ export class Room {
     }
 
     changeColor(id: string, color: string): void {
-        this.userInfo[id].userColor = color;
+        for(var i = 0; i < this.userInfo.length; i++) {
+            if (this.userInfo[i].socketID == id) {
+                this.userInfo[i].userColor = color;
+                return
+            }
+        }
     }
 }

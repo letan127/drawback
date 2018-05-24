@@ -80,7 +80,6 @@ io.on('connection', (socket) => {
         socket.emit('userInfo', rooms[room].getUserInfo());
         var users = {
             amount: 1,
-            socketID: socket.id,
             userInfo: rooms[room].getSpecificUser(socket.id)
         }
         socket.to(room).emit('updateUsers', users);
@@ -159,10 +158,9 @@ io.on('connection', (socket) => {
     socket.on('color', (roomColor) => {
         rooms[roomColor.room].changeColor(socket.id, roomColor.color);
         var userDetails = {
+            socketID: socket.id,
             userColor: roomColor.color,
-            socketID: socket.id
         }
-        console.log("here")
         socket.to(roomColor.room).emit('changeUserColor', userDetails);
     })
 });

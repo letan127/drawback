@@ -193,4 +193,22 @@ export class DrawService {
             });
         });
     }
+
+    // Tell client that their socket disconnected from the server
+    public disconnected = () => {
+        return Observable.create((observer) => {
+            this.socket.on('disconnect', () => {
+                observer.next();
+            });
+        });
+    }
+
+    // Tell client that their socket reconnected with the server
+    public reconnected = () => {
+        return Observable.create((observer) => {
+            this.socket.on('reconnect', () => {
+                observer.next();
+            });
+        });
+    }
 }

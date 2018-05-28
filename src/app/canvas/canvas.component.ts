@@ -49,6 +49,11 @@ export class CanvasComponent implements OnInit {
     doneStrokes = {}
     socketID: string;
 
+    // Error Alert
+    alert: HTMLElement;
+    curAlert: string;   // Current type/color of the alert
+
+
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
         this.numUsers = 1;
@@ -67,6 +72,8 @@ export class CanvasComponent implements OnInit {
         this.undoIDs = new Array<number>();
         this.drag = false;
         this.orphanUndoCount = 0;
+
+        this.curAlert = 'alert-danger';
     }
 
     ngOnInit(): void {
@@ -183,12 +190,38 @@ export class CanvasComponent implements OnInit {
             this.liveStrokes[this.socketID].canDraw = false;
             this.drawAll();
         });
+
+        // Alert user that they disconnected from the server
+        this.drawService.disconnected().subscribe(() => {
+            // Make the alert red
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+
+            // Show the alert and keep it on the screen until reconnected
+            this.alert.innerHTML = 'Disconnected from the server.';
+            this.alert.classList.toggle('show');
+        });
+
+        // Alert user that they reconnected to the server
+        this.drawService.reconnected().subscribe(() => {
+            // Make the alert green
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-success');
+            this.curAlert = 'alert-success';
+
+            this.alert.innerHTML = 'Reconnected to the server.';
+            setTimeout(() => {
+                this.alert.classList.toggle('show');
+            }, 5000);
+        });
     }
 
     ngAfterViewInit() {
         // Set callback functions for canvas mouse events
         this.canvas = <HTMLCanvasElement>document.getElementById("canvas");
         this.context = this.canvas.getContext("2d");
+        this.alert = document.getElementById('alert');
         window.addEventListener("resize", this.resize.bind(this), false);
         window.addEventListener("click", this.closeMenus.bind(this));
         window.addEventListener("keypress", this.closeMenus.bind(this));

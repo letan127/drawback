@@ -117,15 +117,23 @@ io.on('connection', (socket) => {
     // When a client clicks undo, tell all other clients in the room to undo
     // that stroke
     socket.on('undo', (undoStroke) => {
-        socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
-        rooms[undoStroke.room].setDraw(undoStroke.strokeID, false);
+        if (rooms[undoStroke.room].setDraw(undoStroke.strokeID, false)) {
+            socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
+        }
+        else {
+            console.error("Undo error from " + undoStroke.strokeID);
+        }
    });
 
     // When a client clicks redo, tell all other clients in the room to redo
     // that stroke
     socket.on('redo', (redoStroke) => {
-        socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
-        rooms[redoStroke.room].setDraw(redoStroke.strokeID, true);
+        if (rooms[redoStroke.room].setDraw(redoStroke.strokeID, true)) {
+            socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
+        }
+        else {
+            console.error("Redo error from " + redoStroke.strokeID);
+        }
     });
 
     // Let client know if the room they want to move to exists (from share modal)
@@ -155,7 +163,7 @@ io.on('connection', (socket) => {
             rooms[pixel.room].addPixel(socket.id, pixel.pixel);
         }
         else {
-            socket.emit('pixelError'); // Tell user to stop drawing
+            console.error("Pixel error from " + pixel);
         }
     });
 });

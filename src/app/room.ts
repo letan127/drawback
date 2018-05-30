@@ -63,8 +63,14 @@ export class Room {
     }
 
     // Set draw=true if the stroke should be drawn; otherwise false (for undo/redo)
-    setDraw(id: number, draw: boolean): void {
-        this.strokes[id].draw = draw;
+    setDraw(id: number, draw: boolean): boolean {
+        if (id in this.strokes) {
+            this.strokes[id].draw = draw;
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     // Add user to the room

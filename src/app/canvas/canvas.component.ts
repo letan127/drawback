@@ -51,7 +51,8 @@ export class CanvasComponent implements OnInit {
 
     // Error Alert
     alert: HTMLElement;
-    curAlert: string;   // Current type/color of the alert
+    curAlert: string;           // Current type/color of the alert
+    prevDrawStatus: boolean;    // Previous canDraw value before an error occured
 
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
@@ -185,12 +186,6 @@ export class CanvasComponent implements OnInit {
             this.drawPixel(pixelAndID.pixel,pixelAndID.id)
         })
 
-        // Stop drawing if the server did not receive this pixel's livestroke
-        this.drawService.getPixelError().subscribe(errorPixel => {
-            this.liveStrokes[this.socketID].canDraw = false;
-            this.drawAll();
-        });
-
         // Alert user that they disconnected from the server
         this.drawService.disconnected().subscribe(() => {
             // Make the alert red
@@ -213,7 +208,7 @@ export class CanvasComponent implements OnInit {
             this.alert.innerHTML = 'Reconnected to the server.';
             setTimeout(() => {
                 this.alert.classList.toggle('show');
-            }, 5000);
+            }, 3000);
         });
     }
 

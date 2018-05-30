@@ -62,7 +62,6 @@ html body {
 }
 #alert {
     position: fixed;
-    display: none;
     text-align: center;
     width: auto;
 }

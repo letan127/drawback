@@ -203,10 +203,10 @@ export class DrawService {
         });
     }
 
-    // Tell client that their socket reconnected with the server
-    public reconnected = () => {
+    // Tell client that their socket connected or reconnected to the server
+    public connected = () => {
         return Observable.create((observer) => {
-            this.socket.on('reconnect', () => {
+            this.socket.on('connect', () => {
                 observer.next();
             });
         });

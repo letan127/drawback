@@ -195,20 +195,22 @@ export class CanvasComponent implements OnInit {
 
             // Show the alert and keep it on the screen until reconnected
             this.alert.innerHTML = 'Disconnected from the server.';
-            this.alert.classList.toggle('show');
+            this.alert.style.display = '';
         });
 
-        // Alert user that they reconnected to the server
-        this.drawService.reconnected().subscribe(() => {
+        // Alert user that they connected or reconnected to the server
+        this.drawService.connected().subscribe(() => {
             // Make the alert green
             this.alert.classList.toggle(this.curAlert);
             this.alert.classList.toggle('alert-success');
             this.curAlert = 'alert-success';
 
-            this.alert.innerHTML = 'Reconnected to the server.';
+            // Show the alert and then hide it after 2 seconds
+            this.alert.innerHTML = 'Connected to the server.';
+            this.alert.style.display = ''
             setTimeout(() => {
-                this.alert.classList.toggle('show');
-            }, 3000);
+                this.alert.style.display = 'none';
+            }, 2000);
         });
     }
 

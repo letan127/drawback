@@ -301,3 +301,23 @@ html body {
     text-decoration: none;
     cursor: pointer;
 }
+
+#userModal {
+}
+
+.dropup {
+    position: relative;
+    display: inline-block;
+}
+
+.userDropUp {
+    display: none;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    bottom: 50px;
+    z-index: 1;
+}
+
+.dropup:hover .userDropUp {
+    display: block;
+}

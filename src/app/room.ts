@@ -94,6 +94,12 @@ export class Room {
     // Remove the user from the room
     removeUser(id: string): void {
         this.numUsers--;
+        for(var i = this.userInfo.length - 1; i >= 0; i--) {
+            if (this.userInfo[i].socketID == id) {
+                this.userInfo.splice(i, 1);
+                return
+            }
+        }
     }
 
     //adds a new live stroke to the room based on socket.id

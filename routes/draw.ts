@@ -48,9 +48,8 @@ io.on('connection', (socket) => {
             var users = {
                 amount: -1,
                 socketID: socket.id,
-                userInfo: rooms[socketRooms[1]].getSpecificUser()
             }
-            socket.to(socketRooms[1]).emit('updateUserCount', users);
+            socket.to(socketRooms[1]).emit('updateUsers', users);
         }
     });
 

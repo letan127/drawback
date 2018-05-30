@@ -100,6 +100,7 @@ export class CanvasComponent implements OnInit {
             this.strokes = init.strokes;
             this.liveStrokes = init.liveStrokes;
             this.socketID = init.socketID;
+            this.focus(init.pictureSize);
             this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
             this.updateUserCount();
             this.drawAll();
@@ -169,7 +170,6 @@ export class CanvasComponent implements OnInit {
         })
 
         this.drawService.getNewLiveStroke().subscribe(strokeAndID => {
-            strokeAndID.stroke
             this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
             if(!strokeAndID.stroke.draw)
                 return;
@@ -259,6 +259,25 @@ export class CanvasComponent implements OnInit {
         this.drawAll()
     }
 
+    focus(pictureSize) {
+        //no need to translate if nothing has been drawn
+        var scaling = 1
+        if (pictureSize.focusX == 0 && pictureSize.focusY == 0) {
+            return
+        }
+        this.offset.add(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
+        this.context.translate(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
+        if (pictureSize.pictureWidth > this.canvas.width && pictureSize.pictureHeight > this.canvas.height) {
+            while((pictureSize.pictureHeight * scaling  > this.canvas.height || pictureSize.pictureWidth * scaling  > this.canvas.width) && scaling > .03 ) {
+                scaling = scaling * .66;
+            }
+            if (scaling < .03) {
+                scaling = .03;
+            }
+            this.tool.zoom(scaling)
+        }
+    }
+
     // Close and unhighlight any open menus when clicking outside of it or pressing escape
     closeMenus(event) {
         // Close dropdown menus
@@ -276,6 +295,11 @@ export class CanvasComponent implements OnInit {
     // When a new user enters the room, update the displayed user count
     updateUserCount() {
         document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
+    }
+
+    // Show menu for mobile screens
+    showMenu() {
+        document.getElementById("hamburger-dropdown").classList.toggle("mobile-show");
     }
 
     // Sets draw to true or false depending on whether pen or pan was clicked

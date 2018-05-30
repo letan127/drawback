@@ -1,5 +1,6 @@
 import { Stroke } from '../src/app/stroke';
 import { Room } from '../src/app/room';
+import { Position } from '../src/app/position';
 
 let express = require('express');
 let router = express.Router();
@@ -46,6 +47,7 @@ function join(room, socket): void {
         numUsers: rooms[room].getUsers(),
         strokes: rooms[room].getStrokes(),
         liveStrokes: rooms[room].getLiveStrokes(),
+        pictureSize: rooms[room].getRecentPixel(),
         socketID: socket.id
     };
     socket.emit('initUser', init);

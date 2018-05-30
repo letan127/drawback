@@ -20,7 +20,7 @@
     </div>
     <div id='overlay' class='modal'></div>
     <!-- Invite, Download, and Upload Bar -->
-    <div class="top-bar top-right-bar flex-horizontal canvas-component">
+    <div id="top-right-bar" class="top-bar top-right-bar flex-horizontal canvas-component">
         <div class="bar flex-horizontal">
             <app-invite [roomID]="id"
                         (checkRoom)="drawService.requestRoomCheck($event)">
@@ -35,8 +35,27 @@
                 <span class="tool-tip-text">Upload</span>
             </div>
         </div>
-        <div id="signup-login" class="bar bar-button flex-horizontal" (click)="authentication()">{{loginButton}}</div>
+        <div id="signup-login" class="bar bar-button flex-horizontal" (click)="authentication()">
+            {{loginButton}}
+        </div>
     </div>
+
+    <!-- Mobile hamburger menu-->
+    <div id="hamburger" class="mobile-button canvas-component" (click)="showMenu()">
+        <i class="fa fa-bars"></i>
+    </div>
+    <div id="hamburger-dropdown" class="canvas-component">
+        <div id="hamburger-signup-login" class="hamburger-button" (click)="authentication()">
+            Sign up or Log in
+        </div>
+        <div id="hamburger-upload" class="hamburger-button">
+            Upload
+        </div>
+        <div id="hamburger-download" class="hamburger-button">
+            Download
+        </div>
+    </div>
+
     <!-- Toolbar -->
     <app-tools (setDraw)="setDraw($event)"
                 (callUndo)="undo()"
@@ -48,7 +67,7 @@
     <!-- User Count -->
     <div class="bottom-right-bar bar flex-horizontal canvas-component">
         <div id="num-users-text" class="bar-text"></div>
-        <div class="bar-separator"></div>
+        <div class="user-bar-separator"> </div>
         <div id="num-users" class="bar-button">
             <i class="fa fa-user-circle"></i>
         </div>

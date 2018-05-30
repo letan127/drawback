@@ -1,5 +1,6 @@
 import { Stroke } from '../src/app/stroke';
 import { Room } from '../src/app/room';
+import { Position } from '../src/app/position';
 
 let express = require('express');
 let router = express.Router();
@@ -69,7 +70,8 @@ io.on('connection', (socket) => {
             numUsers: rooms[room].getUsers(),
             strokes: rooms[room].getStrokes(),
             liveStrokes: rooms[room].getLiveStrokes(),
-            socketID: socket.id
+            socketID: socket.id,
+            pictureSize: rooms[room].getRecentPixel()
         };
         socket.emit('initUser', init);
         socket.to(room).emit('updateUserCount', 1);

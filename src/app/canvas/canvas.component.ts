@@ -52,8 +52,6 @@ export class CanvasComponent implements OnInit {
     // Error Alert
     alert: HTMLElement;
     curAlert: string;           // Current type/color of the alert
-    prevDrawStatus: boolean;    // Previous canDraw value before an error occured
-
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
@@ -188,6 +186,9 @@ export class CanvasComponent implements OnInit {
 
         // Alert user that they disconnected from the server
         this.drawService.disconnected().subscribe(() => {
+            // Prevent users interacting with the canvas/UI
+            document.getElementById('overlay').style.display = 'block';
+
             // Make the alert red
             this.alert.classList.toggle(this.curAlert);
             this.alert.classList.toggle('alert-danger');
@@ -200,6 +201,9 @@ export class CanvasComponent implements OnInit {
 
         // Alert user that they connected or reconnected to the server
         this.drawService.connected().subscribe(() => {
+            // Allow users to interact with the UI
+            document.getElementById('overlay').style.display = 'none';
+
             // Make the alert green
             this.alert.classList.toggle(this.curAlert);
             this.alert.classList.toggle('alert-success');

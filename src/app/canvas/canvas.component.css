@@ -59,11 +59,16 @@ html body {
     flex-direction: row;
     justify-content: center;
     width: 100%;
+    z-index: 100;
 }
 #alert {
     position: fixed;
     text-align: center;
     width: auto;
+}
+#overlay {
+    z-index: 99;
+    display: block;
 }
 
 /* Share Bar */

@@ -40,7 +40,6 @@ export class UsersComponent implements OnInit {
         for(var i = 0; i < this.userInfo.length; i++) {
             if (this.userInfo[i].socketID == userDetails.socketID) {
               this.userInfo[i].userColor = userDetails.userColor;
-              console.log(this.userInfo)
               return
             }
         }

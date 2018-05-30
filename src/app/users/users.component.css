@@ -312,12 +312,24 @@ html body {
 
 .userDropUp {
     display: none;
-    background-color: #f1f1f1;
-    min-width: 160px;
-    bottom: 50px;
     z-index: 1;
 }
 
 .dropup:hover .userDropUp {
     display: block;
+}
+
+.userColor {
+    padding: 3px;
+    margin: 3px;
+}
+
+.userName {
+    padding: 3px;
+    margin: 3px;
+}
+
+input {
+    border: none;
+    background: transparent;
 }

@@ -2,6 +2,24 @@
     <div id="num-users-text" class="bar-text"></div>
     <div class="bar-separator"></div>
     <div id="num-users" class="bar-button">
+        <div  *ngFor="let foo of userInfo; let i = index">
+            <div class="flex-horizontal" *ngIf="userInfo[i].socketID != socketID; else user">
+                <div [style.color]="userInfo[i].userColor">
+                    <i class="fa fa-circle"></i>
+                </div>
+                <div>
+                    {{ userInfo[i].userName}}
+                </div>
+            </div>
+            <ng-template #user>
+                <div class="flex-horizontal">
+                    <div [style.color]="userInfo[i].userColor">
+                        <i class="fa fa-circle"></i>
+                    </div>
+                    <input type = "text" [(ngModel)]="userInfo[i].userName">
+                </div>
+            </ng-template>
+        </div>
         <i class="fa fa-user-circle"></i>
     </div>
 </div>

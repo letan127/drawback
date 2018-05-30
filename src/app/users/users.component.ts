@@ -9,6 +9,7 @@ import { DrawService } from '../draw.service';
 export class UsersComponent implements OnInit {
   numUsers: number;
   @Input() roomID: string;
+  @Input() socketID: string;
   userInfo = []
   constructor(private drawService: DrawService) {
     this.numUsers = 0
@@ -24,7 +25,6 @@ export class UsersComponent implements OnInit {
           this.numUsers += 1;
           this.userInfo.push(userInfo.userInfo);
           this.updateUserCount();
-          console.log(this.userInfo)
         }
     })
     this.drawService.users().subscribe(userInfo => {

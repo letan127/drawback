@@ -161,7 +161,7 @@ io.on('connection', (socket) => {
             socketID: socket.id,
             userColor: roomColor.color,
         }
-        socket.to(roomColor.room).emit('changeUserColor', userDetails);
+        io.in(roomColor.room).emit('changeUserColor', userDetails);
     })
 });
 

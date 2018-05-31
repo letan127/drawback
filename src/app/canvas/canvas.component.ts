@@ -519,6 +519,8 @@ export class CanvasComponent implements OnInit {
 
     // Scroll to zoom
     mouseWheel(event): void {
+        event.preventDefault();
+        
         // https://stackoverflow.com/questions/6775168/zooming-with-canvas
         var mousex = event.clientX - this.canvas.offsetLeft;
         var mousey = event.clientY - this.canvas.offsetTop;

@@ -1,7 +1,9 @@
 html body {
     font-family: sans-serif;
     overflow: hidden;
+    position: fixed;
     height: 100%;
+    user-select: none;
 }
 #canvas {
     position: relative;

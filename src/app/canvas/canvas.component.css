@@ -22,17 +22,13 @@ html body {
 }
 
 /* Alert Banner and Overlay */
-.alert-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    width: 100%;
-    z-index: 100;
-}
 #alert {
     position: fixed;
+    display: block;
     text-align: center;
-    width: auto;
+    top: 15px;
+    left: calc(50% - 110px);
+    z-index: 100;
 }
 #overlay {
     z-index: 99;
@@ -364,10 +360,6 @@ html body {
 
 /* Mobile screens */
 @media only screen and (max-width: 600px) {
-    .top-bar {
-        top: 15px;
-        height: 53px;
-    }
     #main-toolbar {
         visibility: hidden;
     }

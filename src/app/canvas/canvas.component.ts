@@ -363,6 +363,7 @@ export class CanvasComponent implements OnInit {
         if(this.orphanedStrokes.length && this.orphanedStrokes.length - this.orphanUndoCount > 0) {
             this.orphanedStrokes[this.orphanedStrokes.length - this.orphanUndoCount - 1].draw = false;
             this.orphanUndoCount++;
+            this.drawAll()
         }
         // Undo my strokes
         else {
@@ -381,6 +382,7 @@ export class CanvasComponent implements OnInit {
         if(!this.undoIDs.length && this.orphanUndoCount) {
             this.orphanedStrokes[this.orphanedStrokes.length - this.orphanUndoCount].draw = true;
             this.orphanUndoCount--;
+            this.drawAll()
         }
         else {
             // Check if strokes with IDs can be undone
@@ -419,6 +421,7 @@ export class CanvasComponent implements OnInit {
         if(this.canDraw) {
             // Discard stored undos
             this.orphanedStrokes.splice(this.orphanedStrokes.length - this.orphanUndoCount, this.orphanUndoCount);
+            this.orphanUndoCount = 0;
             if(this.undoIDs.length) {
                 //TODO: remove the stroke from stroke array?
                 this.undoIDs = [];
@@ -446,6 +449,7 @@ export class CanvasComponent implements OnInit {
         this.drag = false;
         if (this.canDraw) {
             this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+
             this.liveStrokes[this.socketID].liveStroke = false;
             this.drawService.reqStrokeID(this.id);
         }

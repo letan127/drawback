@@ -333,7 +333,7 @@ export class CanvasComponent implements OnInit {
     drawAll() {
         // Clear the canvas and also offscreen
         this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
-        console.log("here")
+        
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < this.strokes.length; i++) {
             if (this.strokes[i])

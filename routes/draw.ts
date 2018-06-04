@@ -88,6 +88,10 @@ io.on('connection', (socket) => {
         console.info('user ' + socket.id + ' disconnected\n');
     });
 
+    socket.on('error', (error) => {
+        console.error('Socket Error: ' + error);
+    });
+
     // When a client sends a new title, send it to all other clients in that room
     socket.on('title', (roomTitle) => {
         rooms[roomTitle.room].rename(roomTitle.title);

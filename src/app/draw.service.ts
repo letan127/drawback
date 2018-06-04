@@ -211,4 +211,20 @@ export class DrawService {
             });
         });
     }
+
+    public connectTimeout = () => {
+        return Observable.create((observer) => {
+            this.socket.on('connect_timeout', () => {
+                observer.next();
+            });
+        });
+    }
+
+    public error = () => {
+        return Observable.create((observer) => {
+            this.socket.on('error', () => {
+                observer.next();
+            });
+        });
+    }
 }

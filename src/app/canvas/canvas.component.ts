@@ -195,7 +195,7 @@ export class CanvasComponent implements OnInit {
             this.curAlert = 'alert-danger';
 
             // Show the alert and keep it on the screen until reconnected
-            this.alert.innerHTML = 'Disconnected from the server.';
+            this.alert.innerHTML = 'Disconnected from the server. Please wait.';
             this.alert.style.display = '';
         });
 
@@ -215,6 +215,26 @@ export class CanvasComponent implements OnInit {
             setTimeout(() => {
                 this.alert.style.display = 'none';
             }, 2000);
+        });
+
+        // Socket received a 'connect_timeout'
+        this.drawService.connectTimeout().subscribe(() => {
+            document.getElementById('overlay').style.display = 'block';
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+            this.alert.innerHTML = 'Connection Timeout: Please refresh.';
+            this.alert.style.display = '';
+        });
+
+        // Socket received an 'error'
+        this.drawService.error().subscribe(() => {
+            document.getElementById('overlay').style.display = 'block';
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+            this.alert.innerHTML = 'Socket Error: Please restart the browser.';
+            this.alert.style.display = '';
         });
     }
 

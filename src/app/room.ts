@@ -83,7 +83,7 @@ export class Room {
 
     // Set draw=true if the stroke should be drawn; otherwise false (for undo/redo)
     setDraw(id: number, draw: boolean): boolean {
-        if (id in this.strokes) {
+        if (this.strokes[id] !== undefined) {
             this.strokes[id].draw = draw;
             return true;
         }

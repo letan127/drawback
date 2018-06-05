@@ -239,8 +239,8 @@ export class CanvasComponent implements OnInit {
             return
         }
         this.offset.add(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
-        this.context.translate(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
-        if (pictureSize.pictureWidth > this.canvas.width && pictureSize.pictureHeight > this.canvas.height) {
+        this.context.translate(pictureSize.focusX + this.canvas.width/2, pictureSize.focusY + this.canvas.height/2);
+        if (pictureSize.pictureWidth > this.canvas.width || pictureSize.pictureHeight > this.canvas.height) {
             while((pictureSize.pictureHeight * scaling  > this.canvas.height || pictureSize.pictureWidth * scaling  > this.canvas.width) && scaling > .03 ) {
                 scaling = scaling * .66;
             }
@@ -248,7 +248,9 @@ export class CanvasComponent implements OnInit {
                 scaling = .03;
             }
             this.tool.zoom(scaling)
+            return
         }
+        this.tool.zoom(scaling)
     }
 
     // Close and unhighlight any open menus when clicking outside of it or pressing escape
@@ -341,6 +343,7 @@ export class CanvasComponent implements OnInit {
     drawAll() {
         // Clear the canvas and also offscreen
         this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
+        
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < this.strokes.length; i++) {
             if (this.strokes[i])
@@ -373,6 +376,7 @@ export class CanvasComponent implements OnInit {
         if(this.orphanedStrokes.length && this.orphanedStrokes.length - this.orphanUndoCount > 0) {
             this.orphanedStrokes[this.orphanedStrokes.length - this.orphanUndoCount - 1].draw = false;
             this.orphanUndoCount++;
+            this.drawAll()
         }
         // Undo my strokes
         else {
@@ -391,6 +395,7 @@ export class CanvasComponent implements OnInit {
         if(!this.undoIDs.length && this.orphanUndoCount) {
             this.orphanedStrokes[this.orphanedStrokes.length - this.orphanUndoCount].draw = true;
             this.orphanUndoCount--;
+            this.drawAll()
         }
         else {
             // Check if strokes with IDs can be undone
@@ -429,6 +434,7 @@ export class CanvasComponent implements OnInit {
         if(this.canDraw) {
             // Discard stored undos
             this.orphanedStrokes.splice(this.orphanedStrokes.length - this.orphanUndoCount, this.orphanUndoCount);
+            this.orphanUndoCount = 0;
             if(this.undoIDs.length) {
                 //TODO: remove the stroke from stroke array?
                 this.undoIDs = [];
@@ -456,6 +462,7 @@ export class CanvasComponent implements OnInit {
         this.drag = false;
         if (this.canDraw) {
             this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+
             this.liveStrokes[this.socketID].liveStroke = false;
             this.drawService.reqStrokeID(this.id);
         }
@@ -472,7 +479,7 @@ export class CanvasComponent implements OnInit {
         else if (this.drag && !this.canDraw) {
             // Translate the this.context by how much is moved
             var currentPosition = new Position(event.x - this.canvas.offsetLeft, event.y - this.canvas.offsetTop);
-            var changePosition  = new Position(this.previousPosition.x - currentPosition.x, this.previousPosition.y - currentPosition.y);
+            var changePosition  = new Position((currentPosition.x - this.previousPosition.x) / this.scaleValue, (currentPosition.y - this.previousPosition.y) / this.scaleValue);
             this.previousPosition = currentPosition;
             this.offset.add(changePosition);
             this.context.translate(changePosition.x, changePosition.y);

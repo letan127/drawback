@@ -36,6 +36,7 @@ export class CanvasComponent implements OnInit {
     drag: boolean;          // True if we should be drawing to canvas
     scaleValue: number;     // Zoom multiplier
     offset: Position;       // Offset relative to current origin
+    maxOffset: Position;
     drawPosition: Position; // Draw position relative to original origin
     previousPosition: Position;
 
@@ -58,6 +59,7 @@ export class CanvasComponent implements OnInit {
         this.canDraw = true;
         this.previousPosition = new Position(0,0);
         this.offset = new Position(0,0);
+        this.maxOffset = this.offset
         this.scaleValue = 1;
         this.drawPosition = new Position(0,0);
 
@@ -137,7 +139,7 @@ export class CanvasComponent implements OnInit {
 
         // When the server sends a clear event, clear the canvas, and reset values
         this.drawService.getClear().subscribe(() => {
-            this.context.clearRect(-60000, -60000, 60000, 60000);
+            this.context.clearRect(-40000, -40000, 80000, 80000);
             this.strokes = [];
             this.myIDs = [];
             this.undoIDs = [];
@@ -229,6 +231,7 @@ export class CanvasComponent implements OnInit {
             return
         }
         this.offset.add(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
+        this.maxOffset = this.offset;
         this.context.translate(pictureSize.focusX + this.canvas.width/2, pictureSize.focusY + this.canvas.height/2);
         if (pictureSize.pictureWidth > this.canvas.width || pictureSize.pictureHeight > this.canvas.height) {
             while((pictureSize.pictureHeight * scaling  > this.canvas.height || pictureSize.pictureWidth * scaling  > this.canvas.width) && scaling > .03 ) {
@@ -332,7 +335,7 @@ export class CanvasComponent implements OnInit {
     // Clears the canvas and redraws every stroke in our list of strokes
     drawAll() {
         // Clear the canvas and also offscreen
-        this.context.clearRect(-60000, -60000, 60000, 60000);
+        this.context.clearRect(-40000, -40000, 80000, 80000);
 
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < this.strokes.length; i++) {
@@ -411,16 +414,47 @@ export class CanvasComponent implements OnInit {
 
     zoom(amount: number) {
         //zooming just goes beyond the size of the canvas
-        if (this.scaleValue * amount * this.canvas.width > 60000 || this.scaleValue * amount * this.canvas.height > 60000 || this.scaleValue * amount * this.canvas.width < -60000 || this.scaleValue * amount * this.canvas.height < -60000) {
+        if (this.canvas.width/(this.scaleValue * amount) > 40000 || this.canvas.height/(this.scaleValue * amount) > 40000 || this.canvas.width/(this.scaleValue * amount) < -40000 || this.canvas.height/(amount * this.scaleValue) < -40000) {
             return
         }
-        this.scaleValue *= amount;
-        //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
-        this.context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * this.canvas.width/2, -(this.scaleValue - 1) * this.canvas.height/2);
-        this.context.translate(this.offset.x, this.offset.y)
-        this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
-        this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
-        this.drawAll();
+        //zooming out will cause shown screen to be greater than actual canvas
+        var boundaryX = ((this.canvas.width/(2 * this.scaleValue * amount)) + this.offset.x/(this.scaleValue * amount))
+        var boundaryY = ((this.canvas.height/(2 * this.scaleValue * amount)) + this.offset.y/(this.scaleValue * amount))
+        if (boundaryX > 40000 || boundaryX < -40000 || boundaryY > 40000 || boundaryY < -40000) {
+            if (boundaryX > 40000) {
+                this.offset.x = boundaryX - 40000 - (this.canvas.width/(2 * this.scaleValue * amount) + this.offset.x/(this.scaleValue * amount))
+                this.offset.x = this.offset.x * this.scaleValue * amount;
+            }
+            else if (boundaryX < -40000) {
+                this.offset.x = boundaryX - -40000 - (this.canvas.width/(2 * this.scaleValue * amount) + this.offset.x/(this.scaleValue * amount))
+                this.offset.x = this.offset.x * this.scaleValue * amount;
+            }
+            if(boundaryY > 40000) {
+                this.offset.y = boundaryY - 40000 - (this.canvas.height/(2 * this.scaleValue * amount) + this.offset.y/(this.scaleValue * amount))
+                this.offset.y = this.offset.y * this.scaleValue * amount;
+            }
+            else if(boundaryY < -40000) {
+                this.offset.y = boundaryY - -40000 - (this.canvas.height/(2 * this.scaleValue * amount) + this.offset.y/(this.scaleValue * amount))
+                this.offset.y = this.offset.y * this.scaleValue * amount;
+            }
+            this.scaleValue *= amount;
+            //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
+            this.context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * this.canvas.width/2, -(this.scaleValue - 1) * this.canvas.height/2);
+
+            this.context.translate(this.offset.x, this.offset.y)
+            this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
+            this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
+            this.drawAll();
+        }
+        else {
+            this.scaleValue *= amount;
+            //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
+            this.context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * this.canvas.width/2, -(this.scaleValue - 1) * this.canvas.height/2);
+            this.context.translate(this.offset.x, this.offset.y)
+            this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
+            this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
+            this.drawAll();
+        }
     }
 
     // Start drawing a stroke
@@ -443,11 +477,7 @@ export class CanvasComponent implements OnInit {
                 this.drag = true;
                 this.drawService.sendNewLiveStroke(this.liveStrokes[this.socketID], this.id);
             }
-            // Add the stroke's pixels and tool settings
-            this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
-            this.drawPixel(new Position(x,y), this.socketID);
-            this.drag = true;
-            this.drawService.sendNewLiveStroke(this.liveStrokes[this.socketID], this.id);
+
         }
         else {
             // Panning
@@ -474,6 +504,7 @@ export class CanvasComponent implements OnInit {
             var x = ((event.x - this.canvas.offsetLeft - this.drawPosition.x)/this.scaleValue) - this.offset.x;
             var y = ((event.y - this.canvas.offsetTop - this.drawPosition.y)/this.scaleValue) - this.offset.y;
             if (this.insideCanvas(x, y)) {
+                console.log("Drawing at: " + x, y)
                 this.drawPixel(new Position(x,y), this.socketID);
                 this.drawService.sendPixel(new Position(x,y), this.id);
             }
@@ -482,10 +513,12 @@ export class CanvasComponent implements OnInit {
             // Translate the this.context by how much is moved
             var currentPosition = new Position(event.x - this.canvas.offsetLeft, event.y - this.canvas.offsetTop);
             var changePosition  = new Position((currentPosition.x - this.previousPosition.x) / this.scaleValue, (currentPosition.y - this.previousPosition.y) / this.scaleValue);
-            this.previousPosition = currentPosition;
-            if (this.insideCanvas(this.offset.x + changePosition.x + this.canvas.height/(2*this.scaleValue), this.offset.y + changePosition.y + this.canvas.height/(2*this.scaleValue))) {
-
+            console.log("Moved :" + changePosition.x)
+            console.log("Static size: " + this.canvas.width/(2*this.scaleValue))
+            if (this.insideCanvas(this.offset.x + changePosition.x + this.canvas.width/(2*this.scaleValue), this.offset.y + changePosition.y + this.canvas.height/(2*this.scaleValue))) {
+                this.previousPosition = currentPosition;
                 this.offset.add(changePosition);
+                console.log("Offset: " + this.offset.x)
                 this.context.translate(changePosition.x, changePosition.y);
                 this.drawAll();
             }
@@ -545,7 +578,7 @@ export class CanvasComponent implements OnInit {
     }
 
     insideCanvas(x,y): boolean {
-        if(x < -60000 || x > 60000 || y < -60000 || y > 60000) {
+        if(x < -40000 || x > 40000 || y < -40000 || y > 40000) {
             return false
         }
         return true

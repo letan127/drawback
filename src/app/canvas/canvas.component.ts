@@ -504,7 +504,6 @@ export class CanvasComponent implements OnInit {
             var x = ((event.x - this.canvas.offsetLeft - this.drawPosition.x)/this.scaleValue) - this.offset.x;
             var y = ((event.y - this.canvas.offsetTop - this.drawPosition.y)/this.scaleValue) - this.offset.y;
             if (this.insideCanvas(x, y)) {
-                console.log("Drawing at: " + x, y)
                 this.drawPixel(new Position(x,y), this.socketID);
                 this.drawService.sendPixel(new Position(x,y), this.id);
             }
@@ -513,12 +512,9 @@ export class CanvasComponent implements OnInit {
             // Translate the this.context by how much is moved
             var currentPosition = new Position(event.x - this.canvas.offsetLeft, event.y - this.canvas.offsetTop);
             var changePosition  = new Position((currentPosition.x - this.previousPosition.x) / this.scaleValue, (currentPosition.y - this.previousPosition.y) / this.scaleValue);
-            console.log("Moved :" + changePosition.x)
-            console.log("Static size: " + this.canvas.width/(2*this.scaleValue))
             if (this.insideCanvas(this.offset.x + changePosition.x + this.canvas.width/(2*this.scaleValue), this.offset.y + changePosition.y + this.canvas.height/(2*this.scaleValue))) {
                 this.previousPosition = currentPosition;
                 this.offset.add(changePosition);
-                console.log("Offset: " + this.offset.x)
                 this.context.translate(changePosition.x, changePosition.y);
                 this.drawAll();
             }

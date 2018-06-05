@@ -185,4 +185,46 @@ export class DrawService {
             });
         });
     }
+
+    public getPixelError = () => {
+        return Observable.create((observer) => {
+            this.socket.on('pixelError', () => {
+                observer.next();
+            });
+        });
+    }
+
+    // Tell client that their socket disconnected from the server
+    public disconnected = () => {
+        return Observable.create((observer) => {
+            this.socket.on('disconnect', () => {
+                observer.next();
+            });
+        });
+    }
+
+    // Tell client that their socket connected or reconnected to the server
+    public connected = () => {
+        return Observable.create((observer) => {
+            this.socket.on('connect', () => {
+                observer.next();
+            });
+        });
+    }
+
+    public connectTimeout = () => {
+        return Observable.create((observer) => {
+            this.socket.on('connect_timeout', () => {
+                observer.next();
+            });
+        });
+    }
+
+    public error = () => {
+        return Observable.create((observer) => {
+            this.socket.on('error', () => {
+                observer.next();
+            });
+        });
+    }
 }

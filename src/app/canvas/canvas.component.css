@@ -1,7 +1,9 @@
 html body {
     font-family: sans-serif;
     overflow: hidden;
+    position: fixed;
     height: 100%;
+    user-select: none;
 }
 #canvas {
     position: relative;
@@ -19,6 +21,20 @@ html body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+/* Alert Banner and Overlay */
+#alert {
+    position: fixed;
+    display: block;
+    text-align: center;
+    top: 15px;
+    left: calc(50% - 110px);
+    z-index: 100;
+}
+#overlay {
+    z-index: 99;
+    display: block;
 }
 
 /* Toolbar */

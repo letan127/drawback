@@ -156,9 +156,10 @@ export class ToolsComponent implements OnInit {
     }
 
     zoom(amount: number) {
-
         this.callZoom.emit(amount);
         // Update displayed zoom amount
-        document.getElementById("zoom-amount").innerHTML = ""+Math.round(100 * this.scaleValue) + "%";
+        setTimeout( () => {
+            document.getElementById("zoom-amount").innerHTML = ""+Math.round(100 * this.scaleValue) + "%";;}
+        , 0);
     }
 }

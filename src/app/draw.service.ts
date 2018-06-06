@@ -202,6 +202,14 @@ export class DrawService {
         this.socket.emit('color', roomColor);
     }
 
+    public changeName(room, name) {
+        var roomName = {
+            room: room,
+            name: name
+        }
+        this.socket.emit('nameChange', roomName);
+    }
+
     public updateUserColor = () => {
         return Observable.create((observer) => {
             this.socket.on('changeUserColor', (userDetails) => {

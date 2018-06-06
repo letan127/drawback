@@ -161,7 +161,18 @@ io.on('connection', (socket) => {
             userColor: roomColor.color,
         }
         io.in(roomColor.room).emit('changeUserColor', userDetails);
-    })
+    });
+
+    socket.on('nameChange', (roomName) => {
+        rooms[roomName.room].changeName(socket.id, roomName.name);
+        var userDetails = {
+            socketID: socket.id,
+            userName: roomName.name,
+        }
+        socket.to(roomName.room).emit('changeUserName', userDetails);
+    });
+
+
 });
 
 module.exports = router;

@@ -20,7 +20,6 @@ export class UsersComponent implements OnInit {
         if (userInfo.amount == -1) {
           this.numUsers -= 1;
           for(var i = this.userInfo.length - 1; i >= 0; i--) {
-              console.log(userInfo.socketID)
               if (this.userInfo[i].socketID == userInfo.socketID) {
                 this.userInfo.splice(i, 1);
               }
@@ -46,7 +45,7 @@ export class UsersComponent implements OnInit {
     })
     this.drawService.updateUserName().subscribe(userDetails => {
       for(var i = 0; i < this.userInfo.length; i++) {
-          if (this.userInfo[i].socketID == userDetails.id) {
+          if (this.userInfo[i].socketID == userDetails.socketID) {
               this.userInfo[i].userName = userDetails.userName;
               return
           }
@@ -61,5 +60,8 @@ export class UsersComponent implements OnInit {
     document.getElementById("userModal").classList.toggle('show')
   }
 
+  onChange(newValue) {
+    this.drawService.changeName(this.roomID, newValue)
+  }
 
 }

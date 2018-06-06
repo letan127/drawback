@@ -120,4 +120,12 @@ export class Room {
             }
         }
     }
+    changeName(id: string, name: string): void {
+        for(var i = 0; i < this.userInfo.length; i++) {
+            if (this.userInfo[i].socketID == id) {
+                this.userInfo[i].userName = name;
+                return
+            }
+        }
+    }
 }

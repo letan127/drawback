@@ -9,7 +9,7 @@
                         <i class="fa fa-circle"></i>
                     </div>
                     <div class="userName">
-                        {{ userInfo[i].userName}}
+                        {{ userInfo[i].userName }}
                     </div>
                 </div>
                 <ng-template #user>
@@ -18,7 +18,7 @@
                         <div class="userColor" [style.color]="userInfo[i].userColor">
                             <i class="fa fa-circle"></i>
                         </div>
-                        <input type = "text" [(ngModel)]="userInfo[i].userName">
+                        <input type = "text" [(ngModel)]="userInfo[i].userName" (ngModelChange)="onChange($event)">
                     </div>
                 </ng-template>
             </div>

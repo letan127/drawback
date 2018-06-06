@@ -34,6 +34,7 @@ export class CanvasComponent implements OnInit {
     context: CanvasRenderingContext2D;
     canDraw: boolean;       // Changes appear on canvas; only false when panning
     drag: boolean;          // True if we should be drawing to canvas
+    mouseLeft: boolean;     // True if user's mouse left
     scaleValue: number;     // Zoom multiplier
     offset: Position;       // Offset relative to current origin
     drawPosition: Position; // Draw position relative to original origin
@@ -60,6 +61,7 @@ export class CanvasComponent implements OnInit {
         this.loginButton = "Sign Up or Login";
 
         this.canDraw = true;
+        this.mouseLeft = false;
         this.previousPosition = new Position(0,0);
         this.offset = new Position(0,0);
         this.scaleValue = 1;
@@ -478,6 +480,9 @@ export class CanvasComponent implements OnInit {
 
     // Start drawing a stroke
     mouseDown(event: MouseEvent): void {
+        //user mouseUp'd off canvas 
+        this.mouseLeft = false;
+
         if(this.canDraw) {
             // Discard stored undos
             this.orphanedStrokes.splice(this.orphanedStrokes.length - this.orphanUndoCount, this.orphanUndoCount);
@@ -526,6 +531,11 @@ export class CanvasComponent implements OnInit {
     // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
     mouseUp(event: MouseEvent): void {
         this.drag = false;
+        //mouseUp after coming back from mouseLeave
+        if (this.mouseLeft) {
+            this.mouseLeft = false;
+            return
+        }
         if (this.canDraw) {
             this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
             this.liveStrokes[this.socketID].liveStroke = false;
@@ -535,12 +545,15 @@ export class CanvasComponent implements OnInit {
 
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
-        this.drag = false;
-        // TODO: Need to check if stroke has been drawn before mouseLeave
-        //if (this.canDraw) {
-        //    this.drawService.reqStrokeID(this.id);
-        //    this.orphanedStrokes.push(this.curStroke);
-        //}
+        //if mouseLeft while dragging, send the stroke
+        if(this.drag && this.canDraw) {
+            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+            this.liveStrokes[this.socketID].liveStroke = false;
+            this.drawService.reqStrokeID(this.id);
+        }
+        this.drag = false
+        this.mouseLeft = true
+
     }
 
     // Scroll to zoom

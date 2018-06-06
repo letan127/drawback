@@ -26,7 +26,6 @@ function generateID() {
 }
 
 server.listen(4000);
-
 //app.get('')
 
 router.get('', (req, res) => {
@@ -36,45 +35,61 @@ router.get('', (req, res) => {
     res.redirect(fullurl);
 })
 
+// Adds unknown user rooms to the server, reinitialize their canvas, and updates user count
+// TODO: Check if room is in database and replace init with database room data
+function join(room, socket): void {
+    socket.leave(socket.id); // Remove socket from the room it automatically joined
+    socket.join(room);       // Join the canvas room
+
+    rooms[room].addUser(socket.id);
+    let init = {
+        name: rooms[room].getName(),
+        numUsers: rooms[room].getUsers(),
+        strokes: rooms[room].getStrokes(),
+        liveStrokes: rooms[room].getLiveStrokes(),
+        pictureSize: rooms[room].getRecentPixel(),
+        socketID: socket.id
+    };
+    socket.emit('initUser', init);
+    socket.to(room).emit('updateUserCount', 1);
+}
+
 // Begin listening for requests when a client connects
 io.on('connection', (socket) => {
-    console.log('user ' + socket.id + ' connected\n');
+    console.info('user ' + socket.id + ' connected\n');
+
+    // Get the user's room ID and add them to the server
+    const url = socket.request.headers.referer;
+    const idIndex = url.indexOf("/rooms");
+    const room = url.slice(idIndex + 7, url.length);
+
+    if (room in rooms === false) {
+        rooms[room] = new Room();
+        console.warn('Did not receive ' + room + '\'s GET request');
+    }
+    join(room, socket);
 
     // Remove user's data from all of their rooms before they disconnect
     socket.on('disconnecting', () => {
         var socketRooms = Object.keys(socket.rooms)
-        if (socketRooms.length > 1) {
-            // Check that user actually joined a room (index 0 is its socket id)
-            rooms[socketRooms[1]].removeUser(socket.id);
-            socket.to(socketRooms[1]).emit('updateUserCount', -1);
+        // TODO: Remove this check if server will decide client rooms
+        if (socket.id !== socketRooms[0]) {
+            rooms[socketRooms[0]].removeUser(socket.id);
+            socket.to(socketRooms[0]).emit('updateUserCount', -1);
+        }
+        else {
+            // User left the room before their socket could request to join their canvas room
+            console.error("Socket " + socket.id + "is in an unspecified, unknown room");
         }
     });
 
     // Client has already left their rooms
     socket.on('disconnect', () => {
-        console.log('user ' + socket.id + ' disconnected\n');
+        console.info('user ' + socket.id + ' disconnected\n');
     });
 
-    // When the server receives a room ID, it will add the client to that room,
-    // give them the current state of the canvas, and notify all other clients
-    socket.on('room', (room) => {
-        socket.join(room);
-        if (!(room in rooms)) {
-            // TODO: Remove this to ensure users can't create new rooms by changing URL
-            // Only happens when user manually types a room URL
-            rooms[room] = new Room();
-        }
-        rooms[room].addUser(socket.id);
-        var init = {
-            name: rooms[room].getName(),
-            numUsers: rooms[room].getUsers(),
-            strokes: rooms[room].getStrokes(),
-            liveStrokes: rooms[room].getLiveStrokes(),
-            socketID: socket.id,
-            pictureSize: rooms[room].getRecentPixel()
-        };
-        socket.emit('initUser', init);
-        socket.to(room).emit('updateUserCount', 1);
+    socket.on('error', (error) => {
+        console.error('Socket Error: ' + error);
     });
 
     // When a client sends a new title, send it to all other clients in that room
@@ -83,7 +98,7 @@ io.on('connection', (socket) => {
         socket.to(roomTitle.room).emit('title', roomTitle.title);
     })
 
-    // When a client sends a stroke, send it to all other clients in that room
+    // Send completed strokes (with stroke ID) to all other clients in the room
     socket.on('stroke', (strokeMessage) => {
         var strokeMessagewithID = {
             strokeID: strokeMessage.strokeID,
@@ -93,7 +108,7 @@ io.on('connection', (socket) => {
         rooms[strokeMessage.room].add(socket.id);
     });
 
-    // When a client requests a strokeID, send an available ID for that room
+    // Send the next available strokeID to the requesting client (requested on mouse up)
     socket.on('strokeID', (room) => {
         socket.emit('strokeID', rooms[room].getID());
         rooms[room].incrementID();
@@ -108,45 +123,54 @@ io.on('connection', (socket) => {
     // When a client clicks undo, tell all other clients in the room to undo
     // that stroke
     socket.on('undo', (undoStroke) => {
-       socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
-       rooms[undoStroke.room].setDraw(undoStroke.strokeID, false);
+        if (rooms[undoStroke.room].setDraw(undoStroke.strokeID, false)) {
+            socket.to(undoStroke.room).emit('undo', undoStroke.strokeID);
+        }
+        else {
+            console.error("Undo error from " + undoStroke.strokeID);
+        }
    });
 
     // When a client clicks redo, tell all other clients in the room to redo
     // that stroke
     socket.on('redo', (redoStroke) => {
-       socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
-       rooms[redoStroke.room].setDraw(redoStroke.strokeID, true);
+        if (rooms[redoStroke.room].setDraw(redoStroke.strokeID, true)) {
+            socket.to(redoStroke.room).emit('redo', redoStroke.strokeID);
+        }
+        else {
+            console.error("Redo error from " + redoStroke.strokeID);
+        }
     });
 
-    // Let client know if the room they want to move to exists
+    // Let client know if the room they want to move to exists (from share modal)
     socket.on('check', (newRoom) => {
-        if (newRoom in rooms)
-            var hasRoom = true;
-        else
-            var hasRoom = false;
-
+        var hasRoom = (newRoom in rooms) ? true : false;
         socket.emit('check', hasRoom);
     });
 
+    // Send everyone the new live stroke (created from mousedown)
     socket.on('newLiveStroke', (liveStroke) => {
         var strokeAndID = {
             stroke: liveStroke.stroke,
             id: socket.id
         }
-       socket.to(liveStroke.room).emit('startLiveStroke', strokeAndID);
-       rooms[liveStroke.room].addLiveStroke(socket.id, liveStroke.stroke);
+        socket.to(liveStroke.room).emit('startLiveStroke', strokeAndID);
+        rooms[liveStroke.room].addLiveStroke(socket.id, liveStroke.stroke);
     });
 
+    // Tell everyone else to add pixels to this client's live strokes (created from mousemove)
     socket.on('newPixel', (pixel) => {
-        var pixelAndID = {
-            pixel: pixel.pixel,
-            id: socket.id
+        if (rooms[pixel.room].containsLiveStroke(socket.id)) {
+            var pixelAndID = {
+                pixel: pixel.pixel,
+                id: socket.id
+            }
+            socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
+            rooms[pixel.room].addPixel(socket.id, pixel.pixel);
         }
-       socket.to(pixel.room).emit('addPixelToStroke', pixelAndID);
-       rooms[pixel.room].addPixel(socket.id, pixel.pixel);
+        else {
+            console.error("Pixel error from " + pixel);
+        }
     });
-
 });
-
 module.exports = router;

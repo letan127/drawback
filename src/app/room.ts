@@ -82,8 +82,14 @@ export class Room {
     }
 
     // Set draw=true if the stroke should be drawn; otherwise false (for undo/redo)
-    setDraw(id: number, draw: boolean): void {
-        this.strokes[id].draw = draw;
+    setDraw(id: number, draw: boolean): boolean {
+        if (this.strokes[id] !== undefined) {
+            this.strokes[id].draw = draw;
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     // Add user to the room
@@ -94,6 +100,14 @@ export class Room {
     // Remove the user from the room
     removeUser(id: string): void {
         this.numUsers--;
+    }
+
+    // Return true if room contains id's livestroke
+    containsLiveStroke(id: string): boolean {
+        if (id in this.liveStrokes) {
+            return true;
+        }
+        return false;
     }
 
     //adds a new live stroke to the room based on socket.id

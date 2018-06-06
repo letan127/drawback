@@ -49,6 +49,10 @@ export class CanvasComponent implements OnInit {
     doneStrokes = {}
     socketID: string;
 
+    // Error Alert
+    alert: HTMLElement;
+    curAlert: string;           // Current type/color of the alert
+
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
         this.numUsers = 1;
@@ -67,6 +71,8 @@ export class CanvasComponent implements OnInit {
         this.undoIDs = new Array<number>();
         this.drag = false;
         this.orphanUndoCount = 0;
+
+        this.curAlert = 'alert-danger';
     }
 
     ngOnInit(): void {
@@ -86,9 +92,6 @@ export class CanvasComponent implements OnInit {
         this.route.params.subscribe(params => {
             this.id = params['id'];
         })
-
-        // Send the room ID to the server
-        this.drawService.sendRoom(this.id);
 
         // This client is a new user; give them the current canvas state to draw
         this.drawService.initUser().subscribe(init => {
@@ -175,17 +178,71 @@ export class CanvasComponent implements OnInit {
             this.prepareCanvas(strokeAndID.stroke);
             this.drawFirstPoint(strokeAndID.stroke.pos[0]);
         })
+
         this.drawService.getNewPixel().subscribe(pixelAndID => {
             //get the pixel and add it to the liveStroke of the other user
             this.drawPixel(pixelAndID.pixel,pixelAndID.id)
-
         })
+
+        // Alert user that they disconnected from the server
+        this.drawService.disconnected().subscribe(() => {
+            // Prevent users interacting with the canvas/UI
+            document.getElementById('overlay').style.display = 'block';
+
+            // Make the alert red
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+
+            // Show the alert and keep it on the screen until reconnected
+            this.alert.innerHTML = 'Disconnected from the server. Please wait.';
+            this.alert.style.display = '';
+        });
+
+        // Alert user that they connected or reconnected to the server
+        this.drawService.connected().subscribe(() => {
+            // Allow users to interact with the UI
+            document.getElementById('overlay').style.display = 'none';
+
+            // Make the alert green
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-success');
+            this.curAlert = 'alert-success';
+
+            // Show the alert and then hide it after 2 seconds
+            this.alert.innerHTML = 'Connected to the server.';
+            this.alert.style.display = ''
+            setTimeout(() => {
+                this.alert.style.display = 'none';
+            }, 2000);
+        });
+
+        // Socket received a 'connect_timeout'
+        this.drawService.connectTimeout().subscribe(() => {
+            document.getElementById('overlay').style.display = 'block';
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+            this.alert.innerHTML = 'Connection Timeout: Please refresh.';
+            this.alert.style.display = '';
+        });
+
+        // Socket received an 'error'
+        this.drawService.error().subscribe(() => {
+            document.getElementById('overlay').style.display = 'block';
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+            this.alert.innerHTML = 'Socket Error: Please restart the browser.';
+            this.alert.style.display = '';
+        });
     }
 
     ngAfterViewInit() {
         // Set callback functions for canvas mouse events
         this.canvas = <HTMLCanvasElement>document.getElementById("canvas");
         this.context = this.canvas.getContext("2d");
+        this.alert = document.getElementById('alert');
         window.addEventListener("resize", this.resize.bind(this), false);
         window.addEventListener("click", this.closeMenus.bind(this));
         window.addEventListener("keypress", this.closeMenus.bind(this));
@@ -501,17 +558,6 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
-    mouseUp(event: MouseEvent): void {
-        this.drag = false;
-        if (this.canDraw) {
-            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
-
-            this.liveStrokes[this.socketID].liveStroke = false;
-            this.drawService.reqStrokeID(this.id);
-        }
-    }
-
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (this.drag && this.canDraw) {
@@ -536,6 +582,16 @@ export class CanvasComponent implements OnInit {
         }
     }
 
+    // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
+    mouseUp(event: MouseEvent): void {
+        this.drag = false;
+        if (this.canDraw) {
+            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+            this.liveStrokes[this.socketID].liveStroke = false;
+            this.drawService.reqStrokeID(this.id);
+        }
+    }
+
     // Mouse is outside the canvas
     mouseLeave(event: MouseEvent): void {
         this.drag = false;
@@ -548,6 +604,8 @@ export class CanvasComponent implements OnInit {
 
     // Scroll to zoom
     mouseWheel(event): void {
+        event.preventDefault();
+
         // https://stackoverflow.com/questions/6775168/zooming-with-canvas
         var mousex = event.clientX - this.canvas.offsetLeft;
         var mousey = event.clientY - this.canvas.offsetTop;

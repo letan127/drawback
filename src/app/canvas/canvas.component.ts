@@ -36,7 +36,6 @@ export class CanvasComponent implements OnInit {
     drag: boolean;          // True if we should be drawing to canvas
     scaleValue: number;     // Zoom multiplier
     offset: Position;       // Offset relative to current origin
-    maxOffset: Position;
     drawPosition: Position; // Draw position relative to original origin
     previousPosition: Position;
 
@@ -59,7 +58,6 @@ export class CanvasComponent implements OnInit {
         this.canDraw = true;
         this.previousPosition = new Position(0,0);
         this.offset = new Position(0,0);
-        this.maxOffset = this.offset
         this.scaleValue = 1;
         this.drawPosition = new Position(0,0);
 
@@ -231,14 +229,15 @@ export class CanvasComponent implements OnInit {
             return
         }
         this.offset.add(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
-        this.maxOffset = this.offset;
         this.context.translate(pictureSize.focusX + this.canvas.width/2, pictureSize.focusY + this.canvas.height/2);
         if (pictureSize.pictureWidth > this.canvas.width || pictureSize.pictureHeight > this.canvas.height) {
-            while((pictureSize.pictureHeight * scaling  > this.canvas.height || pictureSize.pictureWidth * scaling  > this.canvas.width) && scaling > .03 ) {
+            while((pictureSize.pictureHeight * scaling  > this.canvas.height ||
+                    pictureSize.pictureWidth * scaling  > this.canvas.width) &&
+                    ((this.offset.x + this.canvas.width)/(2 * scaling * .66) < 40000 &&
+                        (this.offset.x - this.canvas.width)/(2 * scaling * .66) > -40000 &&
+                        ((this.offset.y + this.canvas.height)/(2 * scaling * .66) < 40000) &&
+                        ((this.offset.y - this.canvas.height)/(2 * scaling * .66) > -40000))) {
                 scaling = scaling * .66;
-            }
-            if (scaling < .03) {
-                scaling = .03;
             }
             this.tool.zoom(scaling)
             return
@@ -415,27 +414,40 @@ export class CanvasComponent implements OnInit {
     zoom(amount: number) {
         //zooming just goes beyond the size of the canvas
         if (this.canvas.width/(this.scaleValue * amount) > 40000 || this.canvas.height/(this.scaleValue * amount) > 40000 || this.canvas.width/(this.scaleValue * amount) < -40000 || this.canvas.height/(amount * this.scaleValue) < -40000) {
-            return
+            return false
         }
         //zooming out will cause shown screen to be greater than actual canvas
-        var boundaryX = ((this.canvas.width/(2 * this.scaleValue * amount)) + this.offset.x/(this.scaleValue * amount))
-        var boundaryY = ((this.canvas.height/(2 * this.scaleValue * amount)) + this.offset.y/(this.scaleValue * amount))
-        if (boundaryX > 40000 || boundaryX < -40000 || boundaryY > 40000 || boundaryY < -40000) {
-            if (boundaryX > 40000) {
-                this.offset.x = boundaryX - 40000 - (this.canvas.width/(2 * this.scaleValue * amount) + this.offset.x/(this.scaleValue * amount))
-                this.offset.x = this.offset.x * this.scaleValue * amount;
+        var boundaryLeftX = ((this.canvas.width/(2 * this.scaleValue * amount)) + this.offset.x/(this.scaleValue * amount))
+        var boundaryTopY = ((this.canvas.height/(2 * this.scaleValue * amount)) + this.offset.y/(this.scaleValue * amount))
+        var boundaryRightX = (this.offset.x/(this.scaleValue * amount) - (this.canvas.width/(2 * this.scaleValue * amount)))
+        var boundaryBottomY = (this.offset.y/(this.scaleValue * amount) - (this.canvas.height/(2 * this.scaleValue * amount)))
+        if (amount >= 1) {
+            this.scaleValue *= amount;
+            //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
+            this.context.setTransform(this.scaleValue, 0, 0, this.scaleValue, -(this.scaleValue - 1) * this.canvas.width/2, -(this.scaleValue - 1) * this.canvas.height/2);
+
+            this.context.translate(this.offset.x, this.offset.y)
+            this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
+            this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
+            this.drawAll();
+            return true
+        }
+        if (boundaryLeftX > 40000 || boundaryRightX < -40000 || boundaryTopY > 40000 || boundaryBottomY < -40000) {
+            if (boundaryLeftX > 40000) {
+                this.offset.x = 40000 - this.canvas.width/(2 * this.scaleValue * amount)
+                this.offset.x = this.offset.x * this.scaleValue * amount
             }
-            else if (boundaryX < -40000) {
-                this.offset.x = boundaryX - -40000 - (this.canvas.width/(2 * this.scaleValue * amount) + this.offset.x/(this.scaleValue * amount))
-                this.offset.x = this.offset.x * this.scaleValue * amount;
+            else if (boundaryRightX < -40000) {
+                this.offset.x = -40000 - this.canvas.width/(2 * this.scaleValue * amount)
+                this.offset.x = this.offset.x * this.scaleValue * amount
             }
-            if(boundaryY > 40000) {
-                this.offset.y = boundaryY - 40000 - (this.canvas.height/(2 * this.scaleValue * amount) + this.offset.y/(this.scaleValue * amount))
-                this.offset.y = this.offset.y * this.scaleValue * amount;
+            if(boundaryTopY > 40000) {
+                this.offset.y = 40000 + this.canvas.height/(2 * this.scaleValue * amount)
+                this.offset.y = this.offset.y * this.scaleValue * amount
             }
-            else if(boundaryY < -40000) {
-                this.offset.y = boundaryY - -40000 - (this.canvas.height/(2 * this.scaleValue * amount) + this.offset.y/(this.scaleValue * amount))
-                this.offset.y = this.offset.y * this.scaleValue * amount;
+            else if(boundaryBottomY < -40000) {
+                this.offset.y = -40000 - this.canvas.height/(2 * this.scaleValue * amount)
+                this.offset.y = this.offset.y * this.scaleValue * amount
             }
             this.scaleValue *= amount;
             //https://stackoverflow.com/questions/35123274/apply-zoom-in-center-of-the-canvas in order to transform to center
@@ -445,6 +457,7 @@ export class CanvasComponent implements OnInit {
             this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
             this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
             this.drawAll();
+            return false
         }
         else {
             this.scaleValue *= amount;
@@ -454,6 +467,7 @@ export class CanvasComponent implements OnInit {
             this.drawPosition.x = -(this.scaleValue - 1) * (this.canvas.width/2);
             this.drawPosition.y = -(this.scaleValue - 1) * (this.canvas.height/2);
             this.drawAll();
+            return true
         }
     }
 
@@ -512,7 +526,8 @@ export class CanvasComponent implements OnInit {
             // Translate the this.context by how much is moved
             var currentPosition = new Position(event.x - this.canvas.offsetLeft, event.y - this.canvas.offsetTop);
             var changePosition  = new Position((currentPosition.x - this.previousPosition.x) / this.scaleValue, (currentPosition.y - this.previousPosition.y) / this.scaleValue);
-            if (this.insideCanvas(this.offset.x + changePosition.x + this.canvas.width/(2*this.scaleValue), this.offset.y + changePosition.y + this.canvas.height/(2*this.scaleValue))) {
+            if (this.insideCanvas(this.offset.x + changePosition.x + this.canvas.width/(2*this.scaleValue), this.offset.y + changePosition.y + this.canvas.height/(2*this.scaleValue)) &&
+                this.insideCanvas(this.offset.x + changePosition.x - this.canvas.width/(2*this.scaleValue), this.offset.y + changePosition.y - this.canvas.height/(2*this.scaleValue))) {
                 this.previousPosition = currentPosition;
                 this.offset.add(changePosition);
                 this.context.translate(changePosition.x, changePosition.y);

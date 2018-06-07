@@ -51,7 +51,12 @@ function join(room, socket): void {
         socketID: socket.id
     };
     socket.emit('initUser', init);
-    socket.to(room).emit('updateUserCount', 1);
+    socket.emit('userInfo', rooms[room].getUserInfo());
+    var users = {
+        amount: 1,
+        userInfo: rooms[room].getSpecificUser(socket.id)
+    }
+    socket.to(room).emit('updateUsers', users);
 }
 
 // Begin listening for requests when a client connects
@@ -72,25 +77,18 @@ io.on('connection', (socket) => {
     // Remove user's data from all of their rooms before they disconnect
     socket.on('disconnecting', () => {
         var socketRooms = Object.keys(socket.rooms)
-<<<<<<< HEAD
-        if (socketRooms.length > 1) {
-            // Check that user actually joined a room (index 0 is its socket id)
-            rooms[socketRooms[1]].removeUser(socket.id);
+        // TODO: Remove this check if server will decide client rooms
+        if (socket.id !== socketRooms[0]) {
+            rooms[socketRooms[0]].removeUser(socket.id);
             var users = {
                 amount: -1,
                 socketID: socket.id,
             }
-            socket.to(socketRooms[1]).emit('updateUsers', users);
-=======
-        // TODO: Remove this check if server will decide client rooms
-        if (socket.id !== socketRooms[0]) {
-            rooms[socketRooms[0]].removeUser(socket.id);
-            socket.to(socketRooms[0]).emit('updateUserCount', -1);
+            socket.to(socketRooms[0]).emit('updateUsers', users);
         }
         else {
             // User left the room before their socket could request to join their canvas room
             console.error("Socket " + socket.id + "is in an unspecified, unknown room");
->>>>>>> master
         }
     });
 
@@ -99,7 +97,6 @@ io.on('connection', (socket) => {
         console.info('user ' + socket.id + ' disconnected\n');
     });
 
-<<<<<<< HEAD
     // When the server receives a room ID, it will add the client to that room,
     // give them the current state of the canvas, and notify all other clients
     socket.on('room', (room) => {
@@ -124,10 +121,9 @@ io.on('connection', (socket) => {
             userInfo: rooms[room].getSpecificUser(socket.id)
         }
         socket.to(room).emit('updateUsers', users);
-=======
+    });
     socket.on('error', (error) => {
         console.error('Socket Error: ' + error);
->>>>>>> master
     });
 
     // When a client sends a new title, send it to all other clients in that room
@@ -210,8 +206,6 @@ io.on('connection', (socket) => {
             console.error("Pixel error from " + pixel);
         }
     });
-<<<<<<< HEAD
-
     socket.on('color', (roomColor) => {
         rooms[roomColor.room].changeColor(socket.id, roomColor.color);
         var userDetails = {
@@ -230,8 +224,5 @@ io.on('connection', (socket) => {
         socket.to(roomName.room).emit('changeUserName', userDetails);
     });
 
-
-=======
->>>>>>> master
 });
 module.exports = router;

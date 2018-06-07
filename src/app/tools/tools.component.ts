@@ -41,6 +41,11 @@ export class ToolsComponent implements OnInit {
         this.size = +slider.value * 4;
     }
 
+    // Drop toolbar for mobile screens
+    dropToolbar() {
+        var tb = document.getElementById("main-toolbar").classList.toggle("mobile-show");
+    }
+
     // When the user clicks on a dropdown button, toggle its contents and highlight
     toggleDropdown(event, tool: string) {
          // Don't activate the window.click callback which closes the dropdown
@@ -81,13 +86,18 @@ export class ToolsComponent implements OnInit {
     selectTool(draw: boolean, mode: string=this.mode) {
         this.setDraw.emit(draw);
         this.mode = mode;
+        var icon = document.getElementById("mobile-icon");
 
         // Switch the highlight on the button from the old tool to the new tool
         if (draw && mode === environment.PEN_MODE) {
             var tool = "pen"
+            icon.classList.remove("fa-eraser");
+            icon.classList.add("fa-pencil");
         }
         else if (draw && mode === environment.ERASER_MODE) {
             var tool = "eraser"
+            icon.classList.remove("fa=pencil");
+            icon.classList.add("fa-eraser");
         }
         else if (!draw) {
             var tool = "pan"
@@ -105,7 +115,7 @@ export class ToolsComponent implements OnInit {
     }
 
     // Change the pen size and slider display and automatically select current drawing tool
-    changeSize($event) {
+    changeSize(event) {
         // Need to convert HTMLELement into an InputElement to access value
         var size = +(<HTMLInputElement>event.target).value; // +: string to num
         switch(size) {
@@ -148,7 +158,7 @@ export class ToolsComponent implements OnInit {
     }
 
     zoom(amount: number) {
-        if(this.scaleValue * amount > 11 || this.scaleValue * amount < .09)
+        if(this.scaleValue * amount > 14 || this.scaleValue * amount < .03)
             return;
 
         this.callZoom.emit(amount);

@@ -5,6 +5,7 @@
     <title>Drawback</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 <body>
 <div>
@@ -13,8 +14,11 @@
     <app-title [roomID]=id
                 (sendTitle)="drawService.sendTitle($event.roomID, $event.name)">
     </app-title>
+    <!-- Error Alerts -->
+    <div id='alert' class="alert alert-danger">Not connected to the server.</div>
+    <div id='overlay' class='modal'></div>
     <!-- Invite, Download, and Upload Bar -->
-    <div class="top-bar top-right-bar flex-horizontal canvas-component">
+    <div id="top-right-bar" class="top-bar top-right-bar flex-horizontal canvas-component">
         <div class="bar flex-horizontal">
             <app-invite [roomID]="id"
                         (checkRoom)="drawService.requestRoomCheck($event)">
@@ -29,8 +33,27 @@
                 <span class="tool-tip-text">Upload</span>
             </div>
         </div>
-        <div id="signup-login" class="bar bar-button flex-horizontal" (click)="authentication()">{{loginButton}}</div>
+        <div id="signup-login" class="bar bar-button flex-horizontal" (click)="authentication()">
+            {{loginButton}}
+        </div>
     </div>
+
+    <!-- Mobile hamburger menu-->
+    <div id="hamburger" class="mobile-button canvas-component" (click)="showMenu()">
+        <i class="fa fa-bars"></i>
+    </div>
+    <div id="hamburger-dropdown" class="canvas-component">
+        <div id="hamburger-signup-login" class="hamburger-button" (click)="authentication()">
+            Sign up or Log in
+        </div>
+        <div id="hamburger-upload" class="hamburger-button">
+            Upload
+        </div>
+        <div id="hamburger-download" class="hamburger-button">
+            Download
+        </div>
+    </div>
+
     <!-- Toolbar -->
     <app-tools  [roomID]=id
                 (setDraw)="setDraw($event)"
@@ -42,7 +65,11 @@
     </app-tools>
     <!-- User Count -->
     <app-users [roomID]=id [socketID]=socketID> </app-users>
+
 </div>
+<!-- Bootstrap and JQuery Javascript files -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 </body>
 
 </html>

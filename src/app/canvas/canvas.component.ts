@@ -51,6 +51,10 @@ export class CanvasComponent implements OnInit {
     doneStrokes = {}
     socketID: string;
 
+    // Error Alert
+    alert: HTMLElement;
+    curAlert: string;           // Current type/color of the alert
+
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
         this.loginState = true;
@@ -68,6 +72,8 @@ export class CanvasComponent implements OnInit {
         this.undoIDs = new Array<number>();
         this.drag = false;
         this.orphanUndoCount = 0;
+
+        this.curAlert = 'alert-danger';
     }
 
     ngOnInit(): void {
@@ -88,15 +94,13 @@ export class CanvasComponent implements OnInit {
             this.id = params['id'];
         })
 
-        // Send the room ID to the server
-        this.drawService.sendRoom(this.id);
-
         // This client is a new user; give them the current canvas state to draw
         this.drawService.initUser().subscribe(init => {
             this.title.rename(init.name);
             this.strokes = init.strokes;
             this.liveStrokes = init.liveStrokes;
             this.socketID = init.socketID;
+            this.focus(init.pictureSize);
             this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
             this.users.updateUserCount(init.numUsers);
             this.drawAll();
@@ -162,7 +166,6 @@ export class CanvasComponent implements OnInit {
         })
 
         this.drawService.getNewLiveStroke().subscribe(strokeAndID => {
-            strokeAndID.stroke
             this.liveStrokes[strokeAndID.id] = strokeAndID.stroke;
             if(!strokeAndID.stroke.draw)
                 return;
@@ -171,17 +174,71 @@ export class CanvasComponent implements OnInit {
             this.prepareCanvas(strokeAndID.stroke);
             this.drawFirstPoint(strokeAndID.stroke.pos[0]);
         })
+
         this.drawService.getNewPixel().subscribe(pixelAndID => {
             //get the pixel and add it to the liveStroke of the other user
             this.drawPixel(pixelAndID.pixel,pixelAndID.id)
-
         })
+
+        // Alert user that they disconnected from the server
+        this.drawService.disconnected().subscribe(() => {
+            // Prevent users interacting with the canvas/UI
+            document.getElementById('overlay').style.display = 'block';
+
+            // Make the alert red
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+
+            // Show the alert and keep it on the screen until reconnected
+            this.alert.innerHTML = 'Disconnected from the server. Please wait.';
+            this.alert.style.display = '';
+        });
+
+        // Alert user that they connected or reconnected to the server
+        this.drawService.connected().subscribe(() => {
+            // Allow users to interact with the UI
+            document.getElementById('overlay').style.display = 'none';
+
+            // Make the alert green
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-success');
+            this.curAlert = 'alert-success';
+
+            // Show the alert and then hide it after 2 seconds
+            this.alert.innerHTML = 'Connected to the server.';
+            this.alert.style.display = ''
+            setTimeout(() => {
+                this.alert.style.display = 'none';
+            }, 2000);
+        });
+
+        // Socket received a 'connect_timeout'
+        this.drawService.connectTimeout().subscribe(() => {
+            document.getElementById('overlay').style.display = 'block';
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+            this.alert.innerHTML = 'Connection Timeout: Please refresh.';
+            this.alert.style.display = '';
+        });
+
+        // Socket received an 'error'
+        this.drawService.error().subscribe(() => {
+            document.getElementById('overlay').style.display = 'block';
+            this.alert.classList.toggle(this.curAlert);
+            this.alert.classList.toggle('alert-danger');
+            this.curAlert = 'alert-danger';
+            this.alert.innerHTML = 'Socket Error: Please restart the browser.';
+            this.alert.style.display = '';
+        });
     }
 
     ngAfterViewInit() {
         // Set callback functions for canvas mouse events
         this.canvas = <HTMLCanvasElement>document.getElementById("canvas");
         this.context = this.canvas.getContext("2d");
+        this.alert = document.getElementById('alert');
         window.addEventListener("resize", this.resize.bind(this), false);
         window.addEventListener("click", this.closeMenus.bind(this));
         window.addEventListener("keypress", this.closeMenus.bind(this));
@@ -217,6 +274,27 @@ export class CanvasComponent implements OnInit {
         this.drawAll()
     }
 
+    focus(pictureSize) {
+        //no need to translate if nothing has been drawn
+        var scaling = 1
+        if (pictureSize.focusX == 0 && pictureSize.focusY == 0) {
+            return
+        }
+        this.offset.add(-pictureSize.focusX + this.canvas.width/2, -pictureSize.focusY + this.canvas.height/2);
+        this.context.translate(pictureSize.focusX + this.canvas.width/2, pictureSize.focusY + this.canvas.height/2);
+        if (pictureSize.pictureWidth > this.canvas.width || pictureSize.pictureHeight > this.canvas.height) {
+            while((pictureSize.pictureHeight * scaling  > this.canvas.height || pictureSize.pictureWidth * scaling  > this.canvas.width) && scaling > .03 ) {
+                scaling = scaling * .66;
+            }
+            if (scaling < .03) {
+                scaling = .03;
+            }
+            this.tool.zoom(scaling)
+            return
+        }
+        this.tool.zoom(scaling)
+    }
+
     // Close and unhighlight any open menus when clicking outside of it or pressing escape
     closeMenus(event) {
         // Close dropdown menus
@@ -229,6 +307,11 @@ export class CanvasComponent implements OnInit {
         // Close share modal
         if (event.target.classList.contains("modal") || event.key == "Escape")
             this.invitation.closeShareModal();
+    }
+
+    // Show menu for mobile screens
+    showMenu() {
+        document.getElementById("hamburger-dropdown").classList.toggle("mobile-show");
     }
 
     // Sets draw to true or false depending on whether pen or pan was clicked
@@ -297,6 +380,7 @@ export class CanvasComponent implements OnInit {
     drawAll() {
         // Clear the canvas and also offscreen
         this.context.clearRect(-this.canvas.width*25, -this.canvas.height*25, this.canvas.width*100, this.canvas.height*100);
+
         // Draw each stroke/path from our list of pixel data
         for (var i = 0; i < this.strokes.length; i++) {
             if (this.strokes[i])
@@ -329,6 +413,7 @@ export class CanvasComponent implements OnInit {
         if(this.orphanedStrokes.length && this.orphanedStrokes.length - this.orphanUndoCount > 0) {
             this.orphanedStrokes[this.orphanedStrokes.length - this.orphanUndoCount - 1].draw = false;
             this.orphanUndoCount++;
+            this.drawAll()
         }
         // Undo my strokes
         else {
@@ -347,6 +432,7 @@ export class CanvasComponent implements OnInit {
         if(!this.undoIDs.length && this.orphanUndoCount) {
             this.orphanedStrokes[this.orphanedStrokes.length - this.orphanUndoCount].draw = true;
             this.orphanUndoCount--;
+            this.drawAll()
         }
         else {
             // Check if strokes with IDs can be undone
@@ -385,6 +471,7 @@ export class CanvasComponent implements OnInit {
         if(this.canDraw) {
             // Discard stored undos
             this.orphanedStrokes.splice(this.orphanedStrokes.length - this.orphanUndoCount, this.orphanUndoCount);
+            this.orphanUndoCount = 0;
             if(this.undoIDs.length) {
                 //TODO: remove the stroke from stroke array?
                 this.undoIDs = [];
@@ -407,16 +494,6 @@ export class CanvasComponent implements OnInit {
         }
     }
 
-    // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
-    mouseUp(event: MouseEvent): void {
-        this.drag = false;
-        if (this.canDraw) {
-            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
-            this.liveStrokes[this.socketID].liveStroke = false;
-            this.drawService.reqStrokeID(this.id);
-        }
-    }
-
     // Continue updating and drawing the current stroke
     mouseMove(event: MouseEvent): void {
         if (this.drag && this.canDraw) {
@@ -428,11 +505,21 @@ export class CanvasComponent implements OnInit {
         else if (this.drag && !this.canDraw) {
             // Translate the this.context by how much is moved
             var currentPosition = new Position(event.x - this.canvas.offsetLeft, event.y - this.canvas.offsetTop);
-            var changePosition  = new Position(this.previousPosition.x - currentPosition.x, this.previousPosition.y - currentPosition.y);
+            var changePosition  = new Position((currentPosition.x - this.previousPosition.x) / this.scaleValue, (currentPosition.y - this.previousPosition.y) / this.scaleValue);
             this.previousPosition = currentPosition;
             this.offset.add(changePosition);
             this.context.translate(changePosition.x, changePosition.y);
             this.drawAll();
+        }
+    }
+
+    // Stop drawing, request a strokeID, and buffer this latest stroke until we get an ID
+    mouseUp(event: MouseEvent): void {
+        this.drag = false;
+        if (this.canDraw) {
+            this.orphanedStrokes.push(this.liveStrokes[this.socketID]);
+            this.liveStrokes[this.socketID].liveStroke = false;
+            this.drawService.reqStrokeID(this.id);
         }
     }
 
@@ -448,6 +535,8 @@ export class CanvasComponent implements OnInit {
 
     // Scroll to zoom
     mouseWheel(event): void {
+        event.preventDefault();
+
         // https://stackoverflow.com/questions/6775168/zooming-with-canvas
         var mousex = event.clientX - this.canvas.offsetLeft;
         var mousey = event.clientY - this.canvas.offsetTop;

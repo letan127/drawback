@@ -186,6 +186,7 @@ export class DrawService {
         });
     }
 
+
     public users = () => {
         return Observable.create((observer) => {
             this.socket.on('userInfo', (userInfo) => {
@@ -193,6 +194,16 @@ export class DrawService {
             });
         });
     }
+
+    public getPixelError = () => {
+        return Observable.create((observer) => {
+            this.socket.on('pixelError', () => {
+                observer.next();
+
+            });
+        });
+    }
+
 
     public changeColor(room, color) {
         var roomColor = {
@@ -218,10 +229,47 @@ export class DrawService {
         });
     }
 
+    // Tell client that their socket disconnected from the server
+    public disconnected = () => {
+        return Observable.create((observer) => {
+            this.socket.on('disconnect', () => {
+                observer.next();
+            });
+        });
+    }
+
+    // Tell client that their socket connected or reconnected to the server
+    public connected = () => {
+        return Observable.create((observer) => {
+            this.socket.on('connect', () => {
+                observer.next();
+            });
+        });
+    }
+
+    public connectTimeout = () => {
+        return Observable.create((observer) => {
+            this.socket.on('connect_timeout', () => {
+                observer.next();
+
+            });
+        });
+    }
+
+
     public updateUserName = () => {
         return Observable.create((observer) => {
             this.socket.on('changeUserName', (userDetails) => {
                 observer.next(userDetails);
+            });
+        });
+    }
+
+
+    public error = () => {
+        return Observable.create((observer) => {
+            this.socket.on('error', () => {
+                observer.next();
             });
         });
     }

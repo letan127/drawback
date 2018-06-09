@@ -152,9 +152,10 @@ html body {
 .drop-right {
     top: 5px;
     left: 45px;
+    background-color: #555;
 }
-.show .dropdown-menu {
-    visibility: visible;
+.show .dropup {
+    display: block!important;
 }
 .dropdown-item {
     text-align: center;
@@ -302,21 +303,17 @@ html body {
     cursor: pointer;
 }
 
-#userModal {
-}
-
 .dropup {
-    position: relative;
-    display: inline-block;
-}
-
-.userDropUp {
-    display: none;
+    position: absolute;
     z-index: 1;
+    right: 0px;
+    bottom: 50px;
+    background-color: #555;
+    border-radius: 8px;
 }
 
-.dropup:hover .userDropUp {
-    display: block;
+#userDropUp {
+    display: none;
 }
 
 .userColor {

@@ -1,9 +1,10 @@
 <div class="bottom-right-bar bar flex-horizontal canvas-component">
-    <div id="num-users-text" class="bar-text"></div>
+    <div id="num-users-text" class="bar-text">{{numUsers}}</div>
     <div class="bar-separator"></div>
-    <div id="num-users" class="bar-button">
-        <div class="fa fa-user-circle dropup" (click)="toggleUsers()">
-            <div class="userDropUp" *ngFor="let foo of userInfo; let i = index">
+    <div id="num-users" class="bar-button" (click)="toggleUsers($event)">
+        <div class="fa fa-user-circle"></div>
+        <div id="userDropUp" class="dropup">
+            <div *ngFor="let foo of userInfo; let i = index">
                 <div class="flex-horizontal" *ngIf="userInfo[i].socketID != socketID; else user">
                     <div class="userColor" [style.color]="userInfo[i].userColor">
                         <i class="fa fa-circle"></i>

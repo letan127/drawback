@@ -240,8 +240,8 @@ export class CanvasComponent implements OnInit {
         this.context = this.canvas.getContext("2d");
         this.alert = document.getElementById('alert');
         window.addEventListener("resize", this.resize.bind(this), false);
-        window.addEventListener("click", this.closeMenus.bind(this));
-        window.addEventListener("keypress", this.closeMenus.bind(this));
+        window.addEventListener("click", this.closeMenusWithClick.bind(this));
+        window.addEventListener("keypress", this.closeMenusWithEscape.bind(this));
 
         // Canvas mouse events
         this.canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
@@ -295,18 +295,27 @@ export class CanvasComponent implements OnInit {
         this.tool.zoom(scaling)
     }
 
-    // Close and unhighlight any open menus when clicking outside of it or pressing escape
-    closeMenus(event) {
-        // Close dropdown menus
+    // Close any open dropdowns or modals by clicking the canvas
+    closeMenusWithClick(event: MouseEvent) {
         var openToolMenu = document.getElementsByClassName("show");
-        if (openToolMenu.length > 0 || (openToolMenu.length > 0 && event.key == "Escape")) {
+        if (openToolMenu.length > 0) {
             openToolMenu[0].classList.toggle("active");
             openToolMenu[0].classList.toggle("show");
         }
-
-        // Close share modal
-        if (event.target.classList.contains("modal") || event.key == "Escape")
+        if ((<HTMLElement>event.target).id === 'share-modal')
             this.invitation.closeShareModal();
+    }
+
+    // Close any open dropdowns or modals by pressing escape
+    closeMenusWithEscape(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            var openToolMenu = document.getElementsByClassName("show");
+            if (openToolMenu.length > 0) {
+                openToolMenu[0].classList.toggle("active");
+                openToolMenu[0].classList.toggle("show");
+            }
+            this.invitation.closeShareModal();
+        }
     }
 
     // Show menu for mobile screens

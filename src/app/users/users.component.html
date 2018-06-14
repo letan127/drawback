@@ -19,7 +19,7 @@
                         <div class="userColor" [style.color]="userInfo[i].userColor">
                             <i class="fa fa-circle"></i>
                         </div>
-                        <input type = "text" [(ngModel)]="userInfo[i].userName" (ngModelChange)="onChange($event)">
+                        <input id='my-name' type = "text" [(ngModel)]="userInfo[i].userName" (ngModelChange)="onChange($event)" (keydown)='unfocus($event)'>
                     </div>
                 </ng-template>
             </div>

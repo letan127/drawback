@@ -75,4 +75,11 @@ export class UsersComponent implements OnInit {
         this.drawService.changeName(this.roomID, newValue)
     }
 
+    // Unfocus the user's input bar if they press enter
+    unfocus(event) {
+        if (event.key === 'Enter') {
+            document.getElementById('my-name').blur();
+        }
+    }
+
 }

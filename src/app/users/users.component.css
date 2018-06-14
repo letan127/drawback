@@ -310,6 +310,7 @@ html body {
     bottom: 50px;
     background-color: #555;
     border-radius: 8px;
+    cursor: default;
 }
 
 #userDropUp {

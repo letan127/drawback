@@ -62,8 +62,13 @@ export class UsersComponent implements OnInit {
         else if (window.event) {
             window.event.cancelBubble=true;
         }
-        document.getElementById("num-users").classList.toggle('show');
-        document.getElementById("num-users").classList.toggle('active');
+
+        // Only toggle if button is cliked
+        if (event.target.id == 'num-users' ||
+            event.target.classList.contains('fa-user-circle')) {
+            document.getElementById("num-users").classList.toggle('show');
+            document.getElementById("num-users").classList.toggle('active');
+        }
     }
 
     onChange(newValue) {

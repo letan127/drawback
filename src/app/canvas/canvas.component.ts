@@ -50,6 +50,12 @@ export class CanvasComponent implements OnInit {
     doneStrokes = {}
     socketID: string;
 
+    // Touch data
+    prevFingerPosition: TouchList;  // Positions of the fingers during the previous movement
+    prevFingerDistance: number;     // Distance between two fingers during previous movement
+    curFingerDistance: number;      // Current distance between two fingers
+    touchNotDrawn: boolean;         // True if not drawing with touches (2+ fingers, 1 finger move, or 1 finger tap)
+
     // Error Alert
     alert: HTMLElement;
     curAlert: string;           // Current type/color of the alert
@@ -73,6 +79,10 @@ export class CanvasComponent implements OnInit {
         this.undoIDs = new Array<number>();
         this.drag = false;
         this.orphanUndoCount = 0;
+
+        this.prevFingerDistance = 0;
+        this.curFingerDistance = 0;
+        this.touchNotDrawn = false;
 
         this.curAlert = 'alert-danger';
     }
@@ -627,30 +637,106 @@ export class CanvasComponent implements OnInit {
         this.tool.zoom(scaleAmount);
     }
 
-    touchstart(event: TouchEvent): void {
-        event.preventDefault();
-        var touch = event.touches[0];
-        var mouseEvent = new MouseEvent("mousedown", {
-          clientX: touch.clientX,
-          clientY: touch.clientY
+    // Gets the diagonal distance between two fingers
+    findDistance(fingers): number {
+        var fingerDiffX = fingers[0].clientX - fingers[1].clientX;
+        var fingerDiffY = fingers[0].clientY - fingers[1].clientY;
+        return Math.hypot(fingerDiffX, fingerDiffY);
+    }
+
+    createMouseEvent(type: string, x: number, y: number): MouseEvent {
+        return new MouseEvent(type, {
+            clientX: x,
+            clientY: y
         });
-        this.canvas.dispatchEvent(mouseEvent);
+    }
+
+    // Checks whether one or two finger is being used; does not draw the
+    // first point until touchmove to prevent drawing when using 2 fingers
+    touchstart(event: TouchEvent): void {
+        this.prevFingerPosition = event.touches;
+        if (this.touchNotDrawn) {
+            // Second finger touched the screen
+            event.preventDefault();
+            var touch = event.touches[0];
+            var mouseEvent = this.createMouseEvent("mousedown", touch.clientX, touch.clientY);
+
+            // Use two or more fingers to pan or zoom
+            if (event.touches.length > 1) {
+                this.canDraw = false;
+                this.prevFingerDistance = this.findDistance(event.touches);
+            }
+            this.canvas.dispatchEvent(mouseEvent);
+        }
+        else {
+            // First time touching the screen; wait to check for second finger
+            this.touchNotDrawn = true;
+        }
     }
 
     touchmove(event: TouchEvent): void {
         event.preventDefault();
         var touch = event.touches[0];
-        var mouseEvent = new MouseEvent("mousemove", {
-          clientX: touch.clientX,
-          clientY: touch.clientY
-        });
-        this.canvas.dispatchEvent(mouseEvent);
+        var mouseEvent = this.createMouseEvent("mousemove", touch.clientX, touch.clientY);
+
+        // Draw the first point since user is defintely not using 2 fingers
+        if (this.touchNotDrawn && event.touches.length === 1) {
+            this.canDraw = true;
+            var prevMouseEvent = this.createMouseEvent("mousedown", this.prevFingerPosition[0].clientX, this.prevFingerPosition[0].clientY);
+            this.canvas.dispatchEvent(prevMouseEvent);
+            this.touchNotDrawn = false; // Ensures first point is only drawn once
+        }
+
+        // Actions change depending on the number of fingers:
+        // - 1: Draw
+        // - 2: Pinch to zoom or pan
+        // - 3+: Pan
+        if (event.touches.length == 1) {
+            // Draw with one finger
+            this.canvas.dispatchEvent(mouseEvent);
+        }
+        else if (event.touches.length == 2) {
+            // Get the distances between the current fingers
+            this.curFingerDistance = this.findDistance(event.touches);
+            var fingerDelta = this.curFingerDistance - this.prevFingerDistance;
+            this.prevFingerDistance = this.curFingerDistance;
+
+            // Get the direction that each finger moved
+            var deltaX1 = event.touches[0].clientX - this.prevFingerPosition[0].clientX;
+            var deltaY1 = event.touches[0].clientY - this.prevFingerPosition[0].clientY;
+            var deltaX2 = event.touches[1].clientX - this.prevFingerPosition[1].clientX;
+            var deltaY2 = event.touches[1].clientY - this.prevFingerPosition[1].clientY;
+            this.prevFingerPosition = event.touches;
+
+            if (deltaX1 * deltaX2 <= 0 || deltaY1 * deltaY2 <= 0) {
+                // Detect pinch to zoom when fingers move in opposite directions
+                this.tool.zoom(1 + fingerDelta/100);
+            }
+            else {
+                // Pan with two fingers
+                this.canvas.dispatchEvent(mouseEvent);
+            }
+        }
+        else {
+            // Pan with 3+ fingers
+            this.canvas.dispatchEvent(mouseEvent);
+        }
     }
 
     touchend(event: TouchEvent): void {
         event.preventDefault();
+
+        // Draw first point if fingers did not move
+        if (this.touchNotDrawn) {
+            var prevMouseEvent = this.createMouseEvent("mousedown", this.prevFingerPosition[0].clientX, this.prevFingerPosition[0].clientY);
+            this.canvas.dispatchEvent(prevMouseEvent);
+        }
+
+        // Get the strokeID if a stroke was made (not zooming/panning)
         var mouseEvent = new MouseEvent("mouseup", {});
         this.canvas.dispatchEvent(mouseEvent);
+        this.canDraw = true;
+        this.touchNotDrawn = false;
     }
 
     touchcancel(event: TouchEvent): void {

@@ -311,6 +311,8 @@ html body {
     background-color: #555;
     border-radius: 8px;
     cursor: default;
+    max-height: 125px;
+    overflow-y: scroll;
 }
 
 #userDropUp {

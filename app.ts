@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var engines = require('consolidate');
 
 var draw = require('./routes/draw.ts');
+var text = require('textbelt');
 var app = express();
 
 

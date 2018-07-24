@@ -28,10 +28,10 @@ export class DrawService {
     }
 
     // Notify current clients that a user has either entered or left the room
-    public updateUserCount = () => {
+    public updateUsers = () => {
         return Observable.create((observer) => {
-            this.socket.on('updateUserCount', (amount) => {
-                observer.next(amount);
+            this.socket.on('updateUsers', (userInfo) => {
+                observer.next(userInfo);
             })
         })
     }
@@ -186,10 +186,45 @@ export class DrawService {
         });
     }
 
+
+    public users = () => {
+        return Observable.create((observer) => {
+            this.socket.on('userInfo', (userInfo) => {
+                observer.next(userInfo);
+            });
+        });
+    }
+
     public getPixelError = () => {
         return Observable.create((observer) => {
             this.socket.on('pixelError', () => {
                 observer.next();
+
+            });
+        });
+    }
+
+
+    public changeColor(room, color) {
+        var roomColor = {
+            room: room,
+            color: color
+        }
+        this.socket.emit('color', roomColor);
+    }
+
+    public changeName(room, name) {
+        var roomName = {
+            room: room,
+            name: name
+        }
+        this.socket.emit('nameChange', roomName);
+    }
+
+    public updateUserColor = () => {
+        return Observable.create((observer) => {
+            this.socket.on('changeUserColor', (userDetails) => {
+                observer.next(userDetails);
             });
         });
     }
@@ -216,9 +251,20 @@ export class DrawService {
         return Observable.create((observer) => {
             this.socket.on('connect_timeout', () => {
                 observer.next();
+
             });
         });
     }
+
+
+    public updateUserName = () => {
+        return Observable.create((observer) => {
+            this.socket.on('changeUserName', (userDetails) => {
+                observer.next(userDetails);
+            });
+        });
+    }
+
 
     public error = () => {
         return Observable.create((observer) => {
@@ -227,4 +273,5 @@ export class DrawService {
             });
         });
     }
+
 }

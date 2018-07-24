@@ -17,6 +17,7 @@ import { DrawService } from './draw.service';
 import { ToolsComponent } from './tools/tools.component';
 import { InviteComponent } from './invite/invite.component';
 import { TitleComponent } from './title/title.component';
+import { UsersComponent } from './users/users.component';
 
 export const config = {
   apiKey: "AIzaSyBBIYSjhH5moXzFra9BUH-m_0denvu3HmE",
@@ -42,7 +43,8 @@ const appRoutes: Routes = [
         LoginComponent,
         ToolsComponent,
         InviteComponent,
-        TitleComponent
+        TitleComponent,
+        UsersComponent
     ],
     imports: [
         BrowserModule,

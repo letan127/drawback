@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, EventEmitter, Output, Input } from '@angular/core';
 import { environment } from '../../environments/environment';
+import { DrawService } from '../draw.service';
 
 @Component({
     selector: 'app-tools',
@@ -13,14 +14,14 @@ export class ToolsComponent implements OnInit {
     size: number;   // Pen/Eraser size
     allColors: string[]; // List of all available colors
     curActives: HTMLElement[];
+    @Input() roomID: string
     @Output() setDraw = new EventEmitter<boolean>(); // Update CanvasComponent's draw
     @Output() callUndo = new EventEmitter();
     @Output() callRedo = new EventEmitter();
     @Output() callClear = new EventEmitter();
     @Output() callZoom = new EventEmitter<number>();
     @Input() scaleValue: number; // Get reference to CanvasComponent's scaleValue
-
-    constructor() {
+    constructor(private drawService: DrawService) {
         this.mode = environment.PEN_MODE;
         this.color = "black";
         this.size = 8;
@@ -109,6 +110,7 @@ export class ToolsComponent implements OnInit {
     // Change the pen color and automatically select the pen tool
     changeColor(color: string) {
         this.color = color;
+        this.drawService.changeColor(this.roomID, color);
         this.selectTool(true, environment.PEN_MODE);
     }
 

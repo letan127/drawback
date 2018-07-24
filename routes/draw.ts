@@ -51,7 +51,12 @@ function join(room, socket): void {
         socketID: socket.id
     };
     socket.emit('initUser', init);
-    socket.to(room).emit('updateUserCount', 1);
+    socket.emit('userInfo', rooms[room].getUserInfo());
+    var users = {
+        amount: 1,
+        userInfo: rooms[room].getSpecificUser(socket.id)
+    }
+    socket.to(room).emit('updateUsers', users);
 }
 
 // Begin listening for requests when a client connects
@@ -75,7 +80,11 @@ io.on('connection', (socket) => {
         // TODO: Remove this check if server will decide client rooms
         if (socket.id !== socketRooms[0]) {
             rooms[socketRooms[0]].removeUser(socket.id);
-            socket.to(socketRooms[0]).emit('updateUserCount', -1);
+            var users = {
+                amount: -1,
+                socketID: socket.id,
+            }
+            socket.to(socketRooms[0]).emit('updateUsers', users);
         }
         else {
             // User left the room before their socket could request to join their canvas room
@@ -88,6 +97,31 @@ io.on('connection', (socket) => {
         console.info('user ' + socket.id + ' disconnected\n');
     });
 
+    // When the server receives a room ID, it will add the client to that room,
+    // give them the current state of the canvas, and notify all other clients
+    socket.on('room', (room) => {
+        socket.join(room);
+        if (!(room in rooms)) {
+            // TODO: Remove this to ensure users can't create new rooms by changing URL
+            // Only happens when user manually types a room URL
+            rooms[room] = new Room();
+        }
+        rooms[room].addUser(socket.id);
+        var init = {
+            name: rooms[room].getName(),
+            numUsers: rooms[room].getUsers(),
+            strokes: rooms[room].getStrokes(),
+            liveStrokes: rooms[room].getLiveStrokes(),
+            socketID: socket.id
+        };
+        socket.emit('initUser', init);
+        socket.emit('userInfo', rooms[room].getUserInfo());
+        var users = {
+            amount: 1,
+            userInfo: rooms[room].getSpecificUser(socket.id)
+        }
+        socket.to(room).emit('updateUsers', users);
+    });
     socket.on('error', (error) => {
         console.error('Socket Error: ' + error);
     });
@@ -172,5 +206,23 @@ io.on('connection', (socket) => {
             console.error("Pixel error from " + pixel);
         }
     });
+    socket.on('color', (roomColor) => {
+        rooms[roomColor.room].changeColor(socket.id, roomColor.color);
+        var userDetails = {
+            socketID: socket.id,
+            userColor: roomColor.color,
+        }
+        io.in(roomColor.room).emit('changeUserColor', userDetails);
+    });
+
+    socket.on('nameChange', (roomName) => {
+        rooms[roomName.room].changeName(socket.id, roomName.name);
+        var userDetails = {
+            socketID: socket.id,
+            userName: roomName.name,
+        }
+        socket.to(roomName.room).emit('changeUserName', userDetails);
+    });
+
 });
 module.exports = router;

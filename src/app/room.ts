@@ -8,11 +8,13 @@ export class Room {
     private strokes: Stroke[];
     private numUsers: number;
     private liveStrokes = {};
+    private userInfo = [];
     private recentPixel = new Position(0,0);
     private top = 0;
     private bottom = 0;
     private right = 0;
     private left = 0;
+
     constructor() {
         this.name = "Untitled Canvas";
         this.latestStrokeID = 0;
@@ -40,8 +42,20 @@ export class Room {
         return this.numUsers;
     }
 
+    getSpecificUser(id) {
+        for(var i = 0; i < this.userInfo.length; i++) {
+            if (this.userInfo[i].socketID == id) {
+                return this.userInfo[i];
+            }
+        }
+    }
+
     getLiveStrokes() {
         return this.liveStrokes;
+    }
+
+    getUserInfo() {
+        return this.userInfo;
     }
 
     getRecentPixel() {
@@ -95,11 +109,23 @@ export class Room {
     // Add user to the room
     addUser(id: string): void {
         this.numUsers++;
+        var userInfo = {
+            socketID: id,
+            userName: "AnonymousUser" + this.numUsers.toString(),
+            userColor: "black"
+        }
+        this.userInfo.push(userInfo);
     }
 
     // Remove the user from the room
     removeUser(id: string): void {
         this.numUsers--;
+        for(var i = this.userInfo.length - 1; i >= 0; i--) {
+            if (this.userInfo[i].socketID == id) {
+                this.userInfo.splice(i, 1);
+                return
+            }
+        }
     }
 
     // Return true if room contains id's livestroke
@@ -162,6 +188,23 @@ export class Room {
             this.bottom = yvalue
             this.right = xvalue
             this.left = xvalue
+        }
+    }
+
+    changeColor(id: string, color: string): void {
+        for(var i = 0; i < this.userInfo.length; i++) {
+            if (this.userInfo[i].socketID == id) {
+                this.userInfo[i].userColor = color;
+                return
+            }
+        }
+    }
+    changeName(id: string, name: string): void {
+        for(var i = 0; i < this.userInfo.length; i++) {
+            if (this.userInfo[i].socketID == id) {
+                this.userInfo[i].userName = name;
+                return
+            }
         }
     }
 }

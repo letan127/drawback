@@ -55,7 +55,8 @@
     </div>
 
     <!-- Toolbar -->
-    <app-tools (setDraw)="setDraw($event)"
+    <app-tools  [roomID]=id
+                (setDraw)="setDraw($event)"
                 (callUndo)="undo()"
                 (callRedo)="redo()"
                 (callClear)="clear()"
@@ -63,13 +64,8 @@
                 [scaleValue]="scaleValue">
     </app-tools>
     <!-- User Count -->
-    <div class="bottom-right-bar bar flex-horizontal canvas-component">
-        <div id="num-users-text" class="bar-text"></div>
-        <div class="user-bar-separator"> </div>
-        <div id="num-users" class="bar-button">
-            <i class="fa fa-user-circle"></i>
-        </div>
-    </div>
+    <app-users [roomID]=id [socketID]=socketID> </app-users>
+
 </div>
 <!-- Bootstrap and JQuery Javascript files -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

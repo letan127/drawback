@@ -4,6 +4,7 @@ import { Position } from '../position';
 import { ToolsComponent } from '../tools/tools.component';
 import { TitleComponent } from '../title/title.component';
 import { InviteComponent } from '../invite/invite.component';
+import { UsersComponent } from '../users/users.component';
 import { DrawService } from '../draw.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -20,7 +21,6 @@ import * as io from 'socket.io-client';
 export class CanvasComponent implements OnInit {
     // Canvas/Room metadata
     id: string;
-    numUsers: number;
     loginState: boolean;
     loginButton: string;
 
@@ -28,6 +28,8 @@ export class CanvasComponent implements OnInit {
     @ViewChild(ToolsComponent) private tool: ToolsComponent;
     @ViewChild(TitleComponent) private title: TitleComponent;
     @ViewChild(InviteComponent) private invitation: InviteComponent;
+    @ViewChild(UsersComponent) private users: UsersComponent;
+
 
     // Canvas data
     canvas: HTMLCanvasElement;
@@ -62,7 +64,6 @@ export class CanvasComponent implements OnInit {
 
     constructor(private drawService: DrawService, private route: ActivatedRoute, private router: Router, public af: AngularFireAuth) {
         this.id = '';
-        this.numUsers = 1;
         this.loginState = true;
         this.loginButton = "Sign Up or Login";
 
@@ -108,21 +109,16 @@ export class CanvasComponent implements OnInit {
         // This client is a new user; give them the current canvas state to draw
         this.drawService.initUser().subscribe(init => {
             this.title.rename(init.name);
-            this.numUsers = init.numUsers;
             this.strokes = init.strokes;
             this.liveStrokes = init.liveStrokes;
             this.socketID = init.socketID;
             this.focus(init.pictureSize);
             this.liveStrokes[this.socketID] = new Stroke(new Array<Position>(), this.tool.color, this.tool.size/this.scaleValue, this.tool.mode, true);
-            this.updateUserCount();
+            this.users.updateUserCount(init.numUsers);
             this.drawAll();
         })
 
         // New user entered a room, so increment our user count
-        this.drawService.updateUserCount().subscribe(amount => {
-            this.numUsers += amount;
-            this.updateUserCount();
-        })
 
         // Update canvas title
         this.drawService.getTitle().subscribe(title => {
@@ -256,8 +252,8 @@ export class CanvasComponent implements OnInit {
         this.context = this.canvas.getContext("2d");
         this.alert = document.getElementById('alert');
         window.addEventListener("resize", this.resize.bind(this), false);
-        window.addEventListener("click", this.closeMenus.bind(this));
-        window.addEventListener("keypress", this.closeMenus.bind(this));
+        window.addEventListener("click", this.closeMenusWithClick.bind(this));
+        window.addEventListener("keypress", this.closeMenusWithEscape.bind(this));
 
         // Canvas mouse events
         this.canvas.addEventListener("mousedown",  this.mouseDown.bind(this), false);
@@ -275,7 +271,6 @@ export class CanvasComponent implements OnInit {
         this.resize();
 
         // Set the displayed user count
-        this.updateUserCount();
     }
 
     // When the window is resized, reset the canvas size and redraw it
@@ -314,23 +309,27 @@ export class CanvasComponent implements OnInit {
         this.tool.zoom(scaling)
     }
 
-    // Close and unhighlight any open menus when clicking outside of it or pressing escape
-    closeMenus(event) {
-        // Close dropdown menus
+    // Close any open dropdowns or modals by clicking the canvas
+    closeMenusWithClick(event: MouseEvent) {
         var openToolMenu = document.getElementsByClassName("show");
-        if (openToolMenu.length > 0 || (openToolMenu.length > 0 && event.key == "Escape")) {
+        if (openToolMenu.length > 0) {
             openToolMenu[0].classList.toggle("active");
             openToolMenu[0].classList.toggle("show");
         }
-
-        // Close share modal
-        if (event.target.classList.contains("modal") || event.key == "Escape")
+        if ((<HTMLElement>event.target).id === 'share-modal')
             this.invitation.closeShareModal();
     }
 
-    // When a new user enters the room, update the displayed user count
-    updateUserCount() {
-        document.getElementById("num-users-text").innerHTML = ""+this.numUsers;
+    // Close any open dropdowns or modals by pressing escape
+    closeMenusWithEscape(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            var openToolMenu = document.getElementsByClassName("show");
+            if (openToolMenu.length > 0) {
+                openToolMenu[0].classList.toggle("active");
+                openToolMenu[0].classList.toggle("show");
+            }
+            this.invitation.closeShareModal();
+        }
     }
 
     // Show menu for mobile screens

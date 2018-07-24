@@ -1,0 +1,28 @@
+<div class="bottom-right-bar bar flex-horizontal canvas-component">
+    <div id="num-users-text" class="bar-text">{{numUsers}}</div>
+    <div class="bar-separator"></div>
+    <div id="num-users" class="bar-button" (click)="toggleUsers($event)">
+        <div class="fa fa-user-circle"></div>
+        <div id="userDropUp" class="dropup">
+            <div *ngFor="let foo of userInfo; let i = index">
+                <div class="flex-horizontal" *ngIf="userInfo[i].socketID != socketID; else user">
+                    <div class="userColor" [style.color]="userInfo[i].userColor">
+                        <i class="fa fa-circle"></i>
+                    </div>
+                    <div class="userName">
+                        {{ userInfo[i].userName }}
+                    </div>
+                </div>
+                <ng-template #user>
+                    <div class="flex-horizontal">
+                        <i class="fa fa-caret-right"></i>
+                        <div class="userColor" [style.color]="userInfo[i].userColor">
+                            <i class="fa fa-circle"></i>
+                        </div>
+                        <input id='my-name' type = "text" [(ngModel)]="userInfo[i].userName" (ngModelChange)="onChange($event)" (keydown)='unfocus($event)'>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

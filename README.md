@@ -1,5 +1,5 @@
-# drawing-jamboard
-Online, collaborative whiteboard written in Angular.
+# drawback
+This is a copy of the original Drawback app, which is an online, collaborative whiteboard written in Angular.
 
 ## Setup
 ### Local
